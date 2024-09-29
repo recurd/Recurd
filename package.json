@@ -3,16 +3,21 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "src/index.js",
+  "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon esm src/index.js",
+    "dev": "nodemon esm src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
-    "passport": "^0.7.0"
+    "express-session": "^1.18.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "postgres": "^3.4.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
