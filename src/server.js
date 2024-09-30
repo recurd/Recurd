@@ -2,10 +2,7 @@ import express, { json, urlencoded } from "express"
 import session from "express-session"
 import dotenv from "dotenv"
 dotenv.config()
-
-import authRouter from "./routes/auth.js"
-import accountRouter from "./routes/account.js"
-import serviceRouter from "./routes/service/service.js"
+import routesRouter from "./routes/routes.js"
 
 const server = express()
 const PORT = 3000  // 0 for auto choose address
@@ -27,11 +24,7 @@ server.use(session({
 server.get('/', (req, res) => {
     res.status(201).send("Hello!")
 })
-
-// Routes
-server.use('/auth', authRouter)
-server.use('/account', accountRouter)
-server.use('/service', serviceRouter)
+server.use('/api', routesRouter) // Backend api
 
 // 404
 server.use((req, res) => {
