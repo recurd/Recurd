@@ -7,11 +7,11 @@ import authRouter from "./routes/auth.js"
 import accountRouter from "./routes/account.js"
 import serviceRouter from "./routes/service/service.js"
 
-const server = express();
-const PORT = 3000;  // 0 for auto choose address
+const server = express()
+const PORT = 3000  // 0 for auto choose address
 
-server.use(json());
-server.use(urlencoded({extended:true}));
+server.use(json())
+server.use(urlencoded({extended:true}))
 
 // Session
 server.use(session({
@@ -44,6 +44,6 @@ server.use((err, req, res, next) => {
     res.status(500).json({ "message": err?.message, "error": err })
 })
 
-const listener = server.listen(PORT, function(err) {
-    console.log(`Listening on http://localhost:${listener.address().port}`)
+const httpServer = server.listen(PORT, () => {
+    console.log(`Listening on http://localhost:${httpServer.address().port}`)
 })

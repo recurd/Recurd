@@ -26,7 +26,7 @@ router.post('/auth', (req, res) => {
 })
 
 router.get('/callback', async (req, res, next) => {
-    const auth_code = req.query.code || null;
+    const auth_code = req.query.code || null
     const redirect_uri = req.protocol + '://' + req.get('host') + req.originalUrl
 
     if (!auth_code) {
@@ -38,7 +38,7 @@ router.get('/callback', async (req, res, next) => {
         const result = await fetch('https://accounts.spotify.com/api/token',  {
             method: 'POST',
             body: new URLSearchParams({ // for urlencoded body
-                code: code,
+                code: auth_code,
                 redirect_uri: redirect_uri,
                 grant_type: 'authorization_code'
             }),
