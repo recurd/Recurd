@@ -37,6 +37,17 @@ server.get('/', (req, res) => {
 server.use('/auth', authRouter)
 server.use('/account', accountRouter)
 
+// 404
+server.use((req, res) => {
+    res.status(404).json({ "name": "404 Error", "message": "Route not found" })
+})
+
+// Error handling
+server.use((err, req, res, next) => {
+    console.error('error', err)
+    res.status(500).json({ "name": err?.name, "message": err?.message, "error": err })
+})
+
 const listener = server.listen(PORT, function(err) {
     console.log(`Listening on http://localhost:${listener.address().port}`)
 })

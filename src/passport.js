@@ -1,6 +1,9 @@
 import passport from "passport"
 import LocalStrategy from "passport-local"
+import SpotifyStrategy from "passport-spotify"
 import bcrypt from "bcrypt"
+import dotenv from 'dotenv'
+dotenv.config()
 import sql from './db/db.js'
 
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
@@ -20,6 +23,7 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
 }))
 
 passport.serializeUser(function(user, cb) {
+    console.log("serializing", user)
     process.nextTick(function() {
         return cb(null, {
             id: user.id,
@@ -31,6 +35,7 @@ passport.serializeUser(function(user, cb) {
 })
 
 passport.deserializeUser(function(user, cb) {
+    console.log("deserializing", user)
     process.nextTick(function() {
         return cb(null, user);
     })
@@ -38,7 +43,7 @@ passport.deserializeUser(function(user, cb) {
 
 // Middleware to check if user is authenticated
 function authGate(req, res, next) {
-    if (!req.user) {
+    if (!req.isAuthenticated()) {
         res.status(401).end()
         return
     }
