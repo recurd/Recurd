@@ -16,22 +16,46 @@ insert into songs (id, name)
 values ('e38935b9-5e14-439c-be85-b56e547d98d9', 'Quangs song');
 
 insert into songs (id, name)
-values ('891132fa-3f10-4edd-8651-6225551d285a', 'songery');
+values ('891132fa-3f10-4edd-8651-6225551d285a', 'Allien');
 
-insert into artistAlbums (artist_id, album_id)
+insert into songs (name)
+values ('huh'); -- ID:  a371be2b-30da-4ddb-ae5b-77db5f61dcb4
+
+insert into songs (name)
+values ('ho'); -- ID:  ec0c34dd-81d6-4920-b1ea-4969976369a3
+
+insert into artist_albums (artist_id, album_id)
 values ('9db9e7b1-b6ee-4d3e-92ab-ffd08767910f', '6c630e24-b085-450f-820e-511c520d9123'); -- Quang => Quang's mixtape
 
-insert into artistAlbums (artist_id, album_id)
+insert into artist_albums (artist_id, album_id)
 values ('9db9e7b1-b6ee-4d3e-92ab-ffd08767910f', '9674d959-e42b-4e55-a76a-18058b778a4c'); -- Quang => Quang's EP
 
-insert into artistAlbums (artist_id, album_id)
+insert into artist_albums (artist_id, album_id)
 values ('b2cae670-1514-4316-a77d-e9504f7856e9', '6c630e24-b085-450f-820e-511c520d9123'); -- Allen => Quang's mixtape
 
-insert into albumSongs (album_id, song_id)
+insert into album_songs (album_id, song_id)
 values ('6c630e24-b085-450f-820e-511c520d9123', 'e38935b9-5e14-439c-be85-b56e547d98d9'); -- Quang's mixtape => Quangs song
 
-insert into albumSongs (album_id, song_id)
-values ('6c630e24-b085-450f-820e-511c520d9123', '891132fa-3f10-4edd-8651-6225551d285a'); -- Quang's mixtape => songery
+insert into album_songs (album_id, song_id)
+values ('6c630e24-b085-450f-820e-511c520d9123', '891132fa-3f10-4edd-8651-6225551d285a'); -- Quang's mixtape => Allien
+
+insert into album_songs (album_id, song_id)
+values ('9674d959-e42b-4e55-a76a-18058b778a4c', 'ec0c34dd-81d6-4920-b1ea-4969976369a3'); -- Quang's EP => ho
+
+insert into album_songs (album_id, song_id)
+values ('9674d959-e42b-4e55-a76a-18058b778a4c', 'a371be2b-30da-4ddb-ae5b-77db5f61dcb4'); -- Quang's EP => huh
+
+insert into listens (user_id, song_id)
+values ('3d7ce88b-714b-45e9-b26a-27ae77c9bdf3', 'e38935b9-5e14-439c-be85-b56e547d98d9'); -- quang listens: Quangs song
+
+insert into listens (user_id, song_id)
+values ('3d7ce88b-714b-45e9-b26a-27ae77c9bdf3', '891132fa-3f10-4edd-8651-6225551d285a'); -- quang listens: Allien
+
+insert into listens (user_id, song_id)
+values ('3d7ce88b-714b-45e9-b26a-27ae77c9bdf3', 'ec0c34dd-81d6-4920-b1ea-4969976369a3'); -- quang listens: ho
+
+insert into listens (user_id, song_id)
+values ('3d7ce88b-714b-45e9-b26a-27ae77c9bdf3', 'a371be2b-30da-4ddb-ae5b-77db5f61dcb4'); -- quang listens: huh
 
 -- Get artist's albums
 select al.id, al.name, al.image
