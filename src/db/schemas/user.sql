@@ -1,3 +1,7 @@
+drop table if exists user_services;
+drop table if exists user_followers;
+drop table if exists users;
+
 create table users (
     id uuid primary key default gen_random_uuid(),
     username varchar(100) unique not null,

@@ -35,21 +35,21 @@ values ('6c630e24-b085-450f-820e-511c520d9123', '891132fa-3f10-4edd-8651-6225551
 
 -- Get artist's albums
 select al.id, al.name, al.image
-from artistAlbums aa
+from artist_albums aa
 join albums al
 on aa.album_id = al.id
 and aa.artist_id = '9db9e7b1-b6ee-4d3e-92ab-ffd08767910f';
 
 -- Get album's artists
 select ar.id, ar.name, ar.image
-from artistAlbums aa
+from artist_albums aa
 join artists ar
 on ar.id = aa.artist_id
 and aa.album_id = '6c630e24-b085-450f-820e-511c520d9123';
 
 -- Get album's songs
 select s.id, s.name
-from albumSongs ass
+from album_songs ass
 join songs s
 on ass.song_id = s.id
 and ass.album_id = '6c630e24-b085-450f-820e-511c520d9123';

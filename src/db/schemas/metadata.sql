@@ -1,3 +1,12 @@
+drop table if exists artist_albums;
+drop table if exists album_songs;
+drop table if exists artists;
+drop table if exists albums;
+drop table if exists songs;
+drop index if exists artist_name;
+drop index if exists album_name;
+drop index if exists song_name;
+
 create table artists (
     id uuid primary key default gen_random_uuid(),
     name varchar(255) not null,
@@ -35,4 +44,10 @@ create table album_songs (
     album_id uuid references albums(id) on delete cascade,
     song_id uuid references songs(id) on delete cascade,
     primary key (album_id, song_id)
+);
+
+create table artist_songs (
+    artist_id uuid references artists(id) on delete cascade,
+    song_id uuid references songs(id) on delete cascade,
+    primary key (artist_id, song_id)
 );

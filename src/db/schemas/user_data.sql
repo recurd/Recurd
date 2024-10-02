@@ -1,3 +1,7 @@
+drop table if exists listens;
+drop table if exists album_opinions;
+drop table if exists song_opinions;
+
 create table listens (
     id uuid primary key default gen_random_uuid(),
     time_stamp timestamp default now(),
