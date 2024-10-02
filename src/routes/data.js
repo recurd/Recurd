@@ -8,10 +8,18 @@ const router = Router()
 
 // Get top (n) artist id, artist name, artist image, listen count (per artist)
 router.get('/top-artists', async (req, res) => {
-    const { user_id, start_date, end_date, n} = req.query;
+    const { user_id, start_date, end_date, n } = req.query;
 
+    // Check that all required parameters are present
     if (!user_id || !start_date || !end_date || !n) {
         return res.status(400).json({ message: "user_id, start_date, end_date, and n are required." });
+    }
+
+    const start = new Date(req.query.start_date).toISOString();
+    const end = new Date(req.query.end_date).toISOString();
+    let count = parseInt(req.query.n, 10);
+    if (isNaN(count) || count <= 0) {
+        return res.status(400).json({ message: "n must be a positive integer." });
     }
 
     try {
@@ -19,8 +27,7 @@ router.get('/top-artists', async (req, res) => {
             SELECT
                 ar.id AS artist_id,
                 ar.name AS artist_name,
-                ar.image AS artist_image,
-                COUNT(l.id) AS listen_count
+                COUNT(*) AS listen_count
             FROM
                 listens l
             JOIN
@@ -29,14 +36,18 @@ router.get('/top-artists', async (req, res) => {
                 artists ar ON ars.artist_id = ar.id
             WHERE
                 l.user_id = ${user_id}
-                AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
+                AND l.time_stamp BETWEEN ${start} AND ${end}
             GROUP BY
-                ar.id, ar.name, ar.image
+                ar.id, ar.name
             ORDER BY
                 listen_count DESC
-            LIMIT ${n};
-        `
+            LIMIT ${count};
+        `;
+
+        return res.status(200).json(topArtists);
+
     } catch (error) {
+        console.error('Error fetching top artists:', error);
         return res.status(500).json({ error: "Failed to get top artists." });
     }
 });
@@ -49,13 +60,20 @@ router.get('/top-albums', async (req, res, next) => {
         return res.status(400).json({ message: "user_id, start_date, end_date, and n are required." });
     }
 
+    const start = new Date(req.query.start_date).toISOString();
+    const end = new Date(req.query.end_date).toISOString();
+    let count = parseInt(req.query.n, 10);
+    if (isNaN(count) || count <= 0) {
+        return res.status(400).json({ message: "n must be a positive integer." });
+    }
+
     try {
         const topAlbums = await sql`
             SELECT
                 a.id AS album_id,
                 a.name AS album_name,
                 a.image AS album_image,
-                COUNT(l.song_id) AS listen_count
+                COUNT(l.id) AS listen_count
             FROM
                 listens l
             JOIN
@@ -64,12 +82,12 @@ router.get('/top-albums', async (req, res, next) => {
                 albums a ON als.album_id = a.id
             WHERE
                 l.user_id = ${user_id}
-                AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
+                AND l.time_stamp BETWEEN ${start} AND ${end}
             GROUP BY
                 a.id, a.name, a.image
             ORDER BY
                 listen_count DESC
-            LIMIT ${n};
+            LIMIT ${count}; -- Safely inject validated count here
         `;
 
         res.json(topAlbums);
@@ -78,23 +96,31 @@ router.get('/top-albums', async (req, res, next) => {
     }
 });
 
+
 // Get top (n) song id, song name, album name, album image, artist name
 router.get('/top-songs', async (req, res) => {
-    const { user_id, start_date, end_date, n} = req.query;
+    const { user_id, start_date, end_date, n } = req.query;
 
     if (!user_id || !start_date || !end_date || !n) {
         return res.status(400).json({ message: "user_id, start_date, end_date, and n are required." });
     }
 
+    const start = new Date(req.query.start_date).toISOString();
+    const end = new Date(req.query.end_date).toISOString();
+    let count = parseInt(req.query.n, 10);
+    if (isNaN(count) || count <= 0) {
+        return res.status(400).json({ message: "n must be a positive integer." });
+    }
+
     try {
-        const topSongs = await sql `
+        const topSongs = await sql`
             SELECT
                 s.id as song_id,
                 s.name as song_name,
                 a.name as album_name,
                 a.image as album_image,
-                ar.name as artist_name,
-                COUNT(l.id) as listen_count
+                ARRAY_AGG(DISTINCT ar.name) as artist_names,
+                COUNT(DISTINCT l.id) as listen_count
             FROM
                 listens l
             JOIN
@@ -104,23 +130,24 @@ router.get('/top-songs', async (req, res) => {
             JOIN
                 albums a ON als.album_id = a.id
             JOIN
-                artist_albums ara ON a.id = ara.album_id
+                artist_songs ars ON s.id = ars.song_id
             JOIN
-                artists ar ON ara.artist_id = ar.id
+                artists ar ON ars.artist_id = ar.id
             WHERE
                 l.user_id = ${user_id}
-                AND l.time_stamp BETWEEN ${start_date} and ${end_date}
+                AND l.time_stamp BETWEEN ${start} AND ${end}
             GROUP BY
-                s.id, s.name, a.name, a.image, ar.name
+                s.id, s.name, a.name, a.image
             ORDER BY
                 listen_count DESC
-            LIMIT ${n};
+            LIMIT ${count};
         `;
-    
+
         res.json(topSongs);
     } catch (error) {
         return res.status(500).json({ error: "Failed to get top songs." });
     }
 });
+
 
 export default router;
