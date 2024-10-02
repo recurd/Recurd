@@ -57,6 +57,15 @@ values ('3d7ce88b-714b-45e9-b26a-27ae77c9bdf3', 'ec0c34dd-81d6-4920-b1ea-4969976
 insert into listens (user_id, song_id)
 values ('3d7ce88b-714b-45e9-b26a-27ae77c9bdf3', 'a371be2b-30da-4ddb-ae5b-77db5f61dcb4'); -- quang listens: huh
 
+insert into artist_songs (artist_id, song_id)
+values ('9db9e7b1-b6ee-4d3e-92ab-ffd08767910f', 'e38935b9-5e14-439c-be85-b56e547d98d9');
+
+insert into artist_songs (artist_id, song_id)
+values ('9db9e7b1-b6ee-4d3e-92ab-ffd08767910f', '891132fa-3f10-4edd-8651-6225551d285a');
+
+insert into artist_songs (artist_id, song_id)
+values ('9db9e7b1-b6ee-4d3e-92ab-ffd08767910f', 'e38935b9-5e14-439c-be85-b56e547d98d9');
+
 -- Get artist's albums
 select al.id, al.name, al.image
 from artist_albums aa

@@ -6,20 +6,42 @@ import authGate from "../authGate.js"
 
 const router = Router()
 
-// Will have to figure out how to get top artists from songs with multiple artists / artists in an album
+// Get top (n) artist id, artist name, artist image, listen count (per artist)
 router.get('/top-artists', async (req, res) => {
+    const { user_id, start_date, end_date, n} = req.query;
 
+    if (!user_id || !start_date || !end_date || !n) {
+        return res.status(400).json({ message: "user_id, start_date, end_date, and n are required." });
+    }
+
+    try {
+        const topArtists = await sql`
+            SELECT
+                ar.id AS artist_id,
+                ar.name AS artist_name,
+                ar.image AS artist_image,
+                COUNT(l.id) AS listen_count
+            FROM
+                listens l
+            JOIN
+                artist_songs ars ON l.song_id = ars.song_id
+            JOIN
+                artists ar ON ars.artist_id = ar.id
+            WHERE
+                l.user_id = ${user_id}
+                AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
+            GROUP BY
+                ar.id, ar.name, ar.image
+            ORDER BY
+                listen_count DESC
+            LIMIT ${n};
+        `
+    } catch (error) {
+        return res.status(500).json({ error: "Failed to get top artists." });
+    }
 });
 
-/*
-    Returns a list of n objects by listen count:
-    {
-        "album_id": "9674d959-e42b-4e55-a76a-18058b778a4c",
-        "album_name": "Quangs EP",
-        "album_image": "",
-        "listen_count": "2"
-    }...
-*/
+// Get top (n) album id, album name, album image, listen count (per album)
 router.get('/top-albums', async (req, res, next) => {
     const { user_id, start_date, end_date, n } = req.query;
 
@@ -47,16 +69,16 @@ router.get('/top-albums', async (req, res, next) => {
                 a.id, a.name, a.image
             ORDER BY
                 listen_count DESC
-            LIMIT ${n};  -- Use the n parameter to limit results
+            LIMIT ${n};
         `;
 
         res.json(topAlbums);
     } catch (error) {
-        next(error);
+        return res.status(500).json({ error: "Failed to get top albums." });
     }
 });
 
-// Get song id, song name, album name, album image, artist name
+// Get top (n) song id, song name, album name, album image, artist name
 router.get('/top-songs', async (req, res) => {
     const { user_id, start_date, end_date, n} = req.query;
 
@@ -97,7 +119,7 @@ router.get('/top-songs', async (req, res) => {
     
         res.json(topSongs);
     } catch (error) {
-        next(error);
+        return res.status(500).json({ error: "Failed to get top songs." });
     }
 });
 
