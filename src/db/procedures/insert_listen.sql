@@ -1,14 +1,23 @@
--- TODO: implement and call add_listen_spotify() procedure to handle importing spotify metadata
-drop procedure add_listen;
-create or replace procedure add_listen (
+drop procedure insert_listen;
+
+-- Given song_name (required), artist_names (required), and album name, 
+-- create necessary song/artists/album records and add a listen record in the listen table
+-- Metadata:
+-- If metadata is provided of the song/artist/album, they will be included when
+-- the song/artist/album is inserted into the database. Otherwise they are ignored.
+-- The format of the metadata is json: {"columnName":"value"}
+create or replace procedure insert_listen (
     out listen_id listens.id%type,
     out song_id songs.id%type,
-    out artists jsonb,
-    out album jsonb,
+    out artists json,
+    out album json,
     user_id users.id%type,
     song_name songs.name%type,
     artist_names varchar(255)[], -- doesn't support array type with column ref; need manual update on type change
     album_name albums.name%type = null,
+    song_metadata json = null,
+    artists_metadata json = null, -- array of json
+    album_metadata json = null,
     time_stamp listens.time_stamp%type = now()
 )
 language plpgsql
@@ -19,16 +28,19 @@ begin
     -- Requires non-empty song name
     if song_name is null or song_name = '' then
         raise exception 'add_listen() requires non-empty song name!';
-    end if;
     -- Requires artist name
-    if array_length(artist_names, 1) = 0 then
+    elsif array_length(artist_names, 1) = 0 then
         raise exception 'add_listen() requires at least one artist name!';
     end if;
 
     -- Look at existing records of songs+artists(+albums) that 
     -- match the provided song, artists (and album, if exists) names.
     -- If they are an EXACT match, utilize those IDs. 
-    -- If not, create new song, artists (and album) and return those IDs.
+    -- If not:
+        -- If album was provided: Look at existing songs with matching artists
+            -- If the song is found, create the album and link to the existing song/artist
+            -- If not, create new song, artists, and album and return those IDs
+        -- Otherwise, create new song, artists and return those IDs.
 
     if album_name is null then
         begin
