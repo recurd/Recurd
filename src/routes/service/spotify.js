@@ -9,7 +9,7 @@ const router = Router()
 router.use(authGate())
 
 // Expects "auth_code" and "redirect_uri" in the request body
-router.get('/auth', async (req, res, next) => {
+router.post('/auth', async (req, res, next) => {
     const auth_code = req.body.auth_code || null
     const redirect_uri = req.body.redirect_uri
 
