@@ -1,5 +1,4 @@
 import { Router } from "express"
-import * as querystring from 'node:querystring'
 import dotenv from 'dotenv'
 import sql from "../../db/db.js"
 import authGate from "../../authGate.js"
@@ -9,26 +8,13 @@ const router = Router()
 
 router.use(authGate())
 
-router.get('/auth', (req, res) => {
-    let redirect_uri = req.protocol + '://' + req.get('host') + '/api/service/spotify/auth/callback'
-    const scope = 'user-read-playback-state user-read-currently-playing user-read-recently-played'
+// Expects "auth_code" and "redirect_uri" in the request body
+router.get('/auth', async (req, res, next) => {
+    const auth_code = req.body.auth_code || null
+    const redirect_uri = req.body.redirect_uri
 
-    res.redirect('https://accounts.spotify.com/authorize?' +
-        querystring.stringify({
-        response_type: 'code',
-        client_id: process.env.SPOTIFY_CLIENT_ID,
-        scope: scope,
-        redirect_uri: redirect_uri
-        // state: state
-    }))
-})
-
-router.get('/auth/callback', async (req, res, next) => {
-    const auth_code = req.query.code || null
-    const redirect_uri = req.protocol + '://' + req.get('host') + '/api/service/spotify/auth/callback'
-
-    if (!auth_code) {
-        res.status(500).json({ message: req.query.error })
+    if (!auth_code || !redirect_uri) {
+        res.status(400).json({ message: "auth_code or redirect_uri missing from request body" })
         return
     }
 
@@ -76,5 +62,21 @@ router.get('/auth/callback', async (req, res, next) => {
         return next(e)
     }
 })
+
+// Move to frontend
+// import * as querystring from 'node:querystring'
+// router.get('/auth', (req, res) => {
+//     let redirect_uri = req.protocol + '://' + req.get('host') + '/api/service/spotify/auth/callback'
+//     const scope = 'user-read-playback-state user-read-currently-playing user-read-recently-played'
+
+//     res.redirect('https://accounts.spotify.com/authorize?' +
+//         querystring.stringify({
+//         response_type: 'code',
+//         client_id: process.env.SPOTIFY_CLIENT_ID,
+//         scope: scope,
+//         redirect_uri: redirect_uri
+//         // state: state
+//     }))
+// })
 
 export default router
