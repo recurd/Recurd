@@ -9,9 +9,8 @@ const router = Router()
 
 router.use(authGate())
 
-router.post('/auth', (req, res) => {
-    // calculate redirect uri from current uri, adding + '/callback'
-    let redirect_uri = (req.protocol + '://' + req.get('host') + req.originalUrl) + '/callback'
+router.get('/auth', (req, res) => {
+    let redirect_uri = req.protocol + '://' + req.get('host') + '/api/service/spotify/auth/callback'
     const scope = 'user-read-playback-state user-read-currently-playing user-read-recently-played'
 
     res.redirect('https://accounts.spotify.com/authorize?' +
@@ -26,7 +25,7 @@ router.post('/auth', (req, res) => {
 
 router.get('/auth/callback', async (req, res, next) => {
     const auth_code = req.query.code || null
-    const redirect_uri = req.protocol + '://' + req.get('host') + req.originalUrl
+    const redirect_uri = req.protocol + '://' + req.get('host') + '/api/service/spotify/auth/callback'
 
     if (!auth_code) {
         res.status(500).json({ message: req.query.error })
@@ -62,8 +61,12 @@ router.get('/auth/callback', async (req, res, next) => {
                 service_type: 'spotify',
                 access_token,
                 refresh_token,
-                expires_at: sql`now() + interval '${expires_in - 5}' seconds`
-            })} on conflict update`
+                expires_at: sql`now() + interval '${sql((expires_in - 5) +' seconds')}'`
+            })} on conflict (user_id, service_type) 
+            do update set 
+                access_token = excluded.access_token, 
+                refresh_token = excluded.refresh_token,
+                expires_at = excluded.expires_at`
         if (dbRes.count == 0) {
             res.status(500).json({ message: 'Failed to insert user Spotify service into database' })
             return
