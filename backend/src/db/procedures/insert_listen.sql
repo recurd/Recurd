@@ -33,14 +33,20 @@ begin
         raise exception 'add_listen() requires at least one artist name!';
     end if;
 
-    -- Look at existing records of songs+artists(+albums) that 
-    -- match the provided song, artists (and album, if exists) names.
-    -- If they are an EXACT match, utilize those IDs. 
-    -- If not:
-        -- If album was provided: Look at existing songs with matching artists
-            -- If the song is found, create the album and link to the existing song/artist
-            -- If not, create new song, artists, and album and return those IDs
-        -- Otherwise, create new song, artists and return those IDs.
+    -- Look at existing records of songs + artists that 
+    -- match the provided song and artists names
+    -- If they are an EXACT match, utilize existing records
+    -- If not, create new song and artists, and link them
+    -- Then, look at existing records for albums matching the album name
+        -- If album does not exist but song does, create album and link song to it, assuming 
+        -- that the artists of the album are exactly the artists of the song
+        -- Lookup order of album:
+            -- Song name + album name + all of album's artist names (in album's metadata)
+            -- Song name + album name + at least one of album's artist names
+            -- Song name + album name + all of song's artist names
+            -- Song name + album name + at least one of song's artist names
+            -- Otherwise, assume album does not exist
+        -- Note that we don't assume the artists of the album are the same as the artists of the song
 
     if album_name is null then
         begin
