@@ -1,1 +1,1 @@
-## Backend for recurd project
+## Recurd project
