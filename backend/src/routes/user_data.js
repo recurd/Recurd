@@ -1,13 +1,10 @@
 import { Router } from "express"
-import bcrypt from "bcrypt"
 import sql from '../db/db.js'
-import { ErrorCodes as PgErrorCodes, isDBError } from '../db/util.js'
-import authGate from "../authGate.js"
 
 const router = Router()
 
 // Get top (n) artist id, artist name, artist image, listen count (per artist)
-router.get('/top-artists', async (req, res) => {
+router.get('/top-artists', async (req, res, next) => {
     const { user_id, start_date, end_date, n } = req.query;
 
     // Check that all required parameters are present
@@ -45,10 +42,8 @@ router.get('/top-artists', async (req, res) => {
         `;
 
         return res.status(200).json(topArtists);
-
-    } catch (error) {
-        console.error('Error fetching top artists:', error);
-        return res.status(500).json({ error: "Failed to get top artists." });
+    } catch (e) {
+        return next(e)
     }
 });
 
@@ -91,14 +86,14 @@ router.get('/top-albums', async (req, res, next) => {
         `;
 
         res.json(topAlbums);
-    } catch (error) {
-        return res.status(500).json({ error: "Failed to get top albums." });
+    } catch (e) {
+        return next(e)
     }
 });
 
 
 // Get top (n) song id, song name, album name, album image, artist name
-router.get('/top-songs', async (req, res) => {
+router.get('/top-songs', async (req, res, next) => {
     const { user_id, start_date, end_date, n } = req.query;
 
     if (!user_id || !start_date || !end_date || !n) {
@@ -144,8 +139,8 @@ router.get('/top-songs', async (req, res) => {
         `;
 
         res.json(topSongs);
-    } catch (error) {
-        return res.status(500).json({ error: "Failed to get top songs." });
+    } catch (e) {
+        return next(e)
     }
 });
 

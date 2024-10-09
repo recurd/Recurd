@@ -9,8 +9,8 @@ router.get('/:id', async (req, res, next) => {
     try {
         const result = 
             await sql`SELECT * 
-                from artists a
-                where a.id = ${id}`
+                FROM artists a
+                WHERE a.id = ${id}`
         res.json(result)
     } catch(e) {
         if (isDBError(e, ErrorCodes.INVALID_TEXT_REPRESENTATION)) {
