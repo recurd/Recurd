@@ -1,6 +1,7 @@
 // postgres error codes
 const ErrorCodes = {
-    UNIQUE_VIOLATION: "23505"
+    UNIQUE_VIOLATION: "23505",
+    INVALID_TEXT_REPRESENTATION: "22P02"
 }
 
 // If errCode is null, checks if error is a DB error. 
