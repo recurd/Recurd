@@ -10,7 +10,7 @@ router.get('/:id', async (req, res, next) => {
         // TODO: add aggregated artists
         const result = 
             await sql`SELECT * 
-                from albums a
+                FROM albums a
                 where a.id = ${id}`
         res.json(result)
     } catch(e) {
