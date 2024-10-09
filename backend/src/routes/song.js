@@ -25,4 +25,19 @@ router.get('/:id/albums', async (req, res, next) => {
     res.status(501).end()
 })
 
+router.get('/:id/ratings', async (req, res, next) => {
+    const id = req.params.id
+    res.status(501).end()
+})
+
+router.get('/:id/reviews', async (req, res, next) => {
+    const id = req.params.id
+    res.status(501).end()
+})
+
+router.get('/:id/top-listeners', async (req, res, next) => {
+    const id = req.params.id
+    res.status(501).end()
+})
+
 export default router
