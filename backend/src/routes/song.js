@@ -10,8 +10,8 @@ router.get('/:id', async (req, res, next) => {
         // TODO: add aggregated artists
         const result = 
             await sql`SELECT * 
-                from songs s
-                where s.id = ${id}`
+                FROM    songs s
+                WHERE   s.id = ${id}`
         res.json(result)
     } catch(e) {
         if (isDBError(e, ErrorCodes.INVALID_TEXT_REPRESENTATION)) {
