@@ -55,5 +55,9 @@ router.get('/:id/songs', async (req, res, next) => {
     }
 })
 
+router.get('/:id/top-listeners', async (req, res, next) => {
+    const id = req.params.id
+    res.status(501).end()
+})
 
 export default router
