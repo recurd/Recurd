@@ -1,78 +1,82 @@
 import { Router } from "express"
-import { z } from "zod"
 import sql from '../db/db.js'
-import { authGate, getAuthUser } from "../auth.js"
-import { findOrInsertSongArtistAlbum, insertListen } from "../db/metadata.js"
-import { albumSchemaT, artistSchema, songSchema } from "../db/schemas/metadata.js"
-import { coerceStrSchemaT, timestampSchemaT, idSchema } from "../db/schemas/shared.js"
+import authGate from "../authGate.js"
 
 const router = Router()
 
-// Returns listen_id, song_id, time_stamp
-router.post('/log-by-id', authGate(), async (req, res, next) => {
-    const inputSchemaT = z.object({
-        song_id: idSchema,
-        time_stamp: timestampSchemaT
-    })
-    try {
-        const { song_id, time_stamp } = inputSchemaT.parse(req.body)
-        const user_id = getAuthUser(req).id
-
-        const result = await insertListen({ user_id, song_id, time_stamp }, sql)
-        res.status(200).json(result)
-    } catch (e) {
-        return next(e)
-    }
-})
-
-// Required: song name and artists (array of string artist names or artist objects with 'name' field) with length at least 1
-// Returns listen_id, song_id, time_stamp, artists (id, name, image per artist), album (id, name, image, and artists)
+// Returns listen_id, song_id, artists (id, name, image per artist), album (id, name, and image)
 router.post('/log', authGate(), async (req, res, next) => {
-    const artistArraySchemaT = z.union([
-        z.string().array().nonempty().transform(arr => arr.map(e => { return { name: e } })),
-        artistSchema.array().nonempty()
-    ])
-    const inputSchemaT = z.object({
-        song_name: coerceStrSchemaT,
-        artists: artistArraySchemaT,
-        // optional
-        song_metadata: songSchema.omit({ name: true }).nullish(),
-        album: albumSchemaT.nullish(),
-        album_artists: artistArraySchemaT.nullish(),
-        time_stamp: timestampSchemaT.nullish()
-    })
+    const { song_name, artist_names } = req.body
+    if (!song_name || !artist_names || Array.isArray(artist_names) || artist_names.length == 0) {
+        res.status(400).json({ message: "song_name and artist_name (an array of at least one name) is required!" })
+        return
+    }
 
+    // optional fields
+    const {
+        album_name,
+        song_metadata,
+        artist_metadatas,
+        album_metadata
+    } = req.body
+    let timestamp = req.body.timestamp ?? Date.now() / 1000
+    const user_id = req.session.user.id // derived from login
+
+    // See Planning doc
     try {
-        const user_id = getAuthUser(req).id
-        const { 
-            song_name, 
-            artists,
-            // optional fields
-            song_metadata,
-            album,
-            album_artists,
-            time_stamp
-        } = inputSchemaT.parse(req.body)
-
         const result = await sql.begin(async sql => {
-            const { song, album: outAlbum } = await findOrInsertSongArtistAlbum({
-                    song: { ...song_metadata, name: song_name }, 
-                    songArtists: artists, 
-                    album, 
-                    albumArtists: album_artists 
-                }, sql)
+            let song_id = null
+            let artists = []
+
+            // Match song name and artist names
+            const matchSongArtts = await 
+            sql`SELECT 
+                    s.id as song_id,
+                    json_agg(json_build_object('id', ar.id, 'name', ar.name, 'image', ar.image)) artists
+            FROM    songs s
+            JOIN    artist_songs ars
+            ON      s.id = ars.song_id
+            JOIN    artists ar
+            ON      ars.artist_id = ar.id
+            WHERE   s.name = ${song_name}
+            GROUP BY s.id
+            HAVING  array_agg(ar.name) = ${artist_names};`
+
+            // If a match is encountered, the song exists, so retrieve data
+            if (matchSongArtts.count != 0) {
+                song_id = matchSongArtts[0].song_id
+                artists = matchSongArtts[0].artists
+            // Otherwise, insert all artists whose names are not present
+            // Then insert song, and insert into artist_songs
+            } else {
+                // use MERGE
+            }
+
             // Insert listen
-            const { listen_id, time_stamp: res_timestamp } = await insertListen({ user_id, song_id: song.id, time_stamp }, sql)
+            const listen_id = await 
+            sql`INSERT INTO listens ${sql(timestamp, user_id, song_id)}
+            RETURNING id`
+
+            // Match album
+            let album = null
+            if (album_name) {
+                // Get album's artists names (prioritizing album's metadata info)
+                let album_artists = artist_names
+                if (album_metadata?.artists) {
+                    album_artists = []
+                    for (const artist in album_metadata.artists) {
+                        album_artists.append(artist['name'])
+                    }
+                }
+            }
+
             return {
                 listen_id,
-                song,
-                artists: song.artists,
-                album: outAlbum,
-                time_stamp: res_timestamp
+                song_id, 
+                artists,
+                album
             }
         })
-
-        res.status(200).json(result)
     } catch (e) {
         return next(e)
     }
