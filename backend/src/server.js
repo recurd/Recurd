@@ -3,6 +3,7 @@ import session from "express-session"
 import dotenv from "dotenv"
 dotenv.config()
 import routesRouter from "./routes/routes.js"
+import { isDBError } from "./db/util.js"
 
 const server = express()
 const PORT = 3000  // 0 for auto choose address
@@ -33,7 +34,13 @@ server.use((req, res) => {
 
 // Error handling
 server.use((err, req, res, next) => {
-    console.error('error', err)
+    if (isDBError(err)) {
+        console.error(err)
+        console.error('Query: ', err.query)
+        console.error('Parameters: ', err.parameters) // uncomment this may leak sensitive info to logs
+    } else {
+        console.error('error', err)
+    }
     res.status(500).json({ "message": err?.message, "error": err })
 })
 

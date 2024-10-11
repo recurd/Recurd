@@ -1,1 +1,1 @@
-## Recurd project
+## Recurd

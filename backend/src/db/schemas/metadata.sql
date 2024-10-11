@@ -1,8 +1,9 @@
 drop table if exists artist_albums;
 drop table if exists album_songs;
-drop table if exists artists;
-drop table if exists albums;
-drop table if exists songs;
+drop table if exists artist_songs;
+drop table if exists artists cascade;
+drop table if exists albums cascade;
+drop table if exists songs cascade;
 drop index if exists artist_name;
 drop index if exists album_name;
 drop index if exists song_name;
@@ -34,6 +35,7 @@ create table songs (
 create index song_name on songs using hash (name);
 
 -- Join tables
+-- TODO: Determin what to do when artist is deleted; delete linked songs? restrict?
 create table artist_albums (
     artist_id uuid references artists(id) on delete cascade,
     album_id uuid references albums(id) on delete cascade,
