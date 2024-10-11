@@ -32,14 +32,15 @@ router.post('/log', authGate(), async (req, res, next) => {
     // WARNING: This feature is not concurrently safe at all!! (yet)
     try {
         const result = await sql.begin(async sql => {
-            let song_id = null
+            let song = null
             let artists = []
+            let album = null
 
             // Match song name and artist names
             const matchSongArtts = await sql`
                 SELECT 
-                        s.id as song_id,
-                        json_agg(json_build_object('id', ar.id, 'name', ar.name, 'image', ar.image)) artists
+                        json_agg(row_to_json(s)) song
+                        json_agg(row_to_json(ar)) artists
                 FROM    songs s
                 JOIN    artist_songs ars
                 ON      s.id = ars.song_id
@@ -51,7 +52,7 @@ router.post('/log', authGate(), async (req, res, next) => {
 
             // If a match is encountered, the song exists, so retrieve data
             if (matchSongArtts.count != 0) {
-                song_id = matchSongArtts[0].song_id
+                song = matchSongArtts[0].song
                 artists = matchSongArtts[0].artists
             }
             // Otherwise, insert all artists whose names are not present
@@ -89,17 +90,17 @@ router.post('/log', authGate(), async (req, res, next) => {
                 console.log('artists created and/or found:', artists)
 
                 // Insert song
-                const song_id = await sql`
+                song = await sql`
                     INSERT INTO songs (name, image)
                     VALUES (${song_name, song_metadata?.image})
-                    RETURNING id`
-                console.log('song created with id: ', song_id)
+                    RETURNING *`
+                console.log('song created with id: ', song.id)
 
                 // Insert artist_song entry
                 const artist_song_inserts = artists.map(e => { // build values to insert into artist songs
                     return {
                         artist_id: e.artist_id,
-                        song_id
+                        song_id: song.id
                     }
                 }) 
                 await sql`
@@ -108,11 +109,10 @@ router.post('/log', authGate(), async (req, res, next) => {
 
             // Insert listen
             const listen_id = await sql`
-                INSERT INTO listens ${sql(timestamp, user_id, song_id)}
+                INSERT INTO listens ${sql(timestamp, user_id, song.id)}
                 RETURNING id`
 
             // Match album
-            let album = null
             if (album_name) {
                 // Get album's artists names (prioritizing album's metadata info, but if not exists, use song's artist ames)
                 let album_artists = artist_names
@@ -126,9 +126,10 @@ router.post('/log', authGate(), async (req, res, next) => {
 
             return {
                 listen_id,
-                song_id, 
+                song, 
                 artists,
-                album
+                album,
+                timestamp
             }
         })
     } catch (e) {
