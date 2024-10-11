@@ -1,14 +1,26 @@
 import { Router } from "express"
 import sql from '../db/db.js'
 import authGate from "../authGate.js"
+import { isDBError } from "../db/util.js"
+import { insertOrFindArtists } from "../db/metadata.js"
 
 const router = Router()
 
 // Returns listen_id, song_id, artists (id, name, image per artist), album (id, name, and image)
 router.post('/log', authGate(), async (req, res, next) => {
-    const { song_name, artist_names } = req.body
-    if (!song_name || !artist_names || Array.isArray(artist_names) || artist_names.length == 0) {
-        res.status(400).json({ message: "song_name and artist_name (an array of at least one name) is required!" })
+    const { 
+        song_name, 
+        artist_names
+    } = req.body
+    if (!song_name || !artist_names || 
+        !Array.isArray(artist_names) || artist_names.length == 0) {
+        res.status(400).json({ message: "song_name and artist_names (an array of at least one name) is required!" })
+        return
+    }
+    let { artist_metadatas } = req.body
+    if (!artist_metadatas) artist_metadatas = artist_names.map(_=>{ return {}})
+    if (!Array.isArray(artist_metadatas) || artist_names.length != artist_metadatas.length) {
+        res.status(400).json({ message: "artist_metadatas' length must be the same as artist_names' length (if present)" })
         return
     }
 
@@ -16,9 +28,8 @@ router.post('/log', authGate(), async (req, res, next) => {
     const {
         album_name,
         song_metadata,
-        artist_metadatas,
         album_metadata,
-        timestamp = Date.now() / 1000
+        time_stamp = Date.now() / 1000
     } = req.body
     const user_id = req.session.user.id // derived from login
 
@@ -36,10 +47,10 @@ router.post('/log', authGate(), async (req, res, next) => {
             let artists = []
             let album = null
 
-            // Match song name and artist names
+            // Find song and artists by exact match on song name and artist names
             const [matchedSA] = await sql`
                 SELECT 
-                        json_agg(row_to_json(s)) song
+                        row_to_json(s) song,
                         json_agg(row_to_json(ar)) artists
                 FROM    songs s
                 JOIN    artist_songs ars
@@ -48,80 +59,72 @@ router.post('/log', authGate(), async (req, res, next) => {
                 ON      ars.artist_id = ar.id
                 WHERE   s.name = ${song_name}
                 GROUP BY s.id
-                HAVING  array_agg(ar.name) = ${artist_names};`
+                HAVING  array_agg(ar.name) @> ${artist_names}
+                    AND array_agg(ar.name) <@ ${artist_names};` // set equality (of arrays)
 
             // If a match is encountered, the song exists, so retrieve data
             if (matchedSA) {
                 song = matchedSA.song
                 artists = matchedSA.artists
+                song.found = true
+                artists = artists.map(e=>{ return {...e, found: true} })
             }
             // Otherwise, insert all artists whose names are not present
             // Then insert song, and insert into artist_songs
             else {
                 // Insert artists
-                // create temp table with same type as artists (excluding id column)
-                await sql`
-                    CREATE TEMPORARY TABLE temp_artists (LIKE artists); 
-                    ALTER TABLE temp_artists DROP COLUMN id`.simple()
-                for (const [i, name] of artist_names.entries()) {
-                    // let metadata = null
-                    // if (artist_metadatas) metadata = artist_metadatas[i]
-                    await sql`INSERT INTO temp_artists ${sql({...artist_metadatas[i], name})}`
+                for (let i = 0; i < artist_names.length; i++) {
+                    artist_metadatas[i].name = artist_names[i]
                 }
-                artists = await sql`
-                    WITH existed as (
-                        SELECT * FROM artists 
-                        WHERE name in (
-                            SELECT name FROM temp_artists
-                        )
-                    ), inserted as (
-                        INSERT INTO artists (name, image, description)
-                        SELECT DISTINCT ON (name) *
-                        FROM temp_artists ta
-                        WHERE NOT EXISTS (
-                            SELECT name FROM existed WHERE name = ta.name
-                        )
-                        RETURNING *
-                    )
-                    SELECT * FROM existed
-                    UNION
-                    SELECT * FROM inserted`
-                console.log('artists created and/or found:', artists)
-                sql`DROP TABLE temp_artists`
+                artists = await insertOrFindArtists(artist_metadatas)
 
                 // Insert song
                 const [res_song] = await sql`
-                    INSERT INTO songs (name, image)
-                    VALUES (${song_name, song_metadata?.image})
+                    INSERT INTO songs ${sql({ ...song_metadata, name: song_name})}
                     RETURNING *`
-                song = res_song
+                song = { ...res_song, found: false }
                 console.log('song created with id: ', song.id)
 
                 // Insert artist_song entry
                 const artist_song_inserts = artists.map(e => { // build values to insert into artist songs
                     return {
-                        artist_id: e.artist_id,
+                        artist_id: e.id,
                         song_id: song.id
                     }
                 }) 
-                sql`INSERT INTO artist_songs ${sql(artist_song_inserts)}`
+                await sql`INSERT INTO artist_songs ${sql(artist_song_inserts)}`
             }
 
             // Insert listen
             const [{ listen_id, res_timestamp }] = await sql`
-                INSERT INTO listens ${sql(timestamp, user_id, song.id)}
-                RETURNING id, EXTRACT (EPOCH FROM timestamp)`
+                INSERT INTO listens ${sql( 
+                    {time_stamp: time_stamp ?? undefined, 
+                    user_id, song_id: song.id })}
+                RETURNING id, EXTRACT (EPOCH FROM time_stamp)`
 
-            // Match album
-            if (album_name) {
+            // If song was found (not created), fetch album by name
+            if (song.found) {
+                const [resAlbum] = await sql`
+                    SELECT *
+                    FROM songs s
+                    JOIN album_songs abs
+                    ON s.id = abs.song_id
+                    JOIN albums ab
+                    ON abs.album_id = ab.id
+                    WHERE s.id = ${song.id}
+                        ${album_name ? sql`AND ab.name = ${album_name}` : sql``}
+                    LIMIT 1`
+                album = resAlbum
+            }
+
+            // Find album
+            if (album_name && !album) { // haven't found album
                 // Get album's artists names (prioritizing album's metadata info, but if not exists, use song's artist ames)
-                let album_artists = artist_names
-                if (album_metadata?.artists) {
-                    album_artists = []
-                    for (const artist in album_metadata.artists) {
-                        album_artists.append(artist['name'])
-                    }
-                }
+                const album_artist_names = 
+                    album_metadata?.artists ?
+                    album_metadata.artists.map(e=>e.name) : 
+                        artist_names
+                
             }
 
             return {
@@ -132,7 +135,14 @@ router.post('/log', authGate(), async (req, res, next) => {
                 res_timestamp
             }
         })
+
+        res.status(200).json(result)
     } catch (e) {
+        // TEMP
+        if (isDBError(e)) {
+            console.error('Query: ', e.query)
+            console.error('Parameters: ', e.parameters) // uncomment this may leak sensitive info to logs
+        } 
         return next(e)
     }
 })
