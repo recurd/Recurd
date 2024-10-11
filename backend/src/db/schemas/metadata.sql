@@ -53,3 +53,23 @@ create table artist_songs (
     song_id uuid references songs(id) on delete cascade,
     primary key (artist_id, song_id)
 );
+
+-- For easy viewing
+drop view if exists artist_album_songs;
+create view artist_album_songs as 
+    select 
+        s.*,
+        coalesce(array_agg(ar.id || ' ' || ar.name)
+            filter (where ar.id is not null), '{}') as artists,
+        coalesce(array_agg(ab.id || ' ' || ab.name) 
+            filter (where ab.id is not null), '{}') as albums
+    from songs s
+    join artist_songs ars
+    on s.id = ars.song_id
+    join artists ar
+    on ars.artist_id = ar.id
+    left join album_songs abs
+    on s.id = abs.song_id
+    left join albums ab
+    on abs.album_id = ab.id
+    group by s.id;

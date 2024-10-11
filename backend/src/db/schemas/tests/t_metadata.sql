@@ -73,6 +73,20 @@ from album_songs ass
     on ass.song_id = s.id
     and ass.album_id = '6c630e24-b085-450f-820e-511c520d9123';
 
+SELECT 
+        row_to_json(s) song,
+        json_agg(row_to_json(ar)) artists,
+        array_agg(ar.name)
+FROM    songs s
+JOIN    artist_songs ars
+ON      s.id = ars.song_id
+JOIN    artists ar
+ON      ars.artist_id = ar.id
+WHERE   s.name = 'Logged Song 1'
+GROUP BY s.id
+HAVING  array_agg(ar.name) @> '{"Logged Artist 1", "Logged Artist 2"}'
+    AND array_agg(ar.name) <@ '{"Logged Artist 1", "Logged Artist 2"}';
+
 -- Get a song by exact match on its name and artist name(s)
 -- Artist fields are aggregated into json
 select s.*, 
