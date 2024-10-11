@@ -37,7 +37,7 @@ router.post('/log', authGate(), async (req, res, next) => {
             let album = null
 
             // Match song name and artist names
-            const matchSongArtts = await sql`
+            const [matchedSA] = await sql`
                 SELECT 
                         json_agg(row_to_json(s)) song
                         json_agg(row_to_json(ar)) artists
@@ -51,9 +51,9 @@ router.post('/log', authGate(), async (req, res, next) => {
                 HAVING  array_agg(ar.name) = ${artist_names};`
 
             // If a match is encountered, the song exists, so retrieve data
-            if (matchSongArtts.count != 0) {
-                song = matchSongArtts[0].song
-                artists = matchSongArtts[0].artists
+            if (matchedSA) {
+                song = matchedSA.song
+                artists = matchedSA.artists
             }
             // Otherwise, insert all artists whose names are not present
             // Then insert song, and insert into artist_songs
@@ -85,15 +85,16 @@ router.post('/log', authGate(), async (req, res, next) => {
                     )
                     SELECT * FROM existed
                     UNION
-                    SELECT * FROM inserted;
-                    DROP TABLE temp_artists`.simple()
+                    SELECT * FROM inserted`
                 console.log('artists created and/or found:', artists)
+                sql`DROP TABLE temp_artists`
 
                 // Insert song
-                song = await sql`
+                const [res_song] = await sql`
                     INSERT INTO songs (name, image)
                     VALUES (${song_name, song_metadata?.image})
                     RETURNING *`
+                song = res_song
                 console.log('song created with id: ', song.id)
 
                 // Insert artist_song entry
@@ -103,14 +104,13 @@ router.post('/log', authGate(), async (req, res, next) => {
                         song_id: song.id
                     }
                 }) 
-                await sql`
-                    INSERT INTO artist_songs ${sql(artist_song_inserts)}`
+                sql`INSERT INTO artist_songs ${sql(artist_song_inserts)}`
             }
 
             // Insert listen
-            const listen_id = await sql`
+            const [{ listen_id, res_timestamp }] = await sql`
                 INSERT INTO listens ${sql(timestamp, user_id, song.id)}
-                RETURNING id`
+                RETURNING id, EXTRACT (EPOCH FROM timestamp)`
 
             // Match album
             if (album_name) {
@@ -129,7 +129,7 @@ router.post('/log', authGate(), async (req, res, next) => {
                 song, 
                 artists,
                 album,
-                timestamp
+                res_timestamp
             }
         })
     } catch (e) {
