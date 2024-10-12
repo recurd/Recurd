@@ -1,5 +1,14 @@
 import sql from "./db.js"
 
+export async function insertListen(user_id, song_id, time_stamp) {
+    const insert_listen = { user_id, song_id, time_stamp }
+    if (!time_stamp) delete insert_listen.time_stamp
+    const [res] = await sql`
+        INSERT INTO listens ${sql(insert_listen)}
+        RETURNING id as listen_id, (EXTRACT (EPOCH FROM time_stamp)::integer) as time_stamp`
+    return res
+}
+
 // Param song (Required): must contain 'name' field
 // Param songArtists (Required): an array of at least one element, each artist must contain 'name' field
 // Param album (Optional): must contain 'name' field
