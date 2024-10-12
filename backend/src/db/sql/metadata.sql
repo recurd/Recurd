@@ -29,7 +29,7 @@ create index album_name on albums using hash (name);
 create table songs (
     id uuid primary key default gen_random_uuid(),
     name varchar(255) not null,
-    image varchar(255) -- DELETE
+    image varchar(255)
 );
 create index song_name on songs using hash (name);
 
