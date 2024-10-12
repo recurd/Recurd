@@ -2,7 +2,7 @@ import { Router } from "express"
 import sql from '../db/db.js'
 import authGate from "../authGate.js"
 import { isDBError } from "../db/util.js"
-import { findOrInsertSongArtistAlbum } from "../db/metadata.js"
+import { findOrInsertSongArtistAlbum, insertListen } from "../db/metadata.js"
 
 const router = Router()
 
@@ -68,7 +68,6 @@ router.post('/log', authGate(), async (req, res, next) => {
                     return { name: e }
                 return e
             })
-            console.log(songArtists)
 
             const albumArtists = (!albumIn?.artists || albumIn?.artists?.length == 0) ? songArtists : albumIn?.artists
 
@@ -78,12 +77,7 @@ router.post('/log', authGate(), async (req, res, next) => {
                     albumIn, 
                     albumArtists)
             // Insert listen
-            const listenInsert = { user_id, song_id: song.id }
-            if (time_stamp) listenInsert.timestamp = time_stamp
-            const [{ listen_id, res_timestamp }] = await sql`
-                INSERT INTO listens ${sql(listenInsert)}
-                RETURNING id, (EXTRACT (EPOCH FROM time_stamp)::integer) as res_timestamp`
-
+            const { listen_id, time_stamp: res_timestamp } = await insertListen(user_id, song.id, time_stamp)
             return {
                 listen_id,
                 song,
