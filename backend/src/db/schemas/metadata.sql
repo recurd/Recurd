@@ -21,7 +21,7 @@ create table albums (
     id uuid primary key default gen_random_uuid(),
     name varchar(255) not null,
     image varchar(255),
-    album_type album_t default 'album',
+    album_type album_t not null default 'album',
     release_date date -- only look at year and month value; used for disambiguating albums/songs from different artists
 );
 create index album_name on albums using hash (name);
@@ -30,12 +30,11 @@ create table songs (
     id uuid primary key default gen_random_uuid(),
     name varchar(255) not null,
     image varchar(255)
-    -- is_single boolean not null default false
 );
 create index song_name on songs using hash (name);
 
 -- Join tables
--- TODO: Determin what to do when artist is deleted; delete linked songs? restrict?
+-- TODO: Determine what to do when artist is deleted; delete linked songs? restrict?
 create table artist_albums (
     artist_id uuid references artists(id) on delete cascade,
     album_id uuid references albums(id) on delete cascade,
@@ -45,7 +44,14 @@ create table artist_albums (
 create table album_songs (
     album_id uuid references albums(id) on delete cascade,
     song_id uuid references songs(id) on delete cascade,
-    primary key (album_id, song_id)
+    disc_number smallint not null default 1, -- disc_number is 1 unless there are more discs
+    album_position smallint, -- album_position is nullable for representing unknown position in album
+    -- TODO: Ensure validity of disc_number and position on change: HARD!
+    primary key (album_id, song_id),
+    unique (album_id, song_id, disc_number, album_position),
+    -- unique constraint does not get checked if any column (i.e.album_position) is null
+    check (not (disc_number > 1 and album_position is null))
+    -- If disc_number is > 1, song's position in album must be known (since it is on discs)
 );
 
 create table artist_songs (

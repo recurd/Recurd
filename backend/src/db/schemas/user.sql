@@ -28,6 +28,6 @@ create table user_services (
 create table user_followers (
     followee uuid references users(id) on delete cascade,
     follower uuid references users(id) on delete cascade,
-    time_stamp timestamp default now(),
+    time_stamp timestamp not null default now(),
     primary key (followee, follower)
 );
