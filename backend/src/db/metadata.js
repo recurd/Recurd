@@ -1,12 +1,21 @@
-import sql from "./db.js"
+import { z } from "zod"
+import sqlDf from "./db.js"
+import { removeNullish } from "./util.js"
+import { albumSchemaT, artistSchema, listenSchemaT, songSchema } from "./schemas/metadata.js"
 
-export async function insertListen(user_id, song_id, time_stamp) {
-    const insert_listen = { user_id, song_id, time_stamp }
-    if (!time_stamp) delete insert_listen.time_stamp
-    const [res] = await sql`
+const artistArraySchemaT = z.union([
+    z.string().array().nonempty().transform(arr => arr.map(e => { return { name: e } })),
+    artistSchema.array().nonempty()
+])
+
+export async function insertListen(insert_listen, sql=sqlDf) {
+    // insert_listen is { user_id, song_id, time_stamp }
+    insert_listen = listenSchemaT.transform(removeNullish).parse(insert_listen)
+    const res = await sql`
         INSERT INTO listens ${sql(insert_listen)}
-        RETURNING id as listen_id, (EXTRACT (EPOCH FROM time_stamp)::integer) as time_stamp`
-    return res
+        RETURNING id as listen_id, time_stamp`
+    console.log(res.statement)
+    return res[0]
 }
 
 // Param song (Required): must contain 'name' field
@@ -15,12 +24,14 @@ export async function insertListen(user_id, song_id, time_stamp) {
 // Param albumArtists (Optional): an array of at least one element, each artist must contain 'name' field
 // Returned: song and album objects,
 // all objects (however nested) has 'found' field that is true iff the object was found in DB
-export async function findOrInsertSongArtistAlbum(song, songArtists, album, albumArtists) {
-    let outSong = await findOrInsertSong(song, songArtists)
+export async function findOrInsertSongArtistAlbum({ song, songArtists, album, albumArtists }, sql=sqlDf) {
+    const hasAlbum = !!album
+    let outSong = await findOrInsertSong({ song, songArtists }, sql)
 
     let outAlbum = null
     // If song was found (not created), fetch album by name
-    if (album && outSong.found) {
+    if (hasAlbum && outSong.found) {
+        album = albumSchemaT.parse(album)
         const [resAlbum] = await sql`
             SELECT 
                 *,
@@ -36,23 +47,20 @@ export async function findOrInsertSongArtistAlbum(song, songArtists, album, albu
             outAlbum = resAlbum
     }
     // If haven't found album, create one when album is specified
-    if (album && !outAlbum) {
-        outAlbum = await findOrInsertAlbum(album, albumArtists)
+    if (hasAlbum && !outAlbum) {
+        outAlbum = await findOrInsertAlbum({ album, albumArtists: albumArtists ?? songArtists }, sql)
 
         if (!outAlbum.found) {
             // Insert into album_songs
             const album_song = { 
                 album_id: outAlbum.id,
-                song_id: outSong.id
+                song_id: outSong.id,
+                disc_number: song.disc_number,
+                album_position: song.album_position
             }
-            if (song?.disc_number) {
-                outSong.disc_number = song.disc_number
-                album_song.disc_number = song.disc_number
-            }
-            if (song?.album_position) {
-                outSong.album_position = song.album_position
-                album_song.album_position = song.album_position
-            }
+            outSong.disc_number = song.disc_number
+            outSong.album_position = song.album_position
+            removeNullish(album_song)
             await sql`
                 INSERT INTO album_songs ${sql(album_song)}`
         }
@@ -60,11 +68,10 @@ export async function findOrInsertSongArtistAlbum(song, songArtists, album, albu
     return { song: outSong, album: outAlbum }
 }
 
-// Param song: must contain 'name' field
-// Param songArtists: an array of at least one element, each artist must contain 'name' field
-// Returned: song, has 'found' field that is true iff the object was found in DB
 // NOT CONCURRENTLY SAFE
-async function findOrInsertSong(song, songArtists) {
+async function findOrInsertSong({ song, songArtists }, sql=sqlDf) {
+    songSchema.parse(song)
+    songArtists = artistArraySchemaT.parse(songArtists)
     const artist_names = songArtists.map(e=>e.name)
     let outSong = null
 
@@ -95,11 +102,11 @@ async function findOrInsertSong(song, songArtists) {
     // Then insert song, and insert into artist_songs
     else {
         // Insert artists
-        const artists = await findOrInsertArtists(songArtists)
+        const artists = await findOrInsertArtists(songArtists, sql)
 
         // Insert song
         const [res_song] = await sql`
-            INSERT INTO songs ${sql(song, 'name', 'image')}
+            INSERT INTO songs ${sql(song)}
             RETURNING *`
         outSong = { 
             ...res_song, 
@@ -120,12 +127,10 @@ async function findOrInsertSong(song, songArtists) {
     return outSong
 }
 
-// Param album: must contain 'name' field
-// Param albumArtists: each artist must contain 'name' field
-// Returned: album object, has 'found' field that is true iff the object was found in DB.
-// Each of album's artists has 'found' field as well
 // NOT CONCURRENTLY SAFE
-async function findOrInsertAlbum(album, albumArtists) {
+async function findOrInsertAlbum({ album, albumArtists }, sql=sqlDf) {
+    album = albumSchemaT.transform(removeNullish).parse(album)
+    albumArtists = artistArraySchemaT.parse(albumArtists)
     const artist_names = albumArtists.map(e=>e.name)
     let outAlbum = null
 
@@ -157,14 +162,14 @@ async function findOrInsertAlbum(album, albumArtists) {
     // Then insert album, and insert into artist_albums
     else  {
         // Insert artists
-        const artists = await findOrInsertArtists(albumArtists)
+        const artists = await findOrInsertArtists(albumArtists, sql)
 
         // Insert album
-        let albumColumns = ['name', 'image', 'release_date']
-        if (album?.album_type) albumColumns.push('album_type') 
+        // let albumColumns = ['name', 'image', 'release_date']
+        // if (album?.album_type) albumColumns.push('album_type') 
             // album_type has constraint: not null default, so either not in column list or inserted as not null
         const [res_album] = await sql`
-            INSERT INTO albums ${sql(album, albumColumns)}
+            INSERT INTO albums ${sql(album)}
             RETURNING *`
         outAlbum = { 
             ...res_album, 
@@ -185,16 +190,14 @@ async function findOrInsertAlbum(album, albumArtists) {
     return outAlbum
 }
 
-// Param artists: an array, each artist must contain 'name' field
-// Param albumArtists: an array of at least one element, each artist must contain 'name' field
-// Returned: artists object, each has 'found' field that is true iff the object was found in DB
+// INTERNAL (NO INPUT VALIDATION)
 // NOT CONCURRENTLY SAFE
-async function findOrInsertArtists(artists) {
+async function findOrInsertArtists(artists, sql=sqlDf) {
     // create temp table with same type as artists (excluding id column)
     await sql`
         CREATE TEMPORARY TABLE temp_artists (LIKE artists); 
         ALTER TABLE temp_artists DROP COLUMN id`.simple() 
-    await sql`INSERT INTO temp_artists ${sql(artists, 'name', 'image', 'description')}`
+    await sql`INSERT INTO temp_artists ${sql(artists)}`
     const res = await sql`
         WITH existed AS (
             SELECT *
