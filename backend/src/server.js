@@ -2,6 +2,7 @@ import express, { json, urlencoded } from "express"
 import session from "express-session"
 import dotenv from "dotenv"
 dotenv.config()
+import cors from "cors"
 import routesRouter from "./routes/routes.js"
 import { isDBError } from "./db/util.js"
 
@@ -20,6 +21,11 @@ server.use(session({
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
         secret: false // true when we have HTTPS
     }
+}))
+
+server.use(cors({
+    origin: "http://localhost:8080",    // do not end the url with a slash /
+    credentials: true
 }))
 
 server.get('/', (req, res) => {
