@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backend from '../backend.js'; 
-import user from '../user.js';  // Import the auth object
 
 function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const navigate = useNavigate()
 
   async function handleLogin() {
     try {
@@ -14,8 +13,11 @@ function Login() {
         username: username,
         password: password
       })
-      user.login(res.data)
-      navigate('/')
+
+      // Get url params for path to redirect back to
+      const url = new URL(window.location.href)
+      const redirPath = url.searchParams.get("from") ?? '/' // default to main page
+      navigate(redirPath)
     } catch (err) {
       // TODO: display error message
       if (err.serverResponds) {
