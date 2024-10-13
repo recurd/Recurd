@@ -1,9 +1,10 @@
 import { Outlet } from 'react-router-dom'
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+// import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 
 export default function Layout() {
     return <>
-        <Tabs>
+        <Outlet />
+        {/* <Tabs>
             <TabList>
                 <Tab>Profile?</Tab>
                 <Tab>album page?</Tab>
@@ -21,6 +22,6 @@ export default function Layout() {
                 <p>artist songs!</p>
                 </TabPanel>
             </TabPanels>
-        </Tabs>
+        </Tabs> */}
     </>
 }
