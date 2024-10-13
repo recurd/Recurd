@@ -13,7 +13,7 @@ import backend from './backend.js';
 
 async function isLoggedIn() {
   try {
-    const res = await backend.get('/auth/')
+    const res = await backend.get('/auth/status')
     return res.data.loggedIn
   } catch (err) {
     // TODO: display error message
