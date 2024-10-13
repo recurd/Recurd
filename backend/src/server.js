@@ -3,6 +3,9 @@ import session from "express-session"
 import dotenv from "dotenv"
 dotenv.config()
 import cors from "cors"
+import morgan from "morgan"
+import { ZodError } from "zod"
+import { fromZodError } from "zod-validation-error"
 import routesRouter from "./routes/routes.js"
 import { isDBError } from "./db/util.js"
 
@@ -11,6 +14,8 @@ const PORT = 3000  // 0 for auto choose address
 
 server.use(json())
 server.use(urlencoded({extended:true}))
+
+server.use(morgan('dev'))
 
 // Session
 server.use(session({
@@ -41,13 +46,22 @@ server.use((req, res) => {
 // Error handling
 server.use((err, req, res, next) => {
     if (isDBError(err)) {
-        console.error(err)
+        console.error('DB error:', err)
         console.error('Query: ', err.query)
         console.error('Parameters: ', err.parameters) // uncomment this may leak sensitive info to logs
+    } else if (err instanceof ZodError) {
+        const errMsg = fromZodError(err).message
+        console.error('Zod error: ', errMsg)
+        err = {
+            message: errMsg,
+            error: err
+        }
     } else {
-        console.error('error', err)
+        console.error('Unknown error:', err)
     }
-    res.status(500).json({ "message": err?.message, "error": err })
+    const message = err?.message
+    if (message) delete err.message
+    res.status(500).json({ "message": message, "error": err })
 })
 
 const httpServer = server.listen(PORT, () => {
