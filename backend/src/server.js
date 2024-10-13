@@ -2,7 +2,6 @@ import express, { json, urlencoded } from "express"
 import session from "express-session"
 import dotenv from "dotenv"
 dotenv.config()
-import cors from "cors"
 import morgan from "morgan"
 import { ZodError } from "zod"
 import { fromZodError } from "zod-validation-error"

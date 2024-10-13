@@ -1,21 +1,13 @@
-import { z } from "zod"
 import sqlDf from "./db.js"
 import { removeNullish } from "./util.js"
-import { albumSchemaT, artistSchema, listenSchemaT, songSchema } from "./schemas/metadata.js"
-
-const artistArraySchemaT = z.union([
-    z.string().array().nonempty().transform(arr => arr.map(e => { return { name: e } })),
-    artistSchema.array().nonempty()
-])
 
 export async function insertListen(insert_listen, sql=sqlDf) {
     // insert_listen is { user_id, song_id, time_stamp }
-    insert_listen = listenSchemaT.transform(removeNullish).parse(insert_listen)
-    const res = await sql`
+    removeNullish(insert_listen)
+    const [res] = await sql`
         INSERT INTO listens ${sql(insert_listen)}
         RETURNING id as listen_id, time_stamp`
-    console.log(res.statement)
-    return res[0]
+    return res
 }
 
 // Param song (Required): must contain 'name' field
@@ -25,13 +17,13 @@ export async function insertListen(insert_listen, sql=sqlDf) {
 // Returned: song and album objects,
 // all objects (however nested) has 'found' field that is true iff the object was found in DB
 export async function findOrInsertSongArtistAlbum({ song, songArtists, album, albumArtists }, sql=sqlDf) {
-    const hasAlbum = !!album
     let outSong = await findOrInsertSong({ song, songArtists }, sql)
 
+    const hasAlbum = !!album
     let outAlbum = null
     // If song was found (not created), fetch album by name
     if (hasAlbum && outSong.found) {
-        album = albumSchemaT.parse(album)
+        if (!album?.name) throw 'album must have a name!'
         const [resAlbum] = await sql`
             SELECT 
                 *,
@@ -70,12 +62,11 @@ export async function findOrInsertSongArtistAlbum({ song, songArtists, album, al
 
 // NOT CONCURRENTLY SAFE
 async function findOrInsertSong({ song, songArtists }, sql=sqlDf) {
-    songSchema.parse(song)
-    songArtists = artistArraySchemaT.parse(songArtists)
     const artist_names = songArtists.map(e=>e.name)
     let outSong = null
 
     // Find song by exact match on song name and artist names
+    if (!song?.name) throw 'song must have a name!'
     const [matchedSA] = await sql`
         SELECT 
                 row_to_json(s) song,
@@ -129,8 +120,6 @@ async function findOrInsertSong({ song, songArtists }, sql=sqlDf) {
 
 // NOT CONCURRENTLY SAFE
 async function findOrInsertAlbum({ album, albumArtists }, sql=sqlDf) {
-    album = albumSchemaT.transform(removeNullish).parse(album)
-    albumArtists = artistArraySchemaT.parse(albumArtists)
     const artist_names = albumArtists.map(e=>e.name)
     let outAlbum = null
 
@@ -165,9 +154,7 @@ async function findOrInsertAlbum({ album, albumArtists }, sql=sqlDf) {
         const artists = await findOrInsertArtists(albumArtists, sql)
 
         // Insert album
-        // let albumColumns = ['name', 'image', 'release_date']
-        // if (album?.album_type) albumColumns.push('album_type') 
-            // album_type has constraint: not null default, so either not in column list or inserted as not null
+        removeNullish(album)
         const [res_album] = await sql`
             INSERT INTO albums ${sql(album)}
             RETURNING *`
@@ -190,31 +177,33 @@ async function findOrInsertAlbum({ album, albumArtists }, sql=sqlDf) {
     return outAlbum
 }
 
-// INTERNAL (NO INPUT VALIDATION)
 // NOT CONCURRENTLY SAFE
 async function findOrInsertArtists(artists, sql=sqlDf) {
-    // create temp table with same type as artists (excluding id column)
-    await sql`
-        CREATE TEMPORARY TABLE temp_artists (LIKE artists); 
-        ALTER TABLE temp_artists DROP COLUMN id`.simple() 
-    await sql`INSERT INTO temp_artists ${sql(artists)}`
-    const res = await sql`
-        WITH existed AS (
-            SELECT *
-            FROM artists 
-            WHERE name IN (SELECT name FROM temp_artists)
-        ), inserted AS (
-            INSERT INTO artists (name, image, description)
-            SELECT *
-            FROM temp_artists ta
-            WHERE NOT EXISTS (SELECT name FROM existed WHERE name = ta.name)
-            RETURNING *
-        )
-        SELECT *, TRUE AS found FROM existed
-        UNION
-        SELECT *, FALSE AS found FROM inserted`
-    // console.log('artists created and/or found:', artists)
-    await sql`DROP TABLE temp_artists`
-    return res
+    try {
+        // create temp table with same type as artists (excluding id column)
+        await sql`
+            CREATE TEMPORARY TABLE temp_artists (LIKE artists); 
+            ALTER TABLE temp_artists DROP COLUMN id`.simple() 
+        artists.forEach(e => removeNullish(e))
+        await sql`INSERT INTO temp_artists ${sql(artists)}`
+        const res = await sql`
+            WITH existed AS (
+                SELECT *
+                FROM artists 
+                WHERE name IN (SELECT name FROM temp_artists)
+            ), inserted AS (
+                INSERT INTO artists (name, image, description)
+                SELECT *
+                FROM temp_artists ta
+                WHERE NOT EXISTS (SELECT name FROM existed WHERE name = ta.name)
+                RETURNING *
+            )
+            SELECT *, TRUE AS found FROM existed
+            UNION
+            SELECT *, FALSE AS found FROM inserted`
+        // console.log('artists created and/or found:', artists)
+        return res
+    } finally {
+        await sql`DROP TABLE temp_artists`
+    } // let error propogate up
 }
-
