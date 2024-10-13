@@ -1,8 +1,9 @@
 import { Router } from "express"
 import bcrypt from "bcrypt"
 import sql from '../db/db.js'
-import { ErrorCodes as PgErrorCodes, isDBError } from '../db/util.js'
-import authGate from "../authGate.js"
+import { DBErrorCodes as DBErrorCodes, isDBError } from '../db/util.js'
+import { authGate } from "../auth.js"
+import { userSchemaT } from "../db/schemas/user.js"
 
 const router = Router()
 
@@ -17,23 +18,18 @@ router.post('/create/password',
         }
     }),
     async (req, res, next) => {
-        const username = req.body.username
-        const password = req.body.password
-        if (!username || !password) {
-            res.status(400).json({ "message": "Email or password field missing from request body" })
-            return 
-        }
-
         try {
+            const { username, password } = userSchemaT.pick({ username: true, password: true}).parse(req.body)
+
             const hash = await bcrypt.hash(password, 10)
-            const dbRes = await sql`insert into users ${sql({ username, password: hash, display_name: username })}`
+            const dbRes = await sql`INSERT INTO USERS ${sql({ username, password: hash, display_name: username })}`
             if (dbRes.count == 0) {
                 res.status(500).json({ message: 'Failed to insert new account into database' })
                 return
             }
             res.status(201).end()
         } catch (e) {
-            if (isDBError(e, PgErrorCodes.UNIQUE_VIOLATION)) {
+            if (isDBError(e, DBErrorCodes.UNIQUE_VIOLATION)) {
                 res.status(400).json({ "message": "Username already exists!", "error": e })
             } else return next(e)
         }

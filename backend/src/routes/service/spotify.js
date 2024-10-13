@@ -1,7 +1,8 @@
 import { Router } from "express"
+import { z } from "zod"
 import dotenv from 'dotenv'
 import sql from "../../db/db.js"
-import authGate from "../../authGate.js"
+import { authGate, getAuthUser } from "../../auth.js"
 dotenv.config()
 
 const router = Router()
@@ -10,15 +11,12 @@ router.use(authGate())
 
 // Expects "auth_code" and "redirect_uri" in the request body
 router.get('/auth', async (req, res, next) => {
-    const auth_code = req.body.auth_code || null
-    const redirect_uri = req.body.redirect_uri
-
-    if (!auth_code || !redirect_uri) {
-        res.status(400).json({ message: "auth_code or redirect_uri missing from request body" })
-        return
-    }
-
     try {
+        const { auth_code, redirect_uri } = z.object({
+                auth_code: z.string(),
+                redirect_uri: z.string().url()
+            }).parse(req.body)
+
         const result = await fetch('https://accounts.spotify.com/api/token',  {
             method: 'POST',
             body: new URLSearchParams({ // for urlencoded body
@@ -40,7 +38,7 @@ router.get('/auth', async (req, res, next) => {
         }
 
         const { access_token, refresh_token, expires_in	} = await result.json()
-        const user_id = req.session.user.id
+        const user_id = getAuthUser(req).id
         const dbRes = await sql`insert into user_services ${
             sql({ 
                 user_id: user_id, 
