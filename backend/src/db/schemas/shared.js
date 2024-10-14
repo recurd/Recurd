@@ -1,13 +1,13 @@
 import { z } from "zod"
 
+export const nonEmptyStrSchema = z.string().min(1)
+
 // Coerce only number to string
 export const coerceStrSchemaT = z.string().or(z.number()).pipe(z.coerce.string())
 
 // Coerce only string to number
 // Prevent empty string from being coerced to 0
 export const coerceNumSchemaT = nonEmptyStrSchema.or(z.number()).pipe(z.coerce.number())
-
-export const nonEmptyStrSchema = z.string().min(1)
 
 export const idSchema = nonEmptyStrSchema.uuid()
 
