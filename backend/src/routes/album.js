@@ -10,7 +10,7 @@ const paramsIdSchema = z.object({ id: idSchema })
 
 router.get('/:id', async (req, res, next) => {
     try {
-        const id = paramsIdSchema.parse(req.params)
+        const { id } = paramsIdSchema.parse(req.params)
         // TODO: add aggregated artists
         const result = 
             await sql`SELECT * 
@@ -25,22 +25,22 @@ router.get('/:id', async (req, res, next) => {
 })
 
 router.get('/:id/songs', async (req, res, next) => {
-    // const id = paramsIdSchema.parse(req.params)
+    // const { id } = paramsIdSchema.parse(req.params)
     res.status(501).end()
 })
 
 router.get('/:id/ratings', async (req, res, next) => {
-    // const id = paramsIdSchema.parse(req.params)
+    // const { id } = paramsIdSchema.parse(req.params)
     res.status(501).end()
 })
 
 router.get('/:id/reviews', async (req, res, next) => {
-    // const id = paramsIdSchema.parse(req.params)
+    // const { id } = paramsIdSchema.parse(req.params)
     res.status(501).end()
 })
 
 router.get('/:id/top-listeners', async (req, res, next) => {
-    // const id = paramsIdSchema.parse(req.params)
+    // const { id } = paramsIdSchema.parse(req.params)
     res.status(501).end()
 })
 

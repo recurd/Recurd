@@ -77,7 +77,7 @@ router.get('/albums', async (req, res, next) => {
 })
 
 
-// Get top (n) song (id and name), album (json, including album image), artists (array of json)
+// Get top (n) song (id and name), album_image, artists (array of json)
 router.get('/songs', async (req, res, next) => {
     try {
         const { user_id, start_date, end_date, n } = topSchemaT.parse(req.body)
@@ -87,7 +87,7 @@ router.get('/songs', async (req, res, next) => {
         const topSongs = await sql`
             SELECT DISTINCT ON (s.id)
                 s.*,
-                ROW_TO_JSON(a) as album,
+                a.image as album_image,
                 JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', ar.id, 'name', ar.name)) as artists,
                 COUNT(DISTINCT l.id) as listen_count
             FROM
