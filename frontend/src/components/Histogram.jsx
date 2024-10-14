@@ -1,13 +1,15 @@
 import React from "react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import backend from '../backend'
+
 
 const SimpleHistogram = () => {
     const data = [
-        { rating: "1 Star", ratings: 5 },
-        { rating: "2 Stars", ratings: 6 },
-        { rating: "3 Stars", ratings: 8 },
-        { rating: "4 Stars", ratings: 7 },
-        { rating: "5 Stars", ratings: 1 },
+        { rating: "1 ★, ", ratings: 5 },
+        { rating: "2 ★, ", ratings: 6 },
+        { rating: "3 ★, ", ratings: 8 },
+        { rating: "4 ★, ", ratings: 7 },
+        { rating: "5 ★, ", ratings: 1 },
     ];
 
     return (
