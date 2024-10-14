@@ -6,7 +6,7 @@ import artistRouter from "./artist.js"
 import albumRouter from "./album.js"
 import songRouter from "./song.js"
 import listenRouter from "./listen.js"
-import userDataRouter from "./user-data.js"
+import userRouter from "./user/user.js"
 
 
 const router = Router()
@@ -18,7 +18,7 @@ router.use('/artist', artistRouter)
 router.use('/album', albumRouter)
 router.use('/song', songRouter)
 router.use('/listen', listenRouter)
-router.use('/user-data', userDataRouter)
+router.use('/user', userRouter)
 
 
 export default router
