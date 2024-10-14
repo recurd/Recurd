@@ -1,26 +1,27 @@
 import { Router } from "express"
 import { z } from "zod"
-import sql from '../db/db.js'
-import { coerceNumSchemaT, timestampSchemaT, idSchema } from "../db/schemas/shared.js"
+import sql from '../../db/db.js'
+import { coerceNumSchemaT, timestampSchemaT, idSchema } from "../../db/schemas/shared.js"
 
 const router = Router()
-
-const querySchemaT = z.object({
+const topSchemaT = z.object({
     user_id: idSchema,
     start_date: timestampSchemaT,
     end_date: timestampSchemaT.nullish().transform(d => d ? d : new Date()), // defaults to current time
     n: coerceNumSchemaT.pipe(z.number().gt(0).lte(100))
-})
+}).refine(obj =>
+    obj.start_date.getUTCMilliseconds() < obj.end_date.getUTCMilliseconds(), {
+        message: "start_date must be before end_date"
+    })
 
-// Get top (n) artist id, artist name, artist image, listen count (per artist)
-router.get('/top-artists', async (req, res, next) => {
+// Get top (n) artist (id, name, ...), listen count (per artist)
+router.get('/artists', async (req, res, next) => {
     try {
-        const { user_id, start_date, end_date, n } = querySchemaT.parse(req.query)
+        const { user_id, start_date, end_date, n } = topSchemaT.parse(req.body)
         const topArtists = await sql`
             SELECT
-                ar.id AS artist_id,
-                ar.name AS artist_name,
-                COUNT(*) AS listen_count
+                ar.*,
+                COUNT(DISTINCT l.id) AS listen_count
             FROM
                 listens l
             JOIN
@@ -31,7 +32,7 @@ router.get('/top-artists', async (req, res, next) => {
                 l.user_id = ${user_id}
                 AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
             GROUP BY
-                ar.id, ar.name
+                ar.id
             ORDER BY
                 listen_count DESC
             LIMIT ${n}`
@@ -42,27 +43,30 @@ router.get('/top-artists', async (req, res, next) => {
     }
 })
 
-// Get top (n) album id, album name, album image, listen count (per album)
-router.get('/top-albums', async (req, res, next) => {
+// Get top (n) album (id, name, image), listen count (per album)
+router.get('/albums', async (req, res, next) => {
     try {
-        const { user_id, start_date, end_date, n } = querySchemaT.parse(req.query)
+        const { user_id, start_date, end_date, n } = topSchemaT.parse(req.body)
         const topAlbums = await sql`
             SELECT
-                a.id AS album_id,
-                a.name AS album_name,
-                a.image AS album_image,
-                COUNT(l.id) AS listen_count
+                a.*,
+                JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', ar.id, 'name', ar.name)) as artists,
+                COUNT(DISTINCT l.id) AS listen_count
             FROM
                 listens l
             JOIN
                 album_songs als ON l.song_id = als.song_id
             JOIN
                 albums a ON als.album_id = a.id
+            JOIN
+                artist_albums abs ON a.id = abs.album_id
+            JOIN
+                artists ar ON abs.artist_id = ar.id
             WHERE
                 l.user_id = ${user_id}
                 AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
             GROUP BY
-                a.id, a.name, a.image
+                a.id
             ORDER BY
                 listen_count DESC
             LIMIT ${n}; -- Safely inject validated count here`
@@ -74,17 +78,18 @@ router.get('/top-albums', async (req, res, next) => {
 })
 
 
-// Get top (n) song id, song name, album name, album image, artist name
-router.get('/top-songs', async (req, res, next) => {
+// Get top (n) song (id and name), album (json, including album image), artists (array of json)
+router.get('/songs', async (req, res, next) => {
     try {
-        const { user_id, start_date, end_date, n } = querySchemaT.parse(req.query)
+        const { user_id, start_date, end_date, n } = topSchemaT.parse(req.body)
+
+        // When a song is linked to multiple albums, some albums will have to be ignored 
+        // Since we are only returning one. So we SELECT DISTINCT ON (l.id) and ORDER_BY a.id
         const topSongs = await sql`
-            SELECT
-                s.id as song_id,
-                s.name as song_name,
-                a.name as album_name,
-                a.image as album_image,
-                ARRAY_AGG(DISTINCT ar.name) as artist_names,
+            SELECT DISTINCT ON (s.id)
+                s.*,
+                ROW_TO_JSON(a) as album,
+                JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', ar.id, 'name', ar.name)) as artists,
                 COUNT(DISTINCT l.id) as listen_count
             FROM
                 listens l
@@ -102,9 +107,9 @@ router.get('/top-songs', async (req, res, next) => {
                 l.user_id = ${user_id}
                 AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
             GROUP BY
-                s.id, s.name, a.name, a.image
+                s.id, a.id
             ORDER BY
-                listen_count DESC
+                s.id, listen_count DESC
             LIMIT ${n}`
 
         res.json(topSongs)
@@ -112,6 +117,5 @@ router.get('/top-songs', async (req, res, next) => {
         return next(e)
     }
 })
-
 
 export default router
