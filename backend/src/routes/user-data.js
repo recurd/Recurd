@@ -65,7 +65,7 @@ router.get('/top-albums', async (req, res, next) => {
                 a.id, a.name, a.image
             ORDER BY
                 listen_count DESC
-            LIMIT ${n}; -- Safely inject validated count here`
+            LIMIT ${n};`
 
         res.json(topAlbums)
     } catch (e) {
@@ -113,5 +113,21 @@ router.get('/top-songs', async (req, res, next) => {
     }
 })
 
+// Get a user's recent n listens.
+router.get('/recent', async (req, res, next) => {
+    try{
+        const { user_id, n } = querySchemaT.parse(req.query)
+        const recent = await sql `
+            SELECT * 
+            FROM listens 
+            WHERE user_id = ${user_id} 
+            ORDER BY time_stamp DESC 
+            LIMIT ${n}`
+
+        res.json(recent)
+    } catch (e) {
+        return next (e)
+    }
+})
 
 export default router
