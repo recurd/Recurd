@@ -17,10 +17,13 @@ const limitSchema = z.object({
 router.get('/:id', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params) // route parameter always exists
-        const result = 
-            await sql`SELECT * 
-                FROM artists a
-                WHERE a.id = ${id}`
+        const [result] = await sql`
+            SELECT
+                *
+            FROM
+                artists a
+            WHERE
+                a.id = ${id}`
         res.json(result)
     } catch(e) {
         if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
@@ -57,9 +60,7 @@ router.get('/:id/albums', async (req, res, next) => {
                 sql`LIMIT ${limit}` : sql``}`
         res.json(result)
     } catch(e) {
-        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
-            res.status(400).json({ "message": "Artist id is not a valid uuid!" })
-        } else return next(e)
+       return next(e)
     }
 })
 
@@ -91,9 +92,7 @@ router.get('/:id/songs', async (req, res, next) => {
                 sql`LIMIT ${limit}` : sql``}`
         res.json(result)
     } catch(e) {
-        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
-            res.status(400).json({ "message": "Artist id is not a valid uuid!" })
-        } else return next(e)
+        return next(e)
     }
 })
 
