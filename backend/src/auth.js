@@ -3,7 +3,7 @@
 // Otherwise it does nothing and continues the chain of execution
 // Callbacks are middlewares, has the parameters (req, res, next)
 // sucCb/errCb is called when user is/is not authenticated
-export default function authGate({ sucCb, errCb } = {}) {
+export function authGate({ sucCb, errCb } = {}) {
     return function (req, res, next) {
         // If is logged in
         if (req.session.user) {
@@ -20,4 +20,9 @@ export default function authGate({ sucCb, errCb } = {}) {
             }
         }
     }
+}
+
+// Take express req object, returns currently authenticated user
+export function getAuthUser(req) {
+    return req.session.user
 }

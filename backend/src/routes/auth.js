@@ -1,7 +1,8 @@
 import { Router } from "express"
 import bcrypt from "bcrypt"
 import sql from '../db/db.js'
-import authGate from '../authGate.js'
+import { authGate } from '../auth.js'
+import { userSchemaT } from "../db/schemas/user.js"
 
 const router = Router()
 
@@ -9,12 +10,7 @@ const router = Router()
 // Body: username (string), password (string)
 router.post('/password', async (req, res, next) => {
     try {
-        const username = req.body.username
-        const password = req.body.password
-        if (!username || !password) {
-            res.status(400).json({ "message": "Email or password field missing from request body" })
-            return 
-        }
+        const { username, password } = userSchemaT.pick({ username: true, password: true}).parse(req.body)
 
         const users = await sql`select * from users where username = ${username}`
         if (users.count == 0) {
