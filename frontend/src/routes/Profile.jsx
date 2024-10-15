@@ -1,6 +1,7 @@
-import React from 'react';
+import { useParams } from "react-router-dom";
 
 function Profile() {
+  const { id } = useParams() // this is user's id
   return (
     <div>
       {/* Header for the Profile Page */}

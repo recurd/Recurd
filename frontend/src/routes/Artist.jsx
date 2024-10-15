@@ -1,6 +1,7 @@
-import React from 'react';
+import { useParams } from "react-router-dom";
 
 function Artist() {
+  const { id } = useParams() // this is artist id
   return (
     <div>
       {/* Header for the Artist Page */}
