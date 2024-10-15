@@ -16,25 +16,11 @@ import Song from './routes/Song.jsx'
 import Profile from './routes/Profile.jsx'
 import Review from './routes/Review.jsx'
 import Settings from './routes/Settings.jsx'
-import backend from './backend.js';
-
-async function isLoggedIn() {
-  try {
-    const res = await backend.get('/auth/status')
-    return res.data.loggedIn
-  } catch (err) {
-    // TODO: display error message
-    if (err.serverResponds) {
-      console.log("Server responds with status " + err.response.status)
-    } else if (err.requestSent) {
-      console.log("Server timed out!")
-    }
-  }
-}
+import User from './user.js';
 
 // Redirects to login page if user is not logged in
 async function authGateLoader({request}) {
-  const loggedIn = await isLoggedIn()
+  const loggedIn = await User.isLoggedIn()
   if (!loggedIn) {
       let params = new URLSearchParams()
       params.set("from", new URL(request.url).pathname)
@@ -44,7 +30,7 @@ async function authGateLoader({request}) {
 }
 
 async function loginPageLoader({request}) {
-  const loggedIn = await isLoggedIn()
+  const loggedIn = await User.isLoggedIn()
   if (loggedIn)  {
     const pathTo = new URL(request.url).searchParams.get("from")
     return redirect(pathTo ?? '/')

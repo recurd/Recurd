@@ -9,7 +9,7 @@ function Login() {
 
   async function handleLogin() {
     try {
-      const res = await backend.post('/auth/password', {
+      await backend.post('/auth/password', {
         username: username,
         password: password
       })
@@ -52,9 +52,6 @@ function Login() {
         </div>
         <button type="button" onClick={()=>handleLogin()}>Login</button>
       </form>
-
-       {/* Placeholder for OAuth (e.g., Spotify login) */}
-      {/* TODO: Add Spotify login integration */}
     </div>
   );
 }
