@@ -1,10 +1,20 @@
 import { Router } from "express"
-import topRouter from './data/top.js'
+import topRouter from './top.js'
 import sql from '../../db/db.js'
 import { z } from "zod"
 import { timestampSchemaT, idSchema } from "../../db/schemas/shared.js"
 
 const router = Router({mergeParams: true})
+
+router.get('/:user_id/profile', async (req, res, next) => {
+    // TODO: implement
+    try {
+        const user_id = idSchema.parse(req.params.user_id)
+    } catch(e) {
+        return next(e)
+    }
+    res.status(501).end()
+})
 
 router.use('/:user_id/top', topRouter)
 
@@ -68,16 +78,6 @@ router.get('/:user_id/listens', async (req, res, next) => {
 
 router.get('/:user_id/currently-listening', async (req, res, next) => {
     // TODO: implement spotify stuff first then this? idk
-    try {
-        const user_id = idSchema.parse(req.params.user_id)
-    } catch(e) {
-        return next(e)
-    }
-    res.status(501).end()
-})
-
-router.get('/:user_id/profile', async (req, res, next) => {
-    // TODO: implement
     try {
         const user_id = idSchema.parse(req.params.user_id)
     } catch(e) {

@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { z } from "zod"
-import sql from '../../../db/db.js'
-import { coerceNumSchemaT, timestampSchemaT, idSchema } from "../../../db/schemas/shared.js"
+import sql from '../../db/db.js'
+import { timestampSchemaT, idSchema } from "../../db/schemas/shared.js"
 
 const router = Router({mergeParams: true})
 
