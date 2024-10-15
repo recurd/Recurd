@@ -7,5 +7,6 @@ export default defineConfig({
   root: "src",
   server: {
     port: 8080
-  }
+  },
+  envDir: "../" // since source file is under /src, .env would need to ne in /src, but we put it in /frontend for symmetricity
 })
