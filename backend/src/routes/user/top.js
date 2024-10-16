@@ -10,7 +10,7 @@ const topSchemaT = z.object({
     end_date: timestampSchemaT.nullish().transform(d => d ? d : new Date()), // defaults to current time
     n: coerceNumSchemaT.pipe(z.number().gt(0).lte(100))
 }).refine(obj =>
-    obj.start_date.getUTCMilliseconds() < obj.end_date.getUTCMilliseconds(), {
+    obj.start_date < obj.end_date, {
         message: "start_date must be before end_date"
     })
 
