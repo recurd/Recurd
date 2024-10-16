@@ -1,6 +1,18 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
+import { redirect } from 'react-router-dom'
+import { isLoggedIn } from '../user.js'
+
 import backend from '../backend.js'; 
+
+export async function loginPageLoader({request}) {
+  const loggedIn = await isLoggedIn()
+  if (loggedIn)  {
+      const pathTo = new URL(request.url).searchParams.get("from")
+      return redirect(pathTo ?? '/')
+  }
+  return null
+}
 
 function Login() {
   const [username, setUsername] = useState('')

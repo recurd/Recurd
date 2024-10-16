@@ -7,22 +7,17 @@ async function getStatus() {
     } catch (err) {
         // TODO: display error message
         if (err.serverResponds) {
-          console.log("Server responds with status " + err.response.status)
+          console.log("getStatus(): Server responds with status " + err.response.status)
         } else if (err.requestSent) {
-          console.log("Server timed out!")
+          console.log("getStatus(): Server timed out!")
         }
     }
 }
 
-async function isLoggedIn() {
-    return (await getStatus()).loggedIn
+export async function isLoggedIn() {
+    return (await getStatus()).logged_in
 }
 
-async function getID() {
+export async function getID() {
     return (await getStatus()).user_id
-}
-
-export default {
-    isLoggedIn,
-    getID
 }

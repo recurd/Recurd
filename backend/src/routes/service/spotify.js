@@ -10,7 +10,7 @@ const router = Router()
 router.use(authGate())
 
 // Expects "auth_code" and "redirect_uri" in the request body
-router.get('/auth', async (req, res, next) => {
+router.post('/auth', async (req, res, next) => {
     try {
         const { auth_code, redirect_uri } = z.object({
                 auth_code: z.string(),
@@ -33,7 +33,8 @@ router.get('/auth', async (req, res, next) => {
         })
 
         if (!result.ok) {
-            res.status(500).json({ message: `Connecting to spotify failed (with status ${result.status}${" "+result.statusText})` })
+            const error = await result.json()
+            res.status(500).json({ message: `Connecting to spotify failed (with status ${result.statusText}${": "+error.error_description})`, error: error })
             return
         }
 

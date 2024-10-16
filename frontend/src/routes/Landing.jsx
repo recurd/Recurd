@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import User from "../user.js"
+import { getID } from "../user.js"
 
 export default function Layout() {
     const [userID, setUserID] = useState('')
     useEffect(()=>{
-        (async () => setUserID(await User.getID()))()
+        (async () => setUserID(await getID()))()
     }, [])
 
     return <>
