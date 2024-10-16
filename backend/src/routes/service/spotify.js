@@ -1,8 +1,8 @@
 import { Router } from "express"
 import { z } from "zod"
 import dotenv from 'dotenv'
-import sql from "../../db/db.js"
 import { authGate, getAuthUser } from "../../auth.js"
+import { insertUserService } from "../../db/user.js"
 dotenv.config()
 
 const router = Router()
@@ -10,7 +10,7 @@ const router = Router()
 router.use(authGate())
 
 // Expects "auth_code" and "redirect_uri" in the request body
-router.post('/auth', async (req, res, next) => {
+router.post('/connect', async (req, res, next) => {
     try {
         const { auth_code, redirect_uri } = z.object({
                 auth_code: z.string(),
@@ -40,19 +40,16 @@ router.post('/auth', async (req, res, next) => {
 
         const { access_token, refresh_token, expires_in	} = await result.json()
         const user_id = getAuthUser(req).id
-        const dbRes = await sql`insert into user_services ${
-            sql({ 
-                user_id: user_id, 
-                service_type: 'spotify',
-                access_token,
-                refresh_token,
-                expires_at: sql`now() + interval '${sql((expires_in - 5) +' seconds')}'`
-            })} on conflict (user_id, service_type) 
-            do update set 
-                access_token = excluded.access_token, 
-                refresh_token = excluded.refresh_token,
-                expires_at = excluded.expires_at`
-        if (dbRes.count == 0) {
+        const expires_at = new Date(Date.now()+expires_in * 1000) // add to current epoch time (milliseconds). expires_in is in seconds
+
+        const success = await insertUserService( {
+            user_id,
+            service_type : 'spotify',
+            access_token : access_token,
+            refresh_token: refresh_token,
+            expires_at: expires_at
+        })
+        if (!success) {
             res.status(500).json({ message: 'Failed to insert user Spotify service into database' })
             return
         }
@@ -61,21 +58,5 @@ router.post('/auth', async (req, res, next) => {
         return next(e)
     }
 })
-
-// Move to frontend
-// import * as querystring from 'node:querystring'
-// router.get('/auth', (req, res) => {
-//     let redirect_uri = req.protocol + '://' + req.get('host') + '/api/service/spotify/auth/callback'
-//     const scope = 'user-read-playback-state user-read-currently-playing user-read-recently-played'
-
-//     res.redirect('https://accounts.spotify.com/authorize?' +
-//         querystring.stringify({
-//         response_type: 'code',
-//         client_id: process.env.SPOTIFY_CLIENT_ID,
-//         scope: scope,
-//         redirect_uri: redirect_uri
-//         // state: state
-//     }))
-// })
 
 export default router
