@@ -42,4 +42,8 @@ router.post('/logout', authGate(), (req, res) => {
     res.status(200).end()
 })
 
+router.get('/status', authGate(), (req, res) => {
+    res.status(200).json({ loggedIn: !!req.session.user, user_id: req.session?.user?.id })
+})
+
 export default router
