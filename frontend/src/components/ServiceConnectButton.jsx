@@ -1,4 +1,4 @@
-import { Button, ButtonGroup } from '@chakra-ui/react'
+import { Button, ButtonGroup, Tooltip } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { disconnectSpotify, isServiceConnected } from '../services'
 
@@ -19,7 +19,7 @@ export default function ConnectServiceButton({ redirectURL, serviceType, service
 
     if (connected)
         return <ButtonGroup size='md' isAttached>
-            <Button 
+                <Button 
                     colorScheme='green' 
                     leftIcon={icon}
                     isDisabled
@@ -36,11 +36,15 @@ export default function ConnectServiceButton({ redirectURL, serviceType, service
                     variant='outline'>Disconnect</Button>}
         </ButtonGroup>
     else
-        return <Button 
+        return <div>
+            <Tooltip hasArrow label={'Redirect to Spotify'}>
+                <Button 
                     onClick={redirectToURL} 
                     colorScheme='green' 
                     size='md' 
                     leftIcon={icon}
                     isLoading={loading}
                     loadingText='Loading'>Connect to {serviceName}</Button>
+            </Tooltip>
+        </div>
 }
