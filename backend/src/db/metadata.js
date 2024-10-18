@@ -1,15 +1,6 @@
 import sqlDf from "./db.js"
 import { removeNullish } from "./util.js"
 
-export async function insertListen(insert_listen, sql=sqlDf) {
-    // insert_listen is { user_id, song_id, time_stamp }
-    removeNullish(insert_listen)
-    const [res] = await sql`
-        INSERT INTO listens ${sql(insert_listen)}
-        RETURNING id as listen_id, time_stamp`
-    return res
-}
-
 // Param song (Required): must contain 'name' field
 // Param songArtists (Required): an array of at least one element, each artist must contain 'name' field
 // Param album (Optional): must contain 'name' field
@@ -62,6 +53,7 @@ export async function findOrInsertSongArtistAlbum({ song, songArtists, album, al
 
 // NOT CONCURRENTLY SAFE
 async function findOrInsertSong({ song, songArtists }, sql=sqlDf) {
+    console.log(songArtists)
     const artist_names = songArtists.map(e=>e.name)
     let outSong = null
 

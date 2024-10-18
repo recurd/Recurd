@@ -1,9 +1,10 @@
 import { Router } from "express"
 import bcrypt from "bcrypt"
 import sql from '../db/db.js'
-import { DBErrorCodes as DBErrorCodes, isDBError } from '../db/util.js'
+import { DBErrorCodes as DBErrorCodes, isDBError } from '../util.js'
 import { authGate } from "../auth.js"
-import { userSchemaT } from "../db/schemas/user.js"
+import { userSchemaT } from "../schemas/user.js"
+import { insertUser } from "../db/user.js"
 
 const router = Router()
 
@@ -22,7 +23,12 @@ router.post('/create/password',
             const { username, password } = userSchemaT.pick({ username: true, password: true}).parse(req.body)
 
             const hash = await bcrypt.hash(password, 10)
-            const dbRes = await sql`INSERT INTO USERS ${sql({ username, password: hash, display_name: username })}`
+            const dbRes = await insertUser({ 
+                username: username,
+                password: hash,
+                display_name: username
+            })
+
             if (dbRes.count == 0) {
                 res.status(500).json({ message: 'Failed to insert new account into database' })
                 return

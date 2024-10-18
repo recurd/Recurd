@@ -1,8 +1,8 @@
 import { Router } from "express"
 import bcrypt from "bcrypt"
-import sql from '../db/db.js'
+import { getUserByUsername } from "../db/user.js"
 import { authGate } from '../auth.js'
-import { userSchemaT } from "../db/schemas/user.js"
+import { userSchemaT } from "../schemas/user.js"
 
 const router = Router()
 
@@ -12,12 +12,11 @@ router.post('/password', async (req, res, next) => {
     try {
         const { username, password } = userSchemaT.pick({ username: true, password: true}).parse(req.body)
 
-        const users = await sql`select * from users where username = ${username}`
-        if (users.count == 0) {
+        const user = await getUserByUsername(username)
+        if (!user) {
             res.status(400).json({ message: 'Incorrect username or password.' })
             return
         }
-        const user = users[0]
 
         const result = await bcrypt.compare(password, user.password)
         if (result) {

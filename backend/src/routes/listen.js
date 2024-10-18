@@ -1,10 +1,9 @@
 import { Router } from "express"
 import { z } from "zod"
-import sql from '../db/db.js'
 import { authGate, getAuthUser } from "../auth.js"
-import { findOrInsertSongArtistAlbum, insertListen } from "../db/metadata.js"
-import { albumSchemaT, artistSchema, songSchema } from "../db/schemas/metadata.js"
-import { coerceStrSchemaT, timestampSchemaT, idSchema } from "../db/schemas/shared.js"
+import { insertListen, insertListenById } from "../db/listen.js"
+import { albumSchemaT, artistSchema, songSchema } from "../schemas/metadata.js"
+import { coerceStrSchemaT, timestampSchemaT, idSchema } from "../schemas/shared.js"
 
 const router = Router()
 
@@ -18,7 +17,7 @@ router.post('/log-by-id', authGate(), async (req, res, next) => {
         const { song_id, time_stamp } = inputSchemaT.parse(req.body)
         const user_id = getAuthUser(req).id
 
-        const result = await insertListen({ user_id, song_id, time_stamp }, sql)
+        const result = await insertListenById({ user_id, song_id, time_stamp })
         res.status(200).json(result)
     } catch (e) {
         return next(e)
@@ -54,24 +53,14 @@ router.post('/log', authGate(), async (req, res, next) => {
             time_stamp
         } = inputSchemaT.parse(req.body)
 
-        const result = await sql.begin(async sql => {
-            const { song, album: outAlbum } = await findOrInsertSongArtistAlbum({
-                    song: { ...song_metadata, name: song_name }, 
-                    songArtists: artists, 
-                    album, 
-                    albumArtists: album_artists 
-                }, sql)
-            // Insert listen
-            const { listen_id, time_stamp: res_timestamp } = await insertListen({ user_id, song_id: song.id, time_stamp }, sql)
-            return {
-                listen_id,
-                song,
-                artists: song.artists,
-                album: outAlbum,
-                time_stamp: res_timestamp
-            }
+        const result = await insertListen({
+            user_id: user_id,
+            time_stamp: time_stamp,
+            song: { ...song_metadata, name: song_name },
+            songArtists: artists,
+            album: album,
+            albumArtists: album_artists
         })
-
         res.status(200).json(result)
     } catch (e) {
         return next(e)
