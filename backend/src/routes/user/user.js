@@ -1,8 +1,8 @@
 import { Router } from "express"
-import topRouter from './top.js'
 import { z } from "zod"
+import { getUserListens } from "recurd-database/user"
+import topRouter from './top.js'
 import { timestampSchemaT, idSchema } from "../../schemas/shared.js"
-import { getUserListens } from "../../db/user.js"
 
 const router = Router({mergeParams: true})
 

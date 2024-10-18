@@ -1,10 +1,9 @@
 import { Router } from "express"
 import bcrypt from "bcrypt"
-import sql from '../db/db.js'
+import { insertUser } from "recurd-database/user"
 import { DBErrorCodes as DBErrorCodes, isDBError } from '../util.js'
 import { authGate } from "../auth.js"
 import { userSchemaT } from "../schemas/user.js"
-import { insertUser } from "../db/user.js"
 
 const router = Router()
 

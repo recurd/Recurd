@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getSong } from "../db/song.js"
+import { getSong } from "recurd-database/song"
 import { DBErrorCodes, isDBError } from "../util.js"
 import { idSchema } from "../schemas/shared.js"
 

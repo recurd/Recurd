@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { z } from "zod"
+import { insertListenById, insertListen } from "recurd-database/listen"
 import { authGate, getAuthUser } from "../auth.js"
-import { insertListen, insertListenById } from "../db/listen.js"
 import { albumSchemaT, artistSchema, songSchema } from "../schemas/metadata.js"
 import { coerceStrSchemaT, timestampSchemaT, idSchema } from "../schemas/shared.js"
 

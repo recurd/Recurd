@@ -1,8 +1,8 @@
 import { Router } from "express"
 import { z } from "zod"
 import dotenv from 'dotenv'
+import { insertUserService } from "recurd-database/userService"
 import { authGate, getAuthUser } from "../../auth.js"
-import { insertUserService } from "../../db/userService.js"
 dotenv.config()
 
 const router = Router()

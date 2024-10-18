@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getUserTopAlbums, getUserTopArtists, getUserTopSongs } from "../../db/user.js"
+import { getUserTopAlbums, getUserTopArtists, getUserTopSongs } from "recurd-database/user"
 import { timestampSchemaT, idSchema } from "../../schemas/shared.js"
 
 const router = Router({mergeParams: true})
