@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { z } from "zod"
 import { initAccessToken } from "recurd-external/spotify"
+import { insertUserService } from "recurd-database/userService"
 import { authGate, getAuthUser } from "../../auth.js"
 
 const SERVICE_TYPE = 'spotify'
@@ -26,7 +27,7 @@ router.post('/connect', authGate(), async (req, res, next) => {
         const user_id = getAuthUser(req).id
         const expires_at = new Date(Date.now()+expires_in * 1000) // add to current epoch time (milliseconds). expires_in is in seconds
 
-        const success = await insertUserService( {
+        const success = await insertUserService({
             user_id,
             service_type : SERVICE_TYPE,
             access_token : access_token,

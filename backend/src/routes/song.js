@@ -1,8 +1,8 @@
 import { Router } from "express"
 import { z } from "zod"
-import sql from '../db/db.js'
-import { DBErrorCodes, isDBError } from "../db/util.js"
-import { idSchema } from "../db/schemas/shared.js"
+import { getSong } from "recurd-database/song"
+import { DBErrorCodes, isDBError } from "../util.js"
+import { idSchema } from "../schemas/shared.js"
 
 const router = Router()
 
@@ -12,10 +12,7 @@ router.get('/:id', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         // TODO: add aggregated artists
-        const result = 
-            await sql`SELECT * 
-                FROM    songs s
-                WHERE   s.id = ${id}`
+        const result = await getSong(id)
         res.json(result)
     } catch(e) {
         if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {

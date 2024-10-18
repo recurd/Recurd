@@ -1,5 +1,5 @@
 // TODO: better design pattern for these, possibly in singleton class
-import dotenv from 'dotenv'
+import dotenv from 'dotenv' // env file in backend (!?)
 dotenv.config()
 
 const SPOTIFY_API_URL_BASE = "https://api.spotify.com/v1"

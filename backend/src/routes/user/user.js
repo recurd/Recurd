@@ -1,10 +1,10 @@
 import { Router } from "express"
 import { z } from "zod"
-import sql from '../../db/db.js'
+import { getUserListens } from "recurd-database/user"
+import { getAccessToken } from "recurd-database/userService"
 import topRouter from './top.js'
-import { getAccessToken } from "recurd-external/spotify"
-import { timestampSchemaT, idSchema } from "../../db/schemas/shared.js"
-import { userServicesTypeSchema } from "../../db/schemas/user.js"
+import { timestampSchemaT, idSchema } from "../../schemas/shared.js"
+import { userServicesTypeSchema } from "../../schemas/user.js"
 
 const router = Router({mergeParams: true})
 
@@ -38,41 +38,13 @@ router.get('/:user_id/listens', async (req, res, next) => {
         const user_id = idSchema.parse(req.params.user_id)
         const { start_date, end_date, n } = listensSchemaT.parse(req.body)
 
-        // When a song is linked to multiple albums, some albums will have to be ignored 
-        // Since we are only returning one. So we SELECT DISTINCT ON (l.id) and ORDER_BY a.id
-        const listens = await sql`
-            SELECT DISTINCT ON (l.id)
-                l.id as listen_id,
-                l.time_stamp as time_stamp,
-                ROW_TO_JSON(s) as song,
-                ROW_TO_JSON(a) as album,
-                -- JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', a.id, 'name', a.name)) as album,
-                JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', ar.id, 'name', ar.name)) as artists
-            FROM
-                listens l
-            JOIN
-                songs s ON l.song_id = s.id
-            JOIN
-                album_songs als ON s.id = als.song_id
-            JOIN
-                albums a ON als.album_id = a.id
-            JOIN
-                artist_songs ars ON s.id = ars.song_id
-            JOIN
-                artists ar ON ars.artist_id = ar.id
-            WHERE
-                l.user_id = ${user_id}
-                AND l.time_stamp 
-                    ${start_date ? 
-                        sql`BETWEEN ${start_date} AND ${end_date}` : 
-                        sql`<= ${end_date}`}
-            GROUP BY
-                l.id, s.id, a.id
-            ORDER BY
-                l.id, time_stamp, a.id 
-                DESC
-            ${!isNullish(n) ? sql`LIMIT ${n}` : sql``}`
-            res.status(200).json({ listens })
+        const listens = await getUserListens({
+            user_id: user_id,
+            start_date: start_date,
+            end_date: end_date,
+            n: n
+        })
+        res.status(200).json({ listens: listens })
     } catch (e) {
         return next(e)
     }

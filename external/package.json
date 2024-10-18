@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
+  "exports": {
+    "./spotify": "./lib/spotify.js"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

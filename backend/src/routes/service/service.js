@@ -1,9 +1,9 @@
 import { Router } from "express"
 import { z } from "zod"
-import sql from "../../db/db.js"
+import { deleteUserService, getUserServiceStatus } from "recurd-database/userService"
 import SpotifyRouter from './spotify.js'
 import { authGate, getAuthUser } from '../../auth.js'
-import { userServicesTypeSchema } from "../../db/schemas/user.js"
+import { userServicesTypeSchema } from "../../schemas/user.js"
 
 const router = Router()
 
@@ -18,20 +18,8 @@ router.get('/:type/status/', authGate(), async (req, res, next) => {
             type: userServicesTypeSchema
         }).parse(req.params)
 
-        const result = await sql`
-            SELECT
-                1
-            FROM
-                user_services us
-            JOIN
-                user_services_t ut
-            ON 
-                us.service_id = ut.id
-            WHERE
-                    us.user_id = ${user_id}
-                AND
-                    ut.service_type = ${type}`
-        res.status(200).json({ connected: result.count > 0 })
+        const result = await getUserServiceStatus(user_id, type)
+        res.status(200).json({ connected: result })
     } catch (e) {
         return next(e)
     }
@@ -44,20 +32,8 @@ router.delete('/:type/disconnect', authGate(), async (req, res, next) => {
             type: userServicesTypeSchema
         }).parse(req.params)
         const user_id = getAuthUser(req).id
-        const result = await sql`
-            DELETE FROM
-                user_services
-            WHERE 
-                    user_id = ${user_id}
-                AND
-                    service_id = 
-                        (SELECT
-                            id
-                        FROM
-                            user_services_t
-                        WHERE
-                            service_type = ${type})`
-        res.status(200).json({ disconnected: result.count > 0 })
+        const result = await deleteUserService(user_id, type)
+        res.status(200).json({ disconnected: result })
     } catch (e) {
         return next(e)
     }
