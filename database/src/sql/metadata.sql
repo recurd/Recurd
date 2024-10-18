@@ -50,8 +50,10 @@ create table album_songs (
     primary key (album_id, song_id),
     unique (album_id, song_id, disc_number, album_position),
     -- unique constraint does not get checked if any column (i.e.album_position) is null
-    check (not (disc_number > 1 and album_position is null))
+    check (not (disc_number > 1 and album_position is null)),
     -- If disc_number is > 1, song's position in album must be known (since it is on discs)
+    check (disc_number >= 1),
+    check (album_position is null or album_position >= 1)
 );
 
 create table artist_songs (

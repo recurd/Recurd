@@ -2,7 +2,7 @@ import { Router } from "express"
 import { z } from "zod"
 import { insertListenById, insertListen } from "recurd-database/listen"
 import { authGate, getAuthUser } from "../auth.js"
-import { albumSchemaT, artistSchema, songSchema } from "../schemas/metadata.js"
+import { albumSchemaT, artistSchema, songSchema, trackSchema } from "../schemas/metadata.js"
 import { coerceStrSchemaT, timestampSchemaT, idSchema } from "../schemas/shared.js"
 
 const router = Router()
@@ -24,8 +24,19 @@ router.post('/log-by-id', authGate(), async (req, res, next) => {
     }
 })
 
-// Required: song name and artists (array of string artist names or artist objects with 'name' field) with length at least 1
-// Returns listen_id, song_id, time_stamp, artists (id, name, image per artist), album (id, name, image, and artists)
+// Required: 
+    // song_name
+    // artists (array of string artist names or artist objects with 'name' field) with length at least 1
+// Optional:
+    // song_metadata
+    // track_metadata (disc_number and album_position)
+    // album (metadata)
+    // album_artists (same requirement as artists field)
+    // time_stamp
+// Returns:
+    // listen_id, time_stamp, 
+    // song (with id, artists object array. optionally: track metadata if it was provided)
+    // album (id, name, image, and artists)
 router.post('/log', authGate(), async (req, res, next) => {
     const artistArraySchemaT = z.union([
         z.string().array().nonempty().transform(arr => arr.map(e => { return { name: e } })),
@@ -36,6 +47,7 @@ router.post('/log', authGate(), async (req, res, next) => {
         artists: artistArraySchemaT,
         // optional
         song_metadata: songSchema.omit({ name: true }).nullish(),
+        track_metadata: trackSchema.nullish(),
         album: albumSchemaT.nullish(),
         album_artists: artistArraySchemaT.nullish(),
         time_stamp: timestampSchemaT.nullish()
@@ -48,6 +60,7 @@ router.post('/log', authGate(), async (req, res, next) => {
             artists,
             // optional fields
             song_metadata,
+            track_metadata,
             album,
             album_artists,
             time_stamp
@@ -57,6 +70,7 @@ router.post('/log', authGate(), async (req, res, next) => {
             user_id: user_id,
             time_stamp: time_stamp,
             song: { ...song_metadata, name: song_name },
+            trackInfo: track_metadata,
             songArtists: artists,
             album: album,
             albumArtists: album_artists

@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getAlbum, getAlbumSongs, getAlbumRatings } from "recurd-database/album"
+import { getAlbum, getAlbumRatings, getAlbumTracks } from "recurd-database/album"
 import { idSchema } from "../schemas/shared.js"
 
 const router = Router()
@@ -17,10 +17,11 @@ router.get('/:id', async (req, res, next) => {
     }
 })
 
-router.get('/:id/songs', async (req, res, next) => {
+// Tracks differ from songs in that tracks contain info of their location in an album
+router.get('/:id/tracks', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
-        const result = await getAlbumSongs(id)
+        const result = await getAlbumTracks(id)
         res.json(result)
     } catch(e) {
         return next(e)

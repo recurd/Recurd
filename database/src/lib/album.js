@@ -18,7 +18,8 @@ export async function getAlbum(id) {
     return result
 }
 
-export async function getAlbumSongs(id) {
+// Tracks differ from songs in that tracks contain info of their location in an album
+export async function getAlbumTracks(id) {
     const result = await sql`
         SELECT
             s.*,
