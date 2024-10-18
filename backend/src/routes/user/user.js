@@ -1,8 +1,10 @@
 import { Router } from "express"
-import topRouter from './top.js'
-import sql from '../../db/db.js'
 import { z } from "zod"
+import sql from '../../db/db.js'
+import topRouter from './top.js'
+import { getAccessToken } from "recurd-external/spotify"
 import { timestampSchemaT, idSchema } from "../../db/schemas/shared.js"
+import { userServicesTypeSchema } from "../../db/schemas/user.js"
 
 const router = Router({mergeParams: true})
 
@@ -76,10 +78,33 @@ router.get('/:user_id/listens', async (req, res, next) => {
     }
 })
 
-router.get('/:user_id/currently-listening', async (req, res, next) => {
-    // TODO: implement spotify stuff first then this? idk
+router.get('/:user_id/:service_type/currently-listening', async (req, res, next) => {
     try {
-        const user_id = idSchema.parse(req.params.user_id)
+        const { user_id, service_type } = z.object({
+            user_id: idSchema,
+            service_type: userServicesTypeSchema
+        }).parse(req.params)
+
+        const access_token = await getAccessToken(user_id, service_type)
+        if (!access_token) {
+            res.status(200).end()
+            // nothing to send
+            // do not return information that user is not connected to this service
+            // because other users can access this route
+        }
+
+        let response = await fetchCurrListeningTrack(access_token)
+        // Should refresh access token
+        if (!response.success && response.retry) {
+
+        } else if (!response.success) {
+            res.status(500).json({ message: response.result })
+        }
+
+        const track = response.result
+        if (track) {
+            
+        }
     } catch(e) {
         return next(e)
     }

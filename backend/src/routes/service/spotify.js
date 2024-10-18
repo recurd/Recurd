@@ -1,17 +1,14 @@
 import { Router } from "express"
 import { z } from "zod"
-import dotenv from 'dotenv'
+import { initAccessToken } from "recurd-external/spotify"
 import { authGate, getAuthUser } from "../../auth.js"
-import { insertUserService } from "../../db/user.js"
-import { initAccessToken } from "../../services/spotify.js"
-dotenv.config()
+
+const SERVICE_TYPE = 'spotify'
 
 const router = Router()
 
-router.use(authGate())
-
 // Expects "auth_code" and "redirect_uri" in the request body
-router.post('/connect', async (req, res, next) => {
+router.post('/connect', authGate(), async (req, res, next) => {
     try {
         const { auth_code, redirect_uri } = z.object({
                 auth_code: z.string(),
@@ -31,7 +28,7 @@ router.post('/connect', async (req, res, next) => {
 
         const success = await insertUserService( {
             user_id,
-            service_type : 'spotify',
+            service_type : SERVICE_TYPE,
             access_token : access_token,
             refresh_token: refresh_token,
             expires_at: expires_at
