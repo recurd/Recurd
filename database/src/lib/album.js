@@ -38,33 +38,62 @@ export async function getAlbumTracks(id) {
     return result
 }
 
+// Return an array of { rating: int, count: int }. Note that if a rating is 0, no corresponding object will be returned
 export async function getAlbumRatings(id) {
     const result = await sql`
-        WITH def AS (
-            SELECT 
-                n as rating,
-                0::integer as count
-            FROM
-                generate_series(1,10) n
-        ), res AS (
-            SELECT
-                aos.rating as rating,
-                COUNT(aos.rating)::integer as count
-            FROM
-                album_opinions aos
-            WHERE
-                aos.album_id = ${id}
-                AND aos.rating IS NOT NULL
-            GROUP BY
-                aos.rating
-        )
-        SELECT * FROM res
-        UNION ALL
-        SELECT * FROM def
-        WHERE NOT EXISTS (
-            SELECT * FROM res WHERE res.rating = def.rating
-        )
+        SELECT
+            rating AS rating
+            COUNT(rating)::integer AS count
+        FROM
+            album_opinions
+        WHERE
+            album_id = ${id}
+            AND rating IS NOT NULL
+        GROUP BY
+            rating
         ORDER BY
             rating ASC`
     return result
 }
+
+export async function getAlbumAvgRating(id) {
+    const [result] = await sql`
+        SELECT
+            AVG(rating) AS average
+        FROM
+            album_opinions
+        WHERE
+            album_id = ${id}
+            AND rating IS NOT NULL`
+    return result
+}
+
+// Old version of album ratings, where we always return an array of { rating: int, count: int }
+// and used SQL to fill in ratings with count of 0. This should not be done on the backend because it is unnecessarily costly.
+// const result = await sql`
+//         WITH def AS (
+//             SELECT 
+//                 n as rating,
+//                 0::integer as count
+//             FROM
+//                 generate_series(1,10) n
+//         ), res AS (
+//             SELECT
+//                 aos.rating as rating,
+//                 COUNT(aos.rating)::integer as count
+//             FROM
+//                 album_opinions aos
+//             WHERE
+//                 aos.album_id = ${id}
+//                 AND aos.rating IS NOT NULL
+//             GROUP BY
+//                 aos.rating
+//         )
+//         SELECT * FROM res
+//         UNION ALL
+//         SELECT * FROM def
+//         WHERE NOT EXISTS (
+//             SELECT * FROM res WHERE res.rating = def.rating
+//         )
+//         ORDER BY
+//             rating ASC`

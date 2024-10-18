@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getAlbum, getAlbumRatings, getAlbumTracks } from "recurd-database/album"
+import { getAlbum, getAlbumRatings, getAlbumAvgRating, getAlbumTracks } from "recurd-database/album"
 import { idSchema } from "../schemas/shared.js"
 
 const router = Router()
@@ -28,10 +28,22 @@ router.get('/:id/tracks', async (req, res, next) => {
     }
 })
 
+// Array of { rating: int, count: int }\
+// Note that if a rating is 0, no corresponding object will be returned
 router.get('/:id/ratings', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         const result = await getAlbumRatings(id)
+        res.status(200).json(result)
+    } catch (e) {
+        return next(e)
+    }
+})
+// { average: int }
+router.get('/:id/average-rating', async (req, res, next) => {
+    try {
+        const { id } = paramsIdSchema.parse(req.params)
+        const result = await getAlbumAvgRating(id)
         res.status(200).json(result)
     } catch (e) {
         return next(e)
