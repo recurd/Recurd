@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { z } from "zod"
-import sql from '../../db/db.js'
-import { timestampSchemaT, idSchema } from "../../db/schemas/shared.js"
+import { getUserTopAlbums, getUserTopArtists, getUserTopSongs } from "recurd-database/user"
+import { timestampSchemaT, idSchema } from "../../schemas/shared.js"
 
 const router = Router({mergeParams: true})
 
@@ -19,25 +19,13 @@ router.get('/artists', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
         const { start_date, end_date, n } = topSchemaT.parse(req.body)
-        const topArtists = await sql`
-            SELECT
-                ar.*,
-                COUNT(DISTINCT l.id) AS listen_count
-            FROM
-                listens l
-            JOIN
-                artist_songs ars ON l.song_id = ars.song_id
-            JOIN
-                artists ar ON ars.artist_id = ar.id
-            WHERE
-                l.user_id = ${user_id}
-                AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
-            GROUP BY
-                ar.id
-            ORDER BY
-                listen_count DESC
-            LIMIT ${n}`
 
+        const topArtists = await getUserTopArtists({
+            user_id: user_id,
+            start_date: start_date,
+            end_date: end_date,
+            n: n
+        })
         return res.status(200).json(topArtists)
     } catch (e) {
         return next(e)
@@ -49,30 +37,13 @@ router.get('/albums', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
         const { start_date, end_date, n } = topSchemaT.parse(req.body)
-        const topAlbums = await sql`
-            SELECT
-                a.*,
-                JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', ar.id, 'name', ar.name)) as artists,
-                COUNT(DISTINCT l.id) AS listen_count
-            FROM
-                listens l
-            JOIN
-                album_songs als ON l.song_id = als.song_id
-            JOIN
-                albums a ON als.album_id = a.id
-            JOIN
-                artist_albums abs ON a.id = abs.album_id
-            JOIN
-                artists ar ON abs.artist_id = ar.id
-            WHERE
-                l.user_id = ${user_id}
-                AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
-            GROUP BY
-                a.id
-            ORDER BY
-                listen_count DESC
-            LIMIT ${n}`
 
+        const topAlbums = await getUserTopAlbums({
+            user_id: user_id,
+            start_date: start_date,
+            end_date: end_date,
+            n: n
+        })
         res.json(topAlbums)
     } catch (e) {
         return next(e)
@@ -86,35 +57,12 @@ router.get('/songs', async (req, res, next) => {
         const user_id = idSchema.parse(req.params.user_id)
         const { start_date, end_date, n } = topSchemaT.parse(req.body)
 
-        // When a song is linked to multiple albums, some albums will have to be ignored 
-        // Since we are only returning one. So we SELECT DISTINCT ON (l.id) and ORDER_BY a.id
-        const topSongs = await sql`
-            SELECT DISTINCT ON (s.id)
-                s.*,
-                a.image as album_image,
-                JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', ar.id, 'name', ar.name)) as artists,
-                COUNT(DISTINCT l.id) as listen_count
-            FROM
-                listens l
-            JOIN
-                songs s ON l.song_id = s.id
-            JOIN
-                album_songs als ON s.id = als.song_id
-            JOIN
-                albums a ON als.album_id = a.id
-            JOIN
-                artist_songs ars ON s.id = ars.song_id
-            JOIN
-                artists ar ON ars.artist_id = ar.id
-            WHERE
-                l.user_id = ${user_id}
-                AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
-            GROUP BY
-                s.id, a.id
-            ORDER BY
-                s.id, listen_count DESC
-            LIMIT ${n}`
-
+        const topSongs = await getUserTopSongs({
+            user_id: user_id,
+            start_date: start_date,
+            end_date: end_date,
+            n: n
+        })
         res.json(topSongs)
     } catch (e) {
         return next(e)

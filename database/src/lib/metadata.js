@@ -1,32 +1,29 @@
-import sqlDf from "./db.js"
-import { removeNullish } from "./util.js"
+import sqlDf from "../db.js"
+import { removeNullish } from "../util.js"
 
-export async function insertListen(insert_listen, sql=sqlDf) {
-    // insert_listen is { user_id, song_id, time_stamp }
-    removeNullish(insert_listen)
-    const [res] = await sql`
-        INSERT INTO listens ${sql(insert_listen)}
-        RETURNING id as listen_id, time_stamp`
-    return res
-}
-
+// Internal function, with transaction context
 // Param song (Required): must contain 'name' field
 // Param songArtists (Required): an array of at least one element, each artist must contain 'name' field
 // Param album (Optional): must contain 'name' field
 // Param albumArtists (Optional): an array of at least one element, each artist must contain 'name' field
 // Returned: song and album objects,
 // all objects (however nested) has 'found' field that is true iff the object was found in DB
-export async function findOrInsertSongArtistAlbum({ song, songArtists, album, albumArtists }, sql=sqlDf) {
-    let outSong = await findOrInsertSong({ song, songArtists }, sql)
+export async function findOrInsertSongArtistAlbum({ song, trackInfo, songArtists, album, albumArtists }, sql=sqlDf) {
+    const outSong = await findOrInsertSong({ song: song, songArtists }, sql)
+    // if album input does not exist, return
+    if (!album) {
+        return { song: outSong }
+    }
 
-    const hasAlbum = !!album
     let outAlbum = null
     // If song was found (not created), fetch album by name
-    if (hasAlbum && outSong.found) {
+    if (outSong.found) {
         if (!album?.name) throw 'album must have a name!'
         const [resAlbum] = await sql`
             SELECT 
-                *,
+                ab.*,
+                abs.disc_number as disc_number, -- include these columns from album_songs for returning track object
+                abs.album_position as album_position,
                 true AS found
             FROM songs s
             JOIN album_songs abs
@@ -34,32 +31,45 @@ export async function findOrInsertSongArtistAlbum({ song, songArtists, album, al
             JOIN albums ab
             ON abs.album_id = ab.id
             WHERE s.id = ${outSong.id}
-                ${album.name ? sql`AND ab.name = ${album.name}` : sql``}
+                AND ab.name = ${album.name}
             LIMIT 1`
             outAlbum = resAlbum
     }
-    // If haven't found album, create one when album is specified
-    if (hasAlbum && !outAlbum) {
-        outAlbum = await findOrInsertAlbum({ album, albumArtists: albumArtists ?? songArtists }, sql)
 
-        if (!outAlbum.found) {
-            // Insert into album_songs
-            const album_song = { 
-                album_id: outAlbum.id,
-                song_id: outSong.id,
-                disc_number: song.disc_number,
-                album_position: song.album_position
-            }
-            outSong.disc_number = song.disc_number
-            outSong.album_position = song.album_position
-            removeNullish(album_song)
-            await sql`
-                INSERT INTO album_songs ${sql(album_song)}`
-        }
+    // If found album
+    if (outAlbum) {
+        // extract track info and remove it from album
+        outSong.disc_number = outAlbum.disc_number
+        outSong.album_position = outAlbum.album_position
+        delete outAlbum.disc_number
+        delete outAlbum.album_position
     }
-    return { song: outSong, album: outAlbum }
+    // If haven't found album, create one when album is specified
+    else {
+        outAlbum = await findOrInsertAlbum({ album, albumArtists: albumArtists ?? songArtists }, sql)
+        outSong.disc_number = trackInfo?.disc_number
+        outSong.album_position = trackInfo?.album_position
+    }
+
+    // If either song or album did not exist, then link them in album_songs
+    if (!outSong.found || !outAlbum.found) {
+        const album_song = { 
+            album_id: outAlbum.id,
+            song_id: outSong.id,
+            disc_number: trackInfo?.disc_number,
+            album_position: trackInfo?.album_position
+        }
+        removeNullish(album_song)
+        await sql`
+            INSERT INTO album_songs ${sql(album_song)}`
+    }
+    return {
+        song: outSong,
+        album: outAlbum
+    }
 }
 
+// Internal function, with transaction context
 // NOT CONCURRENTLY SAFE
 async function findOrInsertSong({ song, songArtists }, sql=sqlDf) {
     const artist_names = songArtists.map(e=>e.name)
@@ -118,6 +128,7 @@ async function findOrInsertSong({ song, songArtists }, sql=sqlDf) {
     return outSong
 }
 
+// Internal function, with transaction context
 // NOT CONCURRENTLY SAFE
 async function findOrInsertAlbum({ album, albumArtists }, sql=sqlDf) {
     const artist_names = albumArtists.map(e=>e.name)
@@ -177,6 +188,7 @@ async function findOrInsertAlbum({ album, albumArtists }, sql=sqlDf) {
     return outAlbum
 }
 
+// Internal function, with transaction context
 // NOT CONCURRENTLY SAFE
 async function findOrInsertArtists(artists, sql=sqlDf) {
     try {
