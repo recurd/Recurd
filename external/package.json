@@ -1,0 +1,11 @@
+{
+  "name": "recurd-external",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
