@@ -42,7 +42,7 @@ export async function getAlbumTracks(id) {
 export async function getAlbumRatings(id) {
     const result = await sql`
         SELECT
-            rating AS rating
+            rating AS rating,
             COUNT(rating)::integer AS count
         FROM
             album_opinions
