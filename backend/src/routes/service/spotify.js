@@ -3,6 +3,7 @@ import { z } from "zod"
 import dotenv from 'dotenv'
 import { authGate, getAuthUser } from "../../auth.js"
 import { insertUserService } from "../../db/user.js"
+import { initAccessToken } from "../../services/spotify.js"
 dotenv.config()
 
 const router = Router()
@@ -17,28 +18,14 @@ router.post('/connect', async (req, res, next) => {
                 redirect_uri: z.string().url()
             }).parse(req.body)
 
-        const result = await fetch('https://accounts.spotify.com/api/token',  {
-            method: 'POST',
-            body: new URLSearchParams({ // for urlencoded body
-                code: auth_code,
-                redirect_uri: redirect_uri,
-                grant_type: 'authorization_code'
-            }),
-            headers: {
-                'content-type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + (new Buffer
-                    .from(process.env.SPOTIFY_CLIENT_ID + ':' + 
-                        process.env.SPOTIFY_CLIENT_SECRET).toString('base64'))
-            }
-        })
+        const result = await initAccessToken(auth_code, redirect_uri)
 
-        if (!result.ok) {
-            const error = await result.json()
-            res.status(500).json({ message: `Connecting to spotify failed (with status ${result.statusText}${": "+error.error_description})`, error: error })
+        if (!result.success) {
+            res.status(500).json({ message: `Connecting to spotify failed: ${result.result})`, error: result.result })
             return
         }
 
-        const { access_token, refresh_token, expires_in	} = await result.json()
+        const { access_token, refresh_token, expires_in	} = result.result
         const user_id = getAuthUser(req).id
         const expires_at = new Date(Date.now()+expires_in * 1000) // add to current epoch time (milliseconds). expires_in is in seconds
 
