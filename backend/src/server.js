@@ -7,7 +7,7 @@ import morgan from "morgan"
 import { ZodError } from "zod"
 import { fromZodError } from "zod-validation-error"
 import routesRouter from "./routes/routes.js"
-import { isDBError } from "./db/util.js"
+import { isDBError } from "./util.js"
 
 const server = express()
 const PORT = 3000  // 0 for auto choose address

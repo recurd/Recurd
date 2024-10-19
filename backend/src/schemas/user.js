@@ -8,9 +8,10 @@ export const userSchemaT = z.object({
     image: urlSchema.nullish()
 })
 
+export const userServicesTypeSchema = z.enum(['spotify'])
 export const userServices = z.object({
     user_id: idSchema, 
-    service_type: z.enum(['spotify']).nullish(),
+    service_type: userServicesTypeSchema.nullish(),
     access_token: nonEmptyStrSchema,
     refresh_token: nonEmptyStrSchema,
     expires_at: timestampSchemaT.nullish(),
