@@ -1,0 +1,13 @@
+# DB
+DB_HOST = recurd.postgres.database.azure.com
+DB_PORT = 5432
+DB_NAME = postgres
+DB_USERNAME = RecurdAdmin
+DB_PASSWORD = Musery@UMN
+
+# Session
+SESSION_SECRET = xe)ieylb*_=6f&ok+ov&9%-3c$ud9p0z@&%2t&kgk+(1g%1t
+
+# Spotify
+SPOTIFY_CLIENT_ID = ef8cec77d2b945a2bbc5bd5482c48a3e
+SPOTIFY_CLIENT_SECRET = fedca667d6a6488697b020b5555eb16d
