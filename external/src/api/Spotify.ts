@@ -9,7 +9,7 @@ const SPOTIFY_API_URL_BASE = 'https://api.spotify.com/v1'
 // Types of input from Spotify Web API
 export interface TokenResponse {
     access_token: string,
-    refresh_token: string,
+    refresh_token: string, // Note: spotify might not provide refresh token if access token has not expired
     expires_in: number
 }
 
@@ -48,6 +48,12 @@ export interface Track { // Spotify doesn't have songs, just tracks
     //     isrc: string // International Standard Recording Code
     // },
     // popularity: number
+}
+
+export interface Listen {
+    track: Track
+    played_at: string, // ISO datestring
+    // context: {}
 }
 
 // Get access token for user (initial process)
@@ -123,7 +129,6 @@ export async function fetchCurrentlyPlayingTrack(accessToken: string) : Promise<
     }
     // Currently playing (might be paused)
     const body = await response.json()
-    console.log(body)
     return { success: true, result: body }
 }
 

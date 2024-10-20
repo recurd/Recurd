@@ -72,13 +72,7 @@ function formatTrackToMetadatas(track: Spotify.Track) {
     }
 }
 
-interface Listen {
-    track: Spotify.Track
-    played_at: string, // ISO datestring
-    // context: {}
-}
-
-function formatRecentlyPlayedTrack(listen: Listen) {
+function formatRecentlyPlayedTrack(listen: Spotify.Listen) {
     const time_stamp = new Date(listen.played_at)
     return {
         time_stamp,

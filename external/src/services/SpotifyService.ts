@@ -64,18 +64,21 @@ export class SpotifyService implements Service {
         }
 
         const { access_token, refresh_token, expires_at } = Formatter.formatTokens(spRes.result)
+        // Special case: refresh_token may be null here 
+        // if we accidentally request a refresh but access token hasn't expired
+        // Not sure how it happens but sometimes Spotify sends back 401 unauthorized which triggers this refresh
         const dbRes = await insertUserService({
             user_id: this.user_id,
             service_type : ServiceType.SPOTIFY,
             access_token : access_token,
-            refresh_token: refresh_token,
+            refresh_token: refresh_token ?? this.#refresh_token,
             expires_at: expires_at
         })
         if (!dbRes) {
             throw new Error(`Failed to insert user ${this.user_id}'s service (${ServiceType.SPOTIFY}) into database on refreshing token`)
         }
         this.#access_token = access_token
-        this.#refresh_token = refresh_token
+        this.#refresh_token = refresh_token ?? this.#refresh_token
     }
 
     async getCurrentlyListening() : Promise<{ track: any, is_paused?: boolean }> {
@@ -92,6 +95,9 @@ export class SpotifyService implements Service {
         // do not return the currently listening track
         const spRes = res.result
         if (spRes?.device?.is_private_session || spRes?.currently_playing_type !== 'track') {
+            return { track: null }
+        }
+        if (!spRes) {
             return { track: null }
         }
 
@@ -112,13 +118,16 @@ export class SpotifyService implements Service {
         }
 
         const spRes = res.result
-        const songNMtdt = spRes.map(e => Formatter.formatRecentlyPlayedTrack(e))
+        if (!spRes) {
+            return { listens: [] }
+        }
 
         const listens: any[] = []
-        for (const smd of songNMtdt) {
+        for (const track of spRes) {
+            const songNMtdt = Formatter.formatRecentlyPlayedTrack(track)
             const listen = await insertListen({
                 user_id: this.user_id,
-                ...smd
+                ...songNMtdt
             })
             listens.push(listen)
         }
