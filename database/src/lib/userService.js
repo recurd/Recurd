@@ -26,29 +26,32 @@ export async function insertUserService({ user_id, service_type, access_token, r
     return dbRes.count > 0
 }
 
-// Internal function
-async function getUserServices(user_id, service_type) {
+export async function getUserService(user_id, service_type) {
     const result = await sql`
         SELECT 
             *
         FROM
-            user_services_t
+            user_services us
+        JOIN
+            user_services_t ut
+        ON
+            us.service_id = ut.id
         WHERE
             user_id = ${user_id}
-            AND sevice_type = ${service_type}`
+            AND ut.service_type = ${service_type}`
     if (result.count > 0)
         return result[0]
     // otherwise return undefined
 }
 
 export async function getAccessToken(user_id, service_type) {
-    const result = await getUserServices(user_id, service_type)
+    const result = await getUserService(user_id, service_type)
     if (result) return result.access_token
     // otherwise return undefined
 }
 
 export async function getRefreshToken(user_id, service_type) {
-    const result = await getUserServices(user_id, service_type)
+    const result = await getUserService(user_id, service_type)
     if (result) return result.refresh_token
     // otherwise return undefined
 }
