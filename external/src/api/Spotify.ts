@@ -50,7 +50,7 @@ export interface Track { // Spotify doesn't have songs, just tracks
     // popularity: number
 }
 
-export interface Listen {
+export interface PlayHistoryObject {
     track: Track
     played_at: string, // ISO datestring
     // context: {}
@@ -163,5 +163,8 @@ export async function fetchRecentlyPlayedTracks(accessToken: string, lastFetchTi
         return { success: true, result: null }
     }
     const body = await response.json()
-    return { success: true, result: body.items }
+    return {
+        success: true,
+        result: body
+    }
 }

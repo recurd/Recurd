@@ -56,7 +56,6 @@ export async function getRefreshToken(user_id, service_type) {
     // otherwise return undefined
 }
 
-
 // returns true if user is connected to this service, false otherwise
 export async function getUserServiceStatus(user_id, service_type) {
     const result = await sql`
@@ -72,6 +71,26 @@ export async function getUserServiceStatus(user_id, service_type) {
                 us.user_id = ${user_id}
             AND
                 ut.service_type = ${service_type}`
+    return result.count > 0
+}
+
+// return true for updating successfully
+export async function setUserServiceLastUpdated(user_id, service_type, last_updated) {
+    const result = await sql`
+        UPDATE
+            user_services us
+        SET 
+            last_updated = ${last_updated}
+        WHERE 
+            user_id = ${user_id}
+            AND service_id = ( 
+                SELECT 
+                    id 
+                FROM 
+                    user_services_t ut 
+                WHERE 
+                    ut.service_type = ${service_type}
+            )`
     return result.count > 0
 }
 

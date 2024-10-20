@@ -20,9 +20,9 @@ export function formatSmplArtist(artist: Spotify.SmplArtist) {
 function parseReleaseDate(datestring: string) : Date {
     const parts = datestring.split('-')
     return new Date(Date.UTC(
-        parseInt(parts.at(0) ?? '0'), // year
-        parseInt(parts.at(1) ?? '1'), // month
-        parseInt(parts.at(2) ?? '1'), // day
+        parseInt(parts.at(0) ?? '0', 10), // year
+        parseInt(parts.at(1) ?? '1', 10), // month
+        parseInt(parts.at(2) ?? '1', 10), // day
     ))
 }
 
@@ -72,7 +72,7 @@ function formatTrackToMetadatas(track: Spotify.Track) {
     }
 }
 
-function formatRecentlyPlayedTrack(listen: Spotify.Listen) {
+function formatPlayHistoryObject(listen: Spotify.PlayHistoryObject) {
     const time_stamp = new Date(listen.played_at)
     return {
         time_stamp,
@@ -86,5 +86,5 @@ export default {
     formatAlbum,
     formatTrack,
     formatTrackToMetadatas,
-    formatRecentlyPlayedTrack
+    formatPlayHistoryObject
 }

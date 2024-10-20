@@ -4,3 +4,4 @@ let service = await External.findService('spotify', '33bd22c5-0bb1-4a4e-8183-5e1
 
 console.log(await service.getCurrentlyListening())
 console.log(await service.getRecentListens())
+console.log("Done")

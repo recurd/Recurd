@@ -1,6 +1,7 @@
 import {
     insertUserService,
-    getUserService
+    getUserService,
+    setUserServiceLastUpdated
 } from 'recurd-database/userService'
 import {
     findOrInsertSongArtistAlbum
@@ -116,6 +117,8 @@ export class SpotifyService implements Service {
         else if (!res.success) {
             throw new Error(res.result)
         }
+        // cache current time for later
+        const now = Date.now()
 
         const spRes = res.result
         if (!spRes) {
@@ -123,13 +126,23 @@ export class SpotifyService implements Service {
         }
 
         const listens: any[] = []
-        for (const track of spRes) {
-            const songNMtdt = Formatter.formatRecentlyPlayedTrack(track)
+        for (const track of spRes?.items) {
+            const songNMtdt = Formatter.formatPlayHistoryObject(track)
             const listen = await insertListen({
                 user_id: this.user_id,
                 ...songNMtdt
             })
             listens.push(listen)
+        }
+
+        // New fetch timestamp will be the time that the user finishes the last song 
+        // (according to Spotify) or current time (if Spotify didn't provide the info)
+        const spotify_new_fetch_tstp = spRes?.cursors?.after ? parseInt(spRes?.cursors?.after) : undefined
+        const new_fetch_timestamp = new Date(spotify_new_fetch_tstp ?? now)
+        const updSuccess = await setUserServiceLastUpdated(this.user_id, ServiceType.SPOTIFY, new_fetch_timestamp)
+        if (!updSuccess) {
+            console.error("Failed to update user service's last updated timestamp!")
+            // What do we do??
         }
         return {
             listens: listens
