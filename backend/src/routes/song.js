@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getSong } from "../../../database/src/lib/song.js"
+import { getSong, getSongAlbums, getSongRatings, getSongReviews } from "../../../database/src/lib/song.js"
 import { DBErrorCodes, isDBError } from "../util.js"
 import { idSchema } from "../schemas/shared.js"
 
@@ -22,18 +22,39 @@ router.get('/:id', async (req, res, next) => {
 })
 
 router.get('/:id/albums', async (req, res, next) => {
-    // const { id } = paramsIdSchema.parse(req.params)
-    res.status(501).end()
+    try {
+        const { id } = paramsIdSchema.parse(req.params)
+        const albums = await getSongAlbums(id)
+        res.status(200).json(albums)
+    } catch(e) {
+        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
+            res.status(400).json({ "message": "Song id is not a valid uuid!" })
+        } else return next(e)
+    }
 })
 
 router.get('/:id/ratings', async (req, res, next) => {
-    // const { id } = paramsIdSchema.parse(req.params)
-    res.status(501).end()
+    try {
+        const { id } = paramsIdSchema.parse(req.params)
+        const ratings = await getSongRatings(id)
+        res.status(200).json(ratings)
+    } catch(e) {
+        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
+            res.status(400).json({ "message": "Song id is not a valid uuid!" })
+        } else return next(e)
+    }
 })
 
 router.get('/:id/reviews', async (req, res, next) => {
-    // const { id } = paramsIdSchema.parse(req.params)
-    res.status(501).end()
+    try {
+        const { id } = paramsIdSchema.parse(req.params)
+        const reviews = await getSongReviews(id)
+        res.status(200).json(reviews)
+    } catch(e) {
+        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
+            res.status(400).json({ "message": "Song id is not a valid uuid!" })
+        } else return next(e)
+    }
 })
 
 router.get('/:id/top-listeners', async (req, res, next) => {
