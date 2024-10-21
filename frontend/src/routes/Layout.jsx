@@ -1,6 +1,7 @@
 import { Outlet, useNavigate } from 'react-router-dom'
 import backend from '../backend.js'
-// import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+import Profile from './Profile.jsx'
 
 export default function Layout() {
     const navigate = useNavigate()
@@ -21,9 +22,10 @@ export default function Layout() {
     return <>
         <Outlet />
         <button type="button" onClick={logout}>Logout</button>
-        {/* <Tabs>
+        { <Tabs>
             <TabList>
                 <Tab>Profile?</Tab>
+                <Profile />
                 <Tab>album page?</Tab>
                 <Tab>Artist page?</Tab>
             </TabList>
@@ -39,6 +41,6 @@ export default function Layout() {
                 <p>artist songs!</p>
                 </TabPanel>
             </TabPanels>
-        </Tabs> */}
+        </Tabs> }
     </>
 }

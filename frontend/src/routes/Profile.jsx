@@ -1,4 +1,9 @@
 import { useParams } from "react-router-dom";
+import TopSongs from "../components/TopSongs";
+import RecentListens from "../components/RecentListens";
+import Histogram from "../components/Histogram";
+import { Box, Image } from '@chakra-ui/react'
+import axios from 'axios';
 
 function Profile() {
   const { id } = useParams() // this is user's id
@@ -6,7 +11,17 @@ function Profile() {
     <div>
       {/* Header for the Profile Page */}
       <h2>User Profile</h2>
-      
+        <Box as="header" height="100vh" width="100vw" bg="0d1117">
+        <Text fontSize="4xl" color="white" textAlign="center">
+
+        </Text>
+        <Image
+          borderRadius='full'
+          boxSize='150px'
+          src='https://bit.ly/dan-abramov'
+          alt='Dan Abramov'
+        />  
+        </Box>
       {/* Placeholder for the profile description */}
       {/* TODO: Display user's profile information */}
       
@@ -18,6 +33,7 @@ function Profile() {
       
       {/* Placeholder for the reviews */}
       {/* TODO: Display user's reviews */}
+
     </div>
   );
 }

@@ -32,7 +32,7 @@ export async function authGateLoader({request}) {
 
 const router = createBrowserRouter([{
     path: "/",
-    element: <Layout/>,
+    element: <Layout />,
     children: [{
       index: true,
       element: <Landing />,
@@ -72,4 +72,5 @@ createRoot(document.getElementById("root")).render(
       <RouterProvider router={router} />
     </StrictMode>
   </ChakraProvider>
+  
 )
