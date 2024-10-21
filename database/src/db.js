@@ -8,7 +8,10 @@ const sql = postgres({
     database             : process.env.DB_NAME, // Name of database to connect to
     username             : process.env.DB_USERNAME, // Username of database user
     password             : process.env.DB_PASSWORD,// Password of database user
-    ssl                  : true
+    ssl                  : true,
+    transform : {
+        undefined: null
+    }
 })
 
 export default sql

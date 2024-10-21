@@ -2,7 +2,11 @@ import { Router } from "express"
 import authRouter from "./auth.js"
 import accountRouter from "./account.js"
 import serviceRouter from "./service/service.js"
-import dataRouter from "./data.js"
+import artistRouter from "./artist.js"
+import albumRouter from "./album.js"
+import songRouter from "./song.js"
+import listenRouter from "./listen.js"
+import userRouter from "./user/user.js"
 
 
 const router = Router()
@@ -10,6 +14,10 @@ const router = Router()
 router.use('/auth', authRouter)
 router.use('/account', accountRouter)
 router.use('/service', serviceRouter)
-router.use('/data', dataRouter)
+router.use('/artist', artistRouter)
+router.use('/album', albumRouter)
+router.use('/song', songRouter)
+router.use('/listen', listenRouter)
+router.use('/user', userRouter)
 
 export default router

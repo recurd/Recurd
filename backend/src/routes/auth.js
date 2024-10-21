@@ -1,7 +1,8 @@
 import { Router } from "express"
 import bcrypt from "bcrypt"
-import sql from '../db/db.js'
-import authGate from '../authGate.js'
+import { getUserByUsername } from "recurd-database/user"
+import { authGate } from '../auth.js'
+import { userSchemaT } from "../schemas/user.js"
 
 const router = Router()
 
@@ -9,19 +10,13 @@ const router = Router()
 // Body: username (string), password (string)
 router.post('/password', async (req, res, next) => {
     try {
-        const username = req.body.username
-        const password = req.body.password
-        if (!username || !password) {
-            res.status(400).json({ "message": "Email or password field missing from request body" })
-            return 
-        }
+        const { username, password } = userSchemaT.pick({ username: true, password: true}).parse(req.body)
 
-        const users = await sql`select * from users where username = ${username}`
-        if (users.count == 0) {
+        const user = await getUserByUsername(username)
+        if (!user) {
             res.status(400).json({ message: 'Incorrect username or password.' })
             return
         }
-        const user = users[0]
 
         const result = await bcrypt.compare(password, user.password)
         if (result) {
@@ -44,6 +39,10 @@ router.post('/password', async (req, res, next) => {
 router.post('/logout', authGate(), (req, res) => {
     delete req.session.user
     res.status(200).end()
+})
+
+router.get('/status', (req, res) => {
+    res.status(200).json({ logged_in: !!req.session.user, user_id: req.session?.user?.id })
 })
 
 export default router
