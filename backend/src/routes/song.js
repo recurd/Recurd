@@ -25,9 +25,11 @@ router.get('/:id/albums', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         const albums = await getSongAlbums(id)
-        res.json(albums)
+        res.status(200).json(albums)
     } catch(e) {
-        next(e)
+        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
+            res.status(400).json({ "message": "Song id is not a valid uuid!" })
+        } else return next(e)
     }
 })
 
@@ -35,7 +37,7 @@ router.get('/:id/ratings', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         const ratings = await getSongRatings(id)
-        res.json(ratings)
+        res.status(200).json(ratings)
     } catch(e) {
         return next(e)
     }
@@ -45,7 +47,7 @@ router.get('/:id/reviews', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         const reviews = await getSongReviews(id)
-        res.json(reviews)
+        res.status(200).json(reviews)
     } catch(e) {
         return next(e)
     }
