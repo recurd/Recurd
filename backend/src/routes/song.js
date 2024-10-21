@@ -25,11 +25,9 @@ router.get('/:id/albums', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         const albums = await getSongAlbums(id)
-        res.status(200).json(albums)
+        res.json(albums)
     } catch(e) {
-        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
-            res.status(400).json({ "message": "Song id is not a valid uuid!" })
-        } else return next(e)
+        next(e)
     }
 })
 
@@ -37,11 +35,9 @@ router.get('/:id/ratings', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         const ratings = await getSongRatings(id)
-        res.status(200).json(ratings)
+        res.json(ratings)
     } catch(e) {
-        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
-            res.status(400).json({ "message": "Song id is not a valid uuid!" })
-        } else return next(e)
+        return next(e)
     }
 })
 
@@ -49,11 +45,9 @@ router.get('/:id/reviews', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         const reviews = await getSongReviews(id)
-        res.status(200).json(reviews)
+        res.json(reviews)
     } catch(e) {
-        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
-            res.status(400).json({ "message": "Song id is not a valid uuid!" })
-        } else return next(e)
+        return next(e)
     }
 })
 
