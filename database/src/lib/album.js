@@ -68,6 +68,23 @@ export async function getAlbumAvgRating(id) {
     return result
 }
 
+export async function getAlbumReviews(id) {
+    const result = await sql`
+        SELECT
+            ao.user_id,
+            ao.time_stamp,
+            ao.rating,
+            ao.review
+        FROM
+            album_opinions ao
+        WHERE
+            ao.album_id = ${id}
+            AND ao.review IS NOT NULL
+        ORDER BY
+            ao.time_stamp DESC`
+    return result
+}
+
 // Old version of album ratings, where we always return an array of { rating: int, count: int }
 // and used SQL to fill in ratings with count of 0. This should not be done on the backend because it is unnecessarily costly.
 // const result = await sql`

@@ -51,8 +51,13 @@ router.get('/:id/average-rating', async (req, res, next) => {
 })
 
 router.get('/:id/reviews', async (req, res, next) => {
-    // const { id } = paramsIdSchema.parse(req.params)
-    res.status(501).end()
+    try {
+        const { id } = paramsIdSchema.parse(req.params)
+        const result = await getAlbumReviews(id)
+        res.status(200).json(result)
+    } catch (e) {
+        return next(e)
+    }
 })
 
 router.get('/:id/top-listeners', async (req, res, next) => {
