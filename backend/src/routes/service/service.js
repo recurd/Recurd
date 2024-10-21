@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { deleteUserService, getUserServiceStatus } from "recurd-database/userService"
+import { deleteUserService, getUserServiceStatus } from "../../../../database/src/lib/userService.js"
 import SpotifyRouter from './spotify.js'
 import { getAuthUser } from '../../auth.js'
 import { userServicesTypeSchema } from "../../schemas/user.js"

@@ -1,6 +1,6 @@
 import { Router } from "express"
 import bcrypt from "bcrypt"
-import { insertUser } from "recurd-database/user"
+import { insertUser } from "../../../database/src/lib/user.js"
 import { DBErrorCodes as DBErrorCodes, isDBError } from '../util.js'
 import { authGate } from "../auth.js"
 import { userSchemaT } from "../schemas/user.js"

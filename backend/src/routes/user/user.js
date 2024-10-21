@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getUserListens } from "recurd-database/user"
+import { getUserListens } from "../../../../database/src/lib/user.js"
 import topRouter from './top.js'
 import { timestampSchemaT, idSchema } from "../../schemas/shared.js"
 

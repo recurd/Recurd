@@ -1,6 +1,6 @@
 import { Router } from "express"
 import bcrypt from "bcrypt"
-import { getUserByUsername } from "recurd-database/user"
+import { getUserByUsername } from "../../../database/src/lib/user.js"
 import { authGate } from '../auth.js'
 import { userSchemaT } from "../schemas/user.js"
 
