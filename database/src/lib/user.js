@@ -128,3 +128,20 @@ export async function getUserListens({ user_id, start_date, end_date, n }) {
         ${!n && n !== 0 ? sql`LIMIT ${n}` : sql``}`
     return listens
 }
+
+export async function getUserProfile(user_id) {
+    const [user] = await sql`
+        SELECT 
+            u.id,
+            u.username,
+            u.display_name,
+            u.image,
+            u.stats,
+            (SELECT COUNT(follower) FROM user_followers WHERE followee = u.id) as follower_count,
+            (SELECT COUNT(followee) FROM user_followers WHERE follower = u.id) as following_count
+        FROM users u
+        WHERE u.id = ${user_id}
+    `
+
+    return user
+}
