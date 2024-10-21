@@ -7,13 +7,16 @@ import { timestampSchemaT, idSchema } from "../../schemas/shared.js"
 const router = Router({mergeParams: true})
 
 router.get('/:user_id/profile', async (req, res, next) => {
-    // TODO: implement
     try {
         const user_id = idSchema.parse(req.params.user_id)
+        const profile = await getUserProfile(user_id)
+        if (!profile) {
+            return res.status(404).json({ error: "User not found" })
+        }
+        res.status(200).json(profile)
     } catch(e) {
-        return next(e)
+        next(e)
     }
-    res.status(501).end()
 })
 
 router.use('/:user_id/top', topRouter)
