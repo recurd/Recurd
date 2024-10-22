@@ -6,11 +6,13 @@ import {
     FormLabel
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
+import { useErrorBoundary } from "react-error-boundary"
 import backend from '../backend.js'
 
 export default function LoginForm() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const { showBoundary } = useErrorBoundary()
     const navigate = useNavigate()
 
     async function handleLogin() {
@@ -31,6 +33,7 @@ export default function LoginForm() {
             } else if (err.requestSent) {
                 console.log("Server timed out!")
             }
+            showBoundary(err)
         }
     }
 

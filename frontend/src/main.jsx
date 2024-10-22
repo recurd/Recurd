@@ -64,7 +64,7 @@ const router = createBrowserRouter([{
 createRoot(document.getElementById("root")).render(
   <ChakraProvider>
     <StrictMode>
-      <RouterProvider router={router} />
+        <RouterProvider router={router} />
     </StrictMode>
   </ChakraProvider>
 )

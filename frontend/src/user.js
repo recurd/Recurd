@@ -15,9 +15,9 @@ async function getStatus() {
 }
 
 export async function isLoggedIn() {
-    return (await getStatus()).logged_in
+    return (await getStatus())?.logged_in ?? false
 }
 
 export async function getID() {
-    return (await getStatus()).user_id
+    return (await getStatus())?.user_id
 }
