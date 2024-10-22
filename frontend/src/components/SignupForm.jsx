@@ -22,6 +22,12 @@ export default function SignupForm() {
                 password: password
             })
 
+            // log in
+            await backend.post('/auth/password', {
+                username: username,
+                password: password
+            })
+
             // Get url params for path to redirect back to
             const url = new URL(window.location.href)
             const redirPath = url.searchParams.get("from") ?? '/' // default to main page

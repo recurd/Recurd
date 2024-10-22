@@ -22,7 +22,7 @@ router.post('/create/password',
         try {
             const { username, password, display_name } = userSchemaT
                 .pick({ username: true, password: true})
-                .extend({ display_name: z.string().nullish() })
+                .extend({ display_name: z.string().nullish().transform(e => e == '' ? null : e) })
                 .parse(req.body)
 
             const hash = await bcrypt.hash(password, 10)
