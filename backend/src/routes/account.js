@@ -1,5 +1,6 @@
 import { Router } from "express"
 import bcrypt from "bcrypt"
+import z from "zod"
 import { insertUser } from "recurd-database/user"
 import { DBErrorCodes as DBErrorCodes, isDBError } from '../util.js'
 import { authGate } from "../auth.js"
@@ -19,13 +20,16 @@ router.post('/create/password',
     }),
     async (req, res, next) => {
         try {
-            const { username, password } = userSchemaT.pick({ username: true, password: true}).parse(req.body)
+            const { username, password, display_name } = userSchemaT
+                .pick({ username: true, password: true})
+                .extend({ display_name: z.string().nullish() })
+                .parse(req.body)
 
             const hash = await bcrypt.hash(password, 10)
             const dbRes = await insertUser({ 
                 username: username,
                 password: hash,
-                display_name: username
+                display_name: display_name ?? username
             })
 
             if (dbRes.count == 0) {

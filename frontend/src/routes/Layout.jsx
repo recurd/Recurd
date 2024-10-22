@@ -1,4 +1,5 @@
 import { Outlet, useNavigate } from 'react-router-dom'
+import { Button } from '@chakra-ui/react'
 import backend from '../backend.js'
 // import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 
@@ -7,7 +8,7 @@ export default function Layout() {
     async function logout() {
         try {
             await backend.post('/auth/logout')
-            navigate('/login')
+            navigate('/')
           } catch (err) {
             // TODO: display error message
             if (err.serverResponds) {
@@ -20,7 +21,7 @@ export default function Layout() {
 
     return <>
         <Outlet />
-        <button type="button" onClick={logout}>Logout</button>
+        <Button type="button" onClick={logout}>Logout</Button>
         {/* <Tabs>
             <TabList>
                 <Tab>Profile?</Tab>

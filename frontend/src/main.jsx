@@ -8,8 +8,7 @@ import './assets/css/index.css'
 import { ChakraProvider } from '@chakra-ui/react'
 import { redirect } from 'react-router-dom'
 import Layout from './routes/Layout'
-import Login, { loginPageLoader } from './routes/Login'
-import Landing from './routes/Landing.jsx'
+import Landing, { landingPageLoader } from './routes/Landing.jsx'
 import Artist from './routes/Artist.jsx'
 import Album from './routes/Album.jsx'
 import Song from './routes/Song.jsx'
@@ -36,11 +35,7 @@ const router = createBrowserRouter([{
     children: [{
       index: true,
       element: <Landing />,
-      loader: authGateLoader,
-    }, {
-      path: "login",
-      element: <Login/>,
-      loader: loginPageLoader
+      loader: landingPageLoader,
     }, {
       path: "settings",
       element: <Settings />,
