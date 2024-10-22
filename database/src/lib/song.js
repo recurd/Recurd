@@ -53,3 +53,19 @@ export async function getSongReviews(id) {
     `
     return result
 }
+
+export async function getTopListeners(id) {
+    const result = await sql`
+        SELECT
+            l.user_id,
+            COUNT(l.id) AS listen_count
+        FROM 
+            listens l
+        WHERE 
+            l.song_id = ${id}
+        GROUP BY 
+            l.user_id
+        ORDER BY 
+            listen_count DESC`
+    return result
+}

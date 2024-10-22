@@ -59,3 +59,21 @@ export async function getArtistSongs(id, limit) {
                 sql`LIMIT ${limit}` : sql``}`
     return result
 }
+
+export async function getTopListeners(id) {
+    const result = await sql`
+        SELECT
+            l.user_id,
+            COUNT(l.id) AS listen_count
+        FROM 
+            listens l
+        JOIN 
+            artist_songs ars ON l.song_id = ars.song_id
+        WHERE 
+            ars.artist_id = ${id}
+        GROUP BY 
+            l.user_id
+        ORDER BY 
+            listen_count DESC`
+    return result
+}

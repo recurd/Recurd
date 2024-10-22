@@ -85,6 +85,24 @@ export async function getAlbumReviews(id) {
     return result
 }
 
+export async function getTopListeners(id) {
+    const result = await sql`
+        SELECT
+            l.user_id,
+            COUNT(l.id) AS listen_count
+        FROM 
+            listens l
+        JOIN 
+            album_songs abs ON l.song_id = abs.song_id
+        WHERE 
+            abs.album_id = ${id}
+        GROUP BY 
+            l.user_id
+        ORDER BY 
+            listen_count DESC`
+    return result
+}
+
 // Old version of album ratings, where we always return an array of { rating: int, count: int }
 // and used SQL to fill in ratings with count of 0. This should not be done on the backend because it is unnecessarily costly.
 // const result = await sql`
