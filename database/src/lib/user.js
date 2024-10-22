@@ -125,7 +125,7 @@ export async function getUserListens({ user_id, start_date, end_date, n }) {
         ORDER BY
             l.id, time_stamp, a.id 
             DESC
-        ${!n && n !== 0 ? sql`LIMIT ${n}` : sql``}`
+        ${n ? sql`LIMIT ${n}` : sql``}`
     return listens
 }
 

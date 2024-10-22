@@ -54,18 +54,27 @@ export async function getSongReviews(id) {
     return result
 }
 
-export async function getTopListeners(id) {
+export async function getTopListeners({ id, start_date, end_date, n }) {
     const result = await sql`
         SELECT
-            l.user_id,
+            l.user_id as id,
+            u.display_name as display_name,
+            u.image as image,
             COUNT(l.id) AS listen_count
         FROM 
             listens l
+        JOIN
+            users u ON l.user_id = u.id
         WHERE 
             l.song_id = ${id}
+            AND l.time_stamp 
+                ${start_date ? 
+                    sql`BETWEEN ${start_date} AND ${end_date}` : 
+                    sql`<= ${end_date}`}
         GROUP BY 
-            l.user_id
+            l.user_id, u.id
         ORDER BY 
-            listen_count DESC`
+            listen_count DESC
+        ${n ? sql`LIMIT ${n}` : sql``}`
     return result
 }
