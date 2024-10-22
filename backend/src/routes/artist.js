@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getArtist, getArtistAlbums, getArtistSongs } from "../../../database/src/lib/artist.js"
+import { getArtist, getArtistAlbums, getArtistSongs, getTopListeners } from "../../../database/src/lib/artist.js"
 import { DBErrorCodes, isDBError } from "../util.js"
 import { idSchema } from "../schemas/shared.js"
 
@@ -51,8 +51,13 @@ router.get('/:id/songs', async (req, res, next) => {
 })
 
 router.get('/:id/top-listeners', async (req, res, next) => {
-    // const { id } = paramsIdSchema.parse(req.params)
-    res.status(501).end()
+    try {
+        const { id } = paramsIdSchema.parse(req.params)
+        const result = await getTopListeners(id)
+        res.status(200).json(result)
+    } catch (e) {
+        return next(e)
+    }
 })
 
 export default router
