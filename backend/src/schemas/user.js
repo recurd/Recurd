@@ -2,7 +2,7 @@ import { z } from "zod"
 import { coerceStrSchemaT, urlSchema, nonEmptyStrSchema, timestampSchemaT, idSchema } from "./shared.js"
 
 export const userSchemaT = z.object({
-    username: nonEmptyStrSchema,
+    username: nonEmptyStrSchema.regex(/^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/),
     password: coerceStrSchemaT,
     display_name: nonEmptyStrSchema,
     image: urlSchema.nullish()
