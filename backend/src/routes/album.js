@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getAlbum, getAlbumRatings, getAlbumAvgRating, getAlbumTracks, getAlbumReviews, getTopListeners } from "../../../database/src/lib/album.js"
+import { getAlbum, getAlbumRatings, getAlbumAvgRating, getAlbumTracks, getAlbumReviews, getTopListeners } from "recurd-database/album"
 import { idSchema, timestampPaginationSchemaT } from "../schemas/shared.js"
 
 const router = Router()

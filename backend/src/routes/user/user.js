@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { getUserListens, getUserProfile } from "../../../../database/src/lib/user.js"
+import { getUserListens, getUserProfile } from "recurd-database/user"
 import topRouter from './top.js'
 import { timestampPaginationSchemaT, idSchema } from "../../schemas/shared.js"
 

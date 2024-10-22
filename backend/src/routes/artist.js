@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getArtist, getArtistAlbums, getArtistSongs, getTopListeners } from "../../../database/src/lib/artist.js"
+import { getArtist, getArtistAlbums, getArtistSongs, getTopListeners } from "recurd-database/artist"
 import { DBErrorCodes, isDBError } from "../util.js"
 import { idSchema, timestampPaginationSchemaT } from "../schemas/shared.js"
 
