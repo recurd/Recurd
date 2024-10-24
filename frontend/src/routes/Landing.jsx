@@ -1,16 +1,42 @@
-import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
-import { getID } from "../user.js"
+import { redirect } from 'react-router-dom'
+import { 
+  Tabs, 
+  TabList, 
+  TabPanels, 
+  Tab, 
+  TabPanel
+} from '@chakra-ui/react'
+import { getID, isLoggedIn } from '../user.js'
+import LoginForm from '../components/LoginForm.jsx'
+import SignupForm from '../components/SignupForm.jsx'
 
-export default function Layout() {
-    const [userID, setUserID] = useState('')
-    useEffect(()=>{
-        (async () => setUserID(await getID()))()
-    }, [])
-
-    return <>
-        <h1>This is the landing page</h1>
-
-        <Link to={'/profile/:'+userID}>Link to user&apos;s profile (dont change this page for now)</Link>
-        </>
+export async function landingPageLoader({request}) {
+  const loggedIn = await isLoggedIn()
+  if (loggedIn)  {
+      const pathTo = new URL(request.url).searchParams.get("from")
+      return redirect(pathTo ?? '/profile/'+await getID()) // TODO: better redirect than this
+  }
+  return null
 }
+
+function Login() {
+
+  return (
+    <Tabs>
+      <TabList>
+        <Tab>Login</Tab>
+        <Tab>Sign Up</Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel>
+          <LoginForm />
+        </TabPanel>
+        <TabPanel>
+          <SignupForm />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  )
+}
+
+export default Login;
