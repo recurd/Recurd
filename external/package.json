@@ -7,6 +7,7 @@
     ".": "./dist/src/index.js"
   },
   "scripts": {
+    "cron": "npx --clean tsc ; node --experimental-specifier-resolution=node dist/src/updater/Crons.js",
     "test": "node ./test/test.js",
     "test_depr": "node --experimental-specifier-resolution=node ./test/test.js"
   },
@@ -14,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "buffer": "^6.0.3",
+    "cron": "^3.1.7",
     "dotenv": "^16.4.5",
     "recurd-database": "file:../database"
   },

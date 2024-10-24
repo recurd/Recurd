@@ -2,6 +2,8 @@ import postgres from 'postgres'
 import dotenv from 'dotenv'
 dotenv.config()
 
+console.log(process.env)
+
 const sql = postgres({
     host                 : process.env.DB_HOST, // Postgres ip address[s] or domain name[s]
     port                 : process.env.DB_PORT, // Postgres server port[s]

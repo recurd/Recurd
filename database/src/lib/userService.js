@@ -111,3 +111,28 @@ export async function deleteUserService(user_id, service_type) {
                         service_type = ${service_type})`
     return result.count > 0
 }
+
+// get a list of all users connected to particular service
+// minSeconds is the minimum number of seconds have pasted since the user's service was last updated
+// All services which are within the range of minSeconds won't be returned
+// forEachRow is an async callback function with the parameter of a singular row
+export async function getUserServicesForUpdate(service_type, minSeconds, forEachRow) {
+    await sql`
+        SELECT
+            *
+        FROM
+            user_services
+        WHERE
+            service_id =
+                (SELECT
+                    id
+                FROM
+                    user_services_t
+                WHERE
+                    service_type = ${service_type})
+            AND last_updated 
+                NOT BETWEEN (NOW() - interval '${minSeconds} seconds') AND NOW()`
+            .cursor(async([row]) => {
+                await forEachRow(row)
+            })
+}
