@@ -1,8 +1,8 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getArtist, getArtistAlbums, getArtistSongs } from "recurd-database/artist"
+import { getArtist, getArtistAlbums, getArtistSongs, getTopListeners } from "recurd-database/artist"
 import { DBErrorCodes, isDBError } from "../util.js"
-import { idSchema } from "../schemas/shared.js"
+import { idSchema, timestampPaginationSchemaT } from "../schemas/shared.js"
 
 const router = Router()
 
@@ -51,8 +51,19 @@ router.get('/:id/songs', async (req, res, next) => {
 })
 
 router.get('/:id/top-listeners', async (req, res, next) => {
-    // const { id } = paramsIdSchema.parse(req.params)
-    res.status(501).end()
+    try {
+        const { id } = paramsIdSchema.parse(req.params)
+        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.body)
+        const result = await getTopListeners({
+            id: id,
+            start_date: start_date,
+            end_date: end_date,
+            n: n
+        })
+        res.status(200).json(result)
+    } catch (e) {
+        return next(e)
+    }
 })
 
 export default router

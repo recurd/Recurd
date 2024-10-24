@@ -68,6 +68,50 @@ export async function getAlbumAvgRating(id) {
     return result
 }
 
+export async function getAlbumReviews(id) {
+    const result = await sql`
+        SELECT
+            ao.user_id,
+            ao.time_stamp,
+            ao.rating,
+            ao.review
+        FROM
+            album_opinions ao
+        WHERE
+            ao.album_id = ${id}
+            AND ao.review IS NOT NULL
+        ORDER BY
+            ao.time_stamp DESC`
+    return result
+}
+
+export async function getTopListeners({ id, start_date, end_date, n }) {
+    const result = await sql`
+        SELECT
+            l.user_id as id,
+            u.display_name as display_name,
+            u.image as image,
+            COUNT(l.id) AS listen_count
+        FROM 
+            listens l
+        JOIN 
+            album_songs abs ON l.song_id = abs.song_id
+        JOIN
+            users u ON l.user_id = u.id
+        WHERE 
+            abs.album_id = ${id}
+            AND l.time_stamp 
+                ${start_date ? 
+                    sql`BETWEEN ${start_date} AND ${end_date}` : 
+                    sql`<= ${end_date}`}
+        GROUP BY 
+            l.user_id, u.id
+        ORDER BY 
+            listen_count DESC
+        ${n ? sql`LIMIT ${n}` : sql``}`
+    return result
+}
+
 // Old version of album ratings, where we always return an array of { rating: int, count: int }
 // and used SQL to fill in ratings with count of 0. This should not be done on the backend because it is unnecessarily costly.
 // const result = await sql`
