@@ -4,7 +4,7 @@
   "description": "",
   "type": "module",
   "exports": {
-    "./*": "./src/lib/*.js"
+    "*": "./src/index.js"
   },
   "author": "",
   "license": "ISC",
