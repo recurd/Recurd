@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getUserTopAlbums, getUserTopArtists, getUserTopSongs } from "recurd-database/user"
+import Database from "../../db.js"
 import { timestampSchemaT, idSchema } from "../../schemas/shared.js"
 
 const router = Router({mergeParams: true})
@@ -20,7 +20,7 @@ router.get('/artists', async (req, res, next) => {
         const user_id = idSchema.parse(req.params.user_id)
         const { start_date, end_date, n } = topSchemaT.parse(req.body)
 
-        const topArtists = await getUserTopArtists({
+        const topArtists = await Database.User.getTopArtists({
             user_id: user_id,
             start_date: start_date,
             end_date: end_date,
@@ -38,7 +38,7 @@ router.get('/albums', async (req, res, next) => {
         const user_id = idSchema.parse(req.params.user_id)
         const { start_date, end_date, n } = topSchemaT.parse(req.body)
 
-        const topAlbums = await getUserTopAlbums({
+        const topAlbums = await Database.User.getTopAlbums({
             user_id: user_id,
             start_date: start_date,
             end_date: end_date,
@@ -57,7 +57,7 @@ router.get('/songs', async (req, res, next) => {
         const user_id = idSchema.parse(req.params.user_id)
         const { start_date, end_date, n } = topSchemaT.parse(req.body)
 
-        const topSongs = await getUserTopSongs({
+        const topSongs = await Database.User.getTopSongs({
             user_id: user_id,
             start_date: start_date,
             end_date: end_date,

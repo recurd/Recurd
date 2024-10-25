@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { insertListenById, insertListen } from "recurd-database/listen"
+import Database from "../db.js"
 import { authGate, getAuthUser } from "../auth.js"
 import { albumSchemaT, artistSchema, songSchema, trackSchema } from "../schemas/metadata.js"
 import { coerceStrSchemaT, timestampSchemaT, idSchema } from "../schemas/shared.js"
@@ -17,7 +17,7 @@ router.post('/log-by-id', authGate(), async (req, res, next) => {
         const { song_id, time_stamp } = inputSchemaT.parse(req.body)
         const user_id = getAuthUser(req).id
 
-        const result = await insertListenById({ user_id, song_id, time_stamp })
+        const result = await Database.Listen.insertById({ user_id, song_id, time_stamp })
         res.status(200).json(result)
     } catch (e) {
         return next(e)
@@ -66,7 +66,7 @@ router.post('/log', authGate(), async (req, res, next) => {
             time_stamp
         } = inputSchemaT.parse(req.body)
 
-        const result = await insertListen({
+        const result = await Database.Listen.insertByData({
             user_id: user_id,
             time_stamp: time_stamp,
             song: { ...song_metadata, name: song_name },
