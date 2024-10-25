@@ -1,11 +1,11 @@
 import postgres from 'postgres'
-import User from './lib/User'
-import UserService from './lib/UserService'
-import Listen from './lib/Listen'
-import Metadata from './lib/Metadata'
-import Artist from './lib/Artist'
-import Album from './lib/Album'
-import Song from './lib/Song'
+import User from './lib/User.js'
+import UserService from './lib/UserService.js'
+import Listen from './lib/Listen.js'
+import Metadata from './lib/Metadata.js'
+import Artist from './lib/Artist.js'
+import Album from './lib/Album.js'
+import Song from './lib/Song.js'
 
 export default function db({ host, port, database, username, password }) {
     const sql = postgres({

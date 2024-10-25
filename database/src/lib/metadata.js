@@ -12,7 +12,7 @@ export default class Metadata {
     async findOrInsertSongArtistAlbum(data) {
         // Need to be in a transaction to execute #findOrInsertSongArtistAlbum()
         const result = await this.#sql.begin(async sqlTxact => {
-            return await this.#findOrInsertSongArtistAlbum(data, sqlTxact)
+            return await this.#findOrInsertSongArtistAlbumTxact(data, sqlTxact)
         })
         return result
     }
@@ -24,7 +24,7 @@ export default class Metadata {
     // Param albumArtists (Optional): an array of at least one element, each artist must contain 'name' field
     // Returned: song and album objects,
     // all objects (however nested) has 'found' field that is true iff the object was found in DB
-    async #findOrInsertSongArtistAlbum({ song, trackInfo, songArtists, album, albumArtists }, sqlTxact) {
+    async #findOrInsertSongArtistAlbumTxact({ song, trackInfo, songArtists, album, albumArtists }, sqlTxact) {
         const outSong = await this.#findOrInsertSong({ song: song, songArtists }, sqlTxact)
         // if album input does not exist, return
         if (!album) {

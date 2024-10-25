@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { z } from "zod"
 import dotenv from 'dotenv'
-import { insertUserService } from "recurd-database/userService"
+import Database from "../../db.js"
 import { authGate, getAuthUser } from "../../auth.js"
 dotenv.config()
 
@@ -42,7 +42,7 @@ router.post('/connect', async (req, res, next) => {
         const user_id = getAuthUser(req).id
         const expires_at = new Date(Date.now()+expires_in * 1000) // add to current epoch time (milliseconds). expires_in is in seconds
 
-        const success = await insertUserService({
+        const success = await Database.UserService.insert({
             user_id,
             service_type : 'spotify',
             access_token : access_token,

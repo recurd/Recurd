@@ -25,7 +25,7 @@ export default class Listen {
 
     async insertByData({ user_id, time_stamp, song, trackInfo, songArtists, album, albumArtists }) {
         const result = await this.#sql.begin(async sqlTxact => {
-            const { song: outSong, album: outAlbum } = await this.#metadata.findOrInsertSongArtistAlbum({
+            const { song: outSong, album: outAlbum } = await this.#metadata.findOrInsertSongArtistAlbumTxact({
                     song,
                     trackInfo,
                     songArtists,

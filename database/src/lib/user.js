@@ -22,18 +22,8 @@ export default class User {
         return user
     }
 
-    async getProfileByUsername(username) {
-        const [user] = await this.#sql`
-            SELECT 
-                u.id,
-                u.username,
-                u.display_name,
-                u.image,
-                u.stats,
-                (SELECT COUNT(follower) FROM user_followers WHERE followee = u.id) as follower_count,
-                (SELECT COUNT(followee) FROM user_followers WHERE follower = u.id) as following_count
-            FROM users u
-            WHERE username = ${username}`
+    async getByUsername(username) {
+        const [user] = await this.#sql`SELECT * FROM users WHERE username = ${username}`
         return user
     }
 
