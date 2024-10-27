@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import backend from '../backend.js'; // Using the pre-configured backend
 
-import css from "../assets/css/components/listen_item.module.css"
+import { SiHeadphonezone } from "react-icons/si";
 import ListenItem from './ListenItem.jsx';
+import { Box, Icon } from '@chakra-ui/react';
 
 export default function RecentListens({ user_id }) {
   const [recentTracks, setRecentTracks] = useState([]); // Use mock data instead of fetching from API
@@ -25,14 +26,16 @@ export default function RecentListens({ user_id }) {
   }, []);
 
   return (
-    <div className={css['recent-listens']}>
-      <h2>Recent Listens</h2>
-      <div className={css['track-list']}>
+    <Box>
+      <Box as="h2" fontSize='1.5rem' marginBottom="2em">
+          <Icon>
+          <SiHeadphonezone/></Icon> Recent Listens</Box>
+      <Box>
         {recentTracks.map(listen =>
             <ListenItem key={listen.id} listen={listen}/>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 
