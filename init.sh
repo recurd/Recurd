@@ -7,3 +7,5 @@
 for d in ./*/ ; do 
     (cd "$d" && npm i);
 done
+
+cd "external" && npm run build
