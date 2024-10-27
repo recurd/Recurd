@@ -70,18 +70,22 @@ router.get('/:user_id/currently-listening', async (req, res, next) => {
     }
 })
 
+// TEMPORARY ROUTE, will change once we implement cron jobs
 router.get('/:user_id/recent-listens-temp', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
         const services = await Database.User.getServices(user_id)
+        const listens = []
         for (const s_type of services) {
             const service = await External.findService(s_type, user_id)
             if (!service) {
                 console.error(`recurd-external cannot find service ${s_type} for a user when it should exist`)
                 continue
             }
+            const slistens = await service.getRecentListens()
+            if(slistens.length > 0) listens.push(slistens)
         }
-        req.status(501).end()
+        res.status(200).json({ listens: listens }).end()
     } catch(e) {
         return next(e)
     }

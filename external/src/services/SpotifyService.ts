@@ -98,10 +98,10 @@ export class SpotifyService implements Service {
         return { track: retSong, is_paused: !spRes.is_playing }
     }
 
-    async getRecentListens() : Promise<{ listens: any[] }> {
+    async getRecentListens() : Promise<any[]> {
         const user_service = await Database.UserService.get(this.user_id, ServiceType.SPOTIFY)
         if (!user_service) {
-            console.error("User service not found when getting recent listens!")
+            throw new Error("User service not found when getting recent listens!")
         }
         const last_fetch_timestamp = user_service.last_updated
 
@@ -113,13 +113,10 @@ export class SpotifyService implements Service {
         else if (!res.success) {
             throw new Error(res.result)
         }
+
         // cache current time for later
         const now = Date.now()
-
         const spRes = res.result
-        if (!spRes) {
-            return { listens: [] }
-        }
 
         // For each listen, format it and insert it into database
         const listens: any[] = []
@@ -130,20 +127,14 @@ export class SpotifyService implements Service {
                 ...songNMtdt
             })
             listens.push(listen)
-            console.log(listen)
         }
 
         // New fetch timestamp will be the time that the user finishes the last song 
         // (according to Spotify) or current time (if Spotify didn't provide the info)
-        const spotify_new_fetch_tstp = spRes?.cursors?.after ? parseInt(spRes?.cursors?.after) : undefined
+        const spotify_new_fetch_tstp = spRes?.cursors?.after ? parseInt(spRes.cursors.after) : undefined
         const new_fetch_timestamp = new Date(spotify_new_fetch_tstp ?? now)
-        const updSuccess = await Database.UserService.setLastUpdated(this.user_id, ServiceType.SPOTIFY, new_fetch_timestamp)
-        if (!updSuccess) {
-            console.error("Failed to update user service's last updated timestamp!")
-            // What do we do??
-        }
-        return {
-            listens: listens
-        }
+        // No await here as we don't need to wait for this to return
+        Database.UserService.setLastUpdated(this.user_id, ServiceType.SPOTIFY, new_fetch_timestamp)
+        return listens
     }
 }
