@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getAlbum, getAlbumRatings, getAlbumAvgRating, getAlbumTracks } from "recurd-database/album"
-import { idSchema } from "../schemas/shared.js"
+import Database from "../db.js"
+import { idSchema, timestampPaginationSchemaT } from "../schemas/shared.js"
 
 const router = Router()
 
@@ -10,7 +10,7 @@ const paramsIdSchema = z.object({ id: idSchema })
 router.get('/:id', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
-        const result = await getAlbum(id)
+        const result = await Database.Album.get(id)
         res.json(result)
     } catch(e) {
         return next(e)
@@ -21,7 +21,7 @@ router.get('/:id', async (req, res, next) => {
 router.get('/:id/tracks', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
-        const result = await getAlbumTracks(id)
+        const result = await Database.Album.getTracks(id)
         res.json(result)
     } catch(e) {
         return next(e)
@@ -33,7 +33,7 @@ router.get('/:id/tracks', async (req, res, next) => {
 router.get('/:id/ratings', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
-        const result = await getAlbumRatings(id)
+        const result = await Database.Album.getRatings(id)
         res.status(200).json(result)
     } catch (e) {
         return next(e)
@@ -43,7 +43,7 @@ router.get('/:id/ratings', async (req, res, next) => {
 router.get('/:id/average-rating', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
-        const result = await getAlbumAvgRating(id)
+        const result = await Database.Album.getAvgRating(id)
         res.status(200).json(result)
     } catch (e) {
         return next(e)
@@ -51,13 +51,29 @@ router.get('/:id/average-rating', async (req, res, next) => {
 })
 
 router.get('/:id/reviews', async (req, res, next) => {
-    // const { id } = paramsIdSchema.parse(req.params)
-    res.status(501).end()
+    try {
+        const { id } = paramsIdSchema.parse(req.params)
+        const result = await Database.Album.getReviews(id)
+        res.status(200).json(result)
+    } catch (e) {
+        return next(e)
+    }
 })
 
 router.get('/:id/top-listeners', async (req, res, next) => {
-    // const { id } = paramsIdSchema.parse(req.params)
-    res.status(501).end()
+    try {
+        const { id } = paramsIdSchema.parse(req.params)
+        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.body)
+        const result = await Database.Album.getTopListeners({
+            id: id,
+            start_date: start_date,
+            end_date: end_date,
+            n: n
+        })
+        res.status(200).json(result)
+    } catch (e) {
+        return next(e)
+    }
 })
 
 export default router
