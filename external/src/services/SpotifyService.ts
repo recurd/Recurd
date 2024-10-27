@@ -98,7 +98,13 @@ export class SpotifyService implements Service {
         return { track: retSong, is_paused: !spRes.is_playing }
     }
 
-    async getRecentListens(last_fetch_timestamp: Date | undefined) : Promise<{ listens: any[] }> {
+    async getRecentListens() : Promise<{ listens: any[] }> {
+        const user_service = await Database.UserService.get(this.user_id, ServiceType.SPOTIFY)
+        if (!user_service) {
+            console.error("User service not found when getting recent listens!")
+        }
+        const last_fetch_timestamp = user_service.last_updated
+
         let res = await Spotify.fetchRecentlyPlayedTracks(this.#access_token, last_fetch_timestamp)
         if (!res.success && res.retry) {
             this.refreshToken() // would throw

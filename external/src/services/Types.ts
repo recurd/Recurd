@@ -14,7 +14,7 @@ export interface Service {
     getCurrentlyListening(): Promise<{ track: any, is_paused?: boolean }>
 
     // Fetches the recent listens from the service, and stores its metadata alongside the listens in the database
-    getRecentListens(last_fetch_timestamp: Date | undefined): Promise<{ listens: any[] }>
+    getRecentListens(): Promise<{ listens: any[] }>
 }
 
 export enum ServiceType {

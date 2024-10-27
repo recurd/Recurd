@@ -1,4 +1,4 @@
-export default class User {
+export default class UserService {
     #sql
 
     constructor(sql) {
