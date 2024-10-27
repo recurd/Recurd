@@ -1,14 +1,4 @@
-import {
-    insertUserService,
-    getUserService,
-    setUserServiceLastUpdated
-} from 'recurd-database/userService'
-import {
-    findOrInsertSongArtistAlbum
-} from 'recurd-database/metadata'
-import {
-    insertListen
-} from 'recurd-database/listen'
+import Database from '../db.js'
 import * as Spotify from '../api/Spotify.js'
 import { Service, ServiceFactory, ServiceType } from './Types.js'
 import Formatter from '../formatter/SpotifyFormatter.js'
@@ -24,7 +14,7 @@ export class SpotifyServiceFactory implements ServiceFactory<SpotifyService> {
 
         const { access_token, refresh_token, expires_at	} = Formatter.formatTokens(result.result)
 
-        const success = await insertUserService({
+        const success = await Database.UserService.insert({
             user_id,
             service_type : ServiceType.SPOTIFY,
             access_token : access_token,
@@ -38,7 +28,7 @@ export class SpotifyServiceFactory implements ServiceFactory<SpotifyService> {
     }
 
     async fromDatabase(user_id: string) {
-        const service = await getUserService(user_id, ServiceType.SPOTIFY)
+        const service = await Database.UserService.get(user_id, ServiceType.SPOTIFY)
         if (!service) {
             // User ${user_id} not connected to this service of type: ${ServiceType.SPOTIFY}
             return undefined
@@ -68,7 +58,7 @@ export class SpotifyService implements Service {
         // Special case: refresh_token may be null here 
         // if we accidentally request a refresh but access token hasn't expired
         // Not sure how it happens but sometimes Spotify sends back 401 unauthorized which triggers this refresh
-        const dbRes = await insertUserService({
+        const dbRes = await Database.UserService.insert({
             user_id: this.user_id,
             service_type : ServiceType.SPOTIFY,
             access_token : access_token,
@@ -104,7 +94,7 @@ export class SpotifyService implements Service {
 
         // Format spotify API returned result to be in our DB format
         const songNMtdt = Formatter.formatTrackToMetadatas(spRes.item)
-        const { song: retSong, album: _ } = await findOrInsertSongArtistAlbum(songNMtdt)
+        const { song: retSong, album: _ } = await Database.Metadata.findOrInsertSongArtistAlbum(songNMtdt)
         return { track: retSong, is_paused: !spRes.is_playing }
     }
 
@@ -125,21 +115,23 @@ export class SpotifyService implements Service {
             return { listens: [] }
         }
 
+        // For each listen, format it and insert it into database
         const listens: any[] = []
         for (const track of spRes?.items) {
             const songNMtdt = Formatter.formatPlayHistoryObject(track)
-            const listen = await insertListen({
+            const listen = await Database.Listen.insertByData({
                 user_id: this.user_id,
                 ...songNMtdt
             })
             listens.push(listen)
+            console.log(listen)
         }
 
         // New fetch timestamp will be the time that the user finishes the last song 
         // (according to Spotify) or current time (if Spotify didn't provide the info)
         const spotify_new_fetch_tstp = spRes?.cursors?.after ? parseInt(spRes?.cursors?.after) : undefined
         const new_fetch_timestamp = new Date(spotify_new_fetch_tstp ?? now)
-        const updSuccess = await setUserServiceLastUpdated(this.user_id, ServiceType.SPOTIFY, new_fetch_timestamp)
+        const updSuccess = await Database.UserService.setLastUpdated(this.user_id, ServiceType.SPOTIFY, new_fetch_timestamp)
         if (!updSuccess) {
             console.error("Failed to update user service's last updated timestamp!")
             // What do we do??

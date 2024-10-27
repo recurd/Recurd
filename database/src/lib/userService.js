@@ -79,6 +79,26 @@ export default class User {
         return dbRes.count > 0
     }
 
+    // return true for updating successfully
+    async setLastUpdated(user_id, service_type, last_updated) {
+        const result = await this.#sql`
+            UPDATE
+                user_services us
+            SET 
+                last_updated = ${last_updated}
+            WHERE 
+                user_id = ${user_id}
+                AND service_id = ( 
+                    SELECT 
+                        id 
+                    FROM 
+                        user_services_t ut 
+                    WHERE 
+                        ut.service_type = ${service_type}
+                )`
+        return result.count > 0
+    }
+
     // returns true if user's service was deleted, false if user wasn't connected to the service
     async delete(user_id, service_type) {
         const result = await this.#sql`
