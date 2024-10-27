@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { deleteUserService, getUserServiceStatus } from "recurd-database/userService"
+import Database from "../../db.js"
 import SpotifyRouter from './spotify.js'
 import { authGate, getAuthUser } from '../../auth.js'
 import { userServicesTypeSchema } from "../../schemas/user.js"
@@ -18,7 +18,7 @@ router.get('/:type/status/', authGate(), async (req, res, next) => {
             type: userServicesTypeSchema
         }).parse(req.params)
 
-        const result = await getUserServiceStatus(user_id, type)
+        const result = await Database.UserService.getStatus(user_id, type)
         res.status(200).json({ connected: result })
     } catch (e) {
         return next(e)
@@ -32,7 +32,7 @@ router.delete('/:type/disconnect', authGate(), async (req, res, next) => {
             type: userServicesTypeSchema
         }).parse(req.params)
         const user_id = getAuthUser(req).id
-        const result = await deleteUserService(user_id, type)
+        const result = await Database.UserService.delete(user_id, type)
         res.status(200).json({ disconnected: result })
     } catch (e) {
         return next(e)

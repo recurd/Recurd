@@ -1,6 +1,6 @@
 import { Router } from "express"
 import bcrypt from "bcrypt"
-import { getUserByUsername } from "recurd-database/user"
+import Database from "../db.js"
 import { authGate } from '../auth.js'
 import { userSchemaT } from "../schemas/user.js"
 
@@ -12,7 +12,7 @@ router.post('/password', async (req, res, next) => {
     try {
         const { username, password } = userSchemaT.pick({ username: true, password: true}).parse(req.body)
 
-        const user = await getUserByUsername(username)
+        const user = await Database.User.getByUsername(username)
         if (!user) {
             res.status(400).json({ message: 'Incorrect username or password.' })
             return
