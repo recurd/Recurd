@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+import TopSongs from "../components/TopSongs";
 
 function Profile() {
   const { id } = useParams() // this is user's id
