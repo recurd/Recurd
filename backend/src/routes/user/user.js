@@ -1,5 +1,7 @@
 import { Router } from "express"
+import { z } from "zod"
 import Database from "../../db.js"
+import External from "recurd-external"
 import topRouter from './top.js'
 import { timestampPaginationSchemaT, idSchema } from "../../schemas/shared.js"
 import { userServicesTypeSchema } from "../../schemas/user.js"
@@ -38,37 +40,51 @@ router.get('/:user_id/listens', async (req, res, next) => {
     }
 })
 
-router.get('/:user_id/:service_type/currently-listening', async (req, res, next) => {
+// Returns object { track: any | null , is_paused: boolean | undefined }
+router.get('/:user_id/currently-listening', async (req, res, next) => {
     try {
-        const { user_id, service_type } = z.object({
-            user_id: idSchema,
-            service_type: userServicesTypeSchema
+        const { user_id } = z.object({
+            user_id: idSchema
         }).parse(req.params)
 
-        const connected = await Database.UserService.isConnected(user_id, service_type)
-        if (!connected) {
-            res.status(200).end()
-            // nothing to send
-            // do not return information that user is not connected to this service
-            // because other users can access this route
+        const services = await Database.User.getServices(user_id)
+
+        // Find any currently listening songs from connected services, return first found
+        for (const s_type of services) {
+            const service = await External.findService(s_type, user_id)
+            if (!service) {
+                console.error(`recurd-external cannot find service ${s_type} for a user when it should exist`)
+                res.status(500).end()
+                return
+            }
+
+            const listening = await service.getCurrentlyListening()
+            if (listening.track) {
+                res.status(201).json(listening)
+                return
+            }
         }
-
-        // let response = await fetchCurrListeningTrack(access_token)
-        // // Should refresh access token
-        // if (!response.success && response.retry) {
-
-        // } else if (!response.success) {
-        //     res.status(500).json({ message: response.result })
-        // }
-
-        // const track = response.result
-        // if (track) {
-            
-        // }
+        res.status(200).json({ track: null })
     } catch(e) {
         return next(e)
     }
-    res.status(501).end()
+})
+
+router.get('/:user_id/recent-listens-temp', async (req, res, next) => {
+    try {
+        const user_id = idSchema.parse(req.params.user_id)
+        const services = await Database.User.getServices(user_id)
+        for (const s_type of services) {
+            const service = await External.findService(s_type, user_id)
+            if (!service) {
+                console.error(`recurd-external cannot find service ${s_type} for a user when it should exist`)
+                continue
+            }
+        }
+        req.status(501).end()
+    } catch(e) {
+        return next(e)
+    }
 })
 
 export default router
