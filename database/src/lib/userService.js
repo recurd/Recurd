@@ -1,8 +1,56 @@
-export default class User {
+export default class UserService {
     #sql
 
     constructor(sql) {
         this.#sql = sql
+    }
+
+    async get(user_id, service_type) {
+        const result = await this.#sql`
+            SELECT 
+                *
+            FROM
+                user_services us
+            JOIN
+                user_services_t ut
+            ON
+                us.service_id = ut.id
+            WHERE
+                user_id = ${user_id}
+                AND ut.service_type = ${service_type}`
+        if (result.count > 0)
+            return result[0]
+        // otherwise return undefined
+    }
+
+    async getAccessToken(user_id, service_type) {
+        const result = await this.get(user_id, service_type)
+        if (result) return result.access_token
+        // otherwise return undefined
+    }
+
+    async getRefreshToken(user_id, service_type) {
+        const result = await this.get(user_id, service_type)
+        if (result) return result.refresh_token
+        // otherwise return undefined
+    }
+
+    // returns true if user is connected to this service, false otherwise
+    async isConnected(user_id, service_type) {
+        const result = await this.#sql`
+            SELECT
+                1
+            FROM
+                user_services us
+            JOIN
+                user_services_t ut
+            ON 
+                us.service_id = ut.id
+            WHERE
+                    us.user_id = ${user_id}
+                AND
+                    ut.service_type = ${service_type}`
+        return result.count > 0
     }
 
     // return bool indicating success/failure
@@ -31,21 +79,23 @@ export default class User {
         return dbRes.count > 0
     }
 
-    // returns true if user is connected to this service, false otherwise
-    async getStatus(user_id, service_type) {
+    // return true for updating successfully
+    async setLastUpdated(user_id, service_type, last_updated) {
         const result = await this.#sql`
-            SELECT
-                1
-            FROM
+            UPDATE
                 user_services us
-            JOIN
-                user_services_t ut
-            ON 
-                us.service_id = ut.id
-            WHERE
-                    us.user_id = ${user_id}
-                AND
-                    ut.service_type = ${service_type}`
+            SET 
+                last_updated = ${last_updated}
+            WHERE 
+                user_id = ${user_id}
+                AND service_id = ( 
+                    SELECT 
+                        id 
+                    FROM 
+                        user_services_t ut 
+                    WHERE 
+                        ut.service_type = ${service_type}
+                )`
         return result.count > 0
     }
 

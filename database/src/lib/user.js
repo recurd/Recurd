@@ -27,6 +27,23 @@ export default class User {
         return user
     }
 
+    async getServices(user_id) {
+        const [result] = await this.#sql`
+            SELECT
+                ARRAY_AGG(ut.service_type) as services
+            FROM
+                users u
+            JOIN
+                user_services us ON u.id = us.user_id
+            JOIN
+                user_services_t ut ON us.service_id = ut.id
+            WHERE
+                u.id = ${user_id}
+            GROUP BY
+                u.id`
+        return result ? result.services : []
+    }
+
     async insert({ username, password, display_name }) {
         return await this.#sql`INSERT INTO USERS ${this.#sql({ username, password, display_name })}`
     }

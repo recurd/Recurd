@@ -1,12 +1,11 @@
 import { removeNullish } from '../util.js'
+import { findOrInsertSongArtistAlbumTxact } from './Metadata.js'
 
 export default class Listen {
     #sql
-    #metadata // the exported object of this library, which contains other DB components
 
-    constructor(sql, metadata) {
+    constructor(sql) {
         this.#sql = sql
-        this.#metadata = metadata
     }
 
     // Internal function, with transaction context
@@ -25,7 +24,7 @@ export default class Listen {
 
     async insertByData({ user_id, time_stamp, song, trackInfo, songArtists, album, albumArtists }) {
         const result = await this.#sql.begin(async sqlTxact => {
-            const { song: outSong, album: outAlbum } = await this.#metadata.findOrInsertSongArtistAlbumTxact({
+            const { song: outSong, album: outAlbum } = await findOrInsertSongArtistAlbumTxact({
                     song,
                     trackInfo,
                     songArtists,

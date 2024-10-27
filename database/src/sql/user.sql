@@ -17,7 +17,6 @@ create table user_services_t (
     id serial primary key,
     service_type varchar(50) not null unique
 );
-insert into user_services_t (service_type) values ('spotify');
 
 create table user_services (
     user_id uuid references users(id) on delete cascade,
