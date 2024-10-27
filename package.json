@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "ag-charts-react": "^10.2.0",
+    "express": "^4.21.1"
+  }
+}
