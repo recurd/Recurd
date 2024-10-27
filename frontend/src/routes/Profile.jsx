@@ -1,4 +1,6 @@
 import { useParams } from "react-router-dom";
+import { Grid, GridItem } from "@chakra-ui/react"
+import RecentListens from "../components/RecentListens";
 
 function Profile() {
   const { id } = useParams() // this is user's id
@@ -14,8 +16,8 @@ function Profile() {
       {/* TODO: Implement edit button for logged-in users */}
       
       {/* Placeholder for the recent listens */}
-      {/* TODO: Add a section to show user's recent listens */}
-      
+      <RecentListens user_id={id}/>
+
       {/* Placeholder for the reviews */}
       {/* TODO: Display user's reviews */}
     </div>

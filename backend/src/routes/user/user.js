@@ -26,7 +26,7 @@ router.use('/:user_id/top', topRouter)
 router.get('/:user_id/listens', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
-        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.body)
+        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.query)
 
         const listens = await Database.User.getListens({
             user_id: user_id,
