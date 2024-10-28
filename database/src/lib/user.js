@@ -61,12 +61,15 @@ export default class User {
                 artists ar ON ars.artist_id = ar.id
             WHERE
                 l.user_id = ${user_id}
-                AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
+                AND l.time_stamp 
+                    ${start_date ? 
+                        this.#sql`BETWEEN ${start_date} AND ${end_date}` : 
+                        this.#sql`<= ${end_date}`}
             GROUP BY
                 ar.id
             ORDER BY
                 listen_count DESC
-            LIMIT ${n}`
+            ${n ? this.#sql`LIMIT ${n}` : this.#sql``}`
         return topArtists
     }
 
@@ -88,12 +91,15 @@ export default class User {
                 artists ar ON abs.artist_id = ar.id
             WHERE
                 l.user_id = ${user_id}
-                AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
+                AND l.time_stamp 
+                    ${start_date ? 
+                        this.#sql`BETWEEN ${start_date} AND ${end_date}` : 
+                        this.#sql`<= ${end_date}`}
             GROUP BY
                 a.id
             ORDER BY
                 listen_count DESC
-            LIMIT ${n}`
+            ${n ? this.#sql`LIMIT ${n}` : this.#sql``}`
         return topAlbums
     }
 
@@ -120,12 +126,15 @@ export default class User {
                 artists ar ON ars.artist_id = ar.id
             WHERE
                 l.user_id = ${user_id}
-                AND l.time_stamp BETWEEN ${start_date} AND ${end_date}
+                AND l.time_stamp 
+                    ${start_date ? 
+                        this.#sql`BETWEEN ${start_date} AND ${end_date}` : 
+                        this.#sql`<= ${end_date}`}
             GROUP BY
                 s.id, a.id
             ORDER BY
                 s.id, listen_count DESC
-            LIMIT ${n}`
+            ${n ? this.#sql`LIMIT ${n}` : this.#sql``}`
         return topSongs
     }
 

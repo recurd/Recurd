@@ -1,6 +1,6 @@
 import React from "react";
 import { BarChart, Bar, XAxis, YAxis, Legend, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
-import styles from "../assets/css/Histogram.module.css"
+import styles from "../assets/css/components/Histogram.module.css"
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {

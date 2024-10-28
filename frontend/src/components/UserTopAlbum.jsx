@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import { Box } from "@chakra-ui/react";
+import { Grid, GridItem } from "@chakra-ui/react";
 import backend from "../backend.js";
 import AlbumItem from "./AlbumItem.jsx";
 
@@ -23,15 +23,17 @@ export default function UserTopAlbum({ user_id }) {
     }, []);
     //change to component
     return (
-        <Box>
+        <Grid templateColumns="repeat(5, 1fr)">
             {topAlbums.length > 0 ? (
                 topAlbums.map(album => (
-                    <AlbumItem key={album.id} album={album} /> // Rendering AlbumItem for each album
+                    <GridItem key={album.id} colSpan="1">
+                        <AlbumItem album={album} /> 
+                    </GridItem>
                 ))
             ) : (
             <p>No top albums available at the moment.</p>
             )}
-        </Box>
+        </Grid>
     );
 }
 
