@@ -1,4 +1,3 @@
-import React from "react";
 export default function AlbumItem({album}){
     return (
         <div>
@@ -7,5 +6,5 @@ export default function AlbumItem({album}){
             <p>{album.artist}</p>
             <p>Rank: {album.rank}</p>
         </div>
-    );
+    )
 }
