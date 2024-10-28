@@ -167,4 +167,22 @@ export default class User {
             ${n ? this.#sql`LIMIT ${n}` : this.#sql``}`
         return listens
     }
+
+    async getAlbumRatings(user_id) {
+        const albumRatings = await this.#sql`
+            SELECT 
+                ao.id AS rating_id,
+                ao.album_id,
+                ao.rating,
+                ao.review,
+                ao.time_stamp
+            FROM 
+                album_opinions ao
+            WHERE 
+                ao.user_id = ${user_id}
+            ORDER BY 
+                ao.time_stamp DESC
+        `
+        return albumRatings
+    }    
 }
