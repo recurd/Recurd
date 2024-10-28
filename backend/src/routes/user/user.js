@@ -40,6 +40,21 @@ router.get('/:user_id/listens', async (req, res, next) => {
     }
 })
 
+router.get('/:user_id/album-ratings', async (req, res, next) => {
+    try {
+        const user_id = idSchema.parse(req.params.user_id)
+        const albumRatings = await Database.User.getAlbumRatings(user_id)
+
+        if (!albumRatings || albumRatings.length === 0) {
+            return res.status(404).json({ error: "No album ratings found for this user" })
+        }
+
+        res.status(200).json({ album_ratings: albumRatings })
+    } catch (e) {
+        return next(e)
+    }
+})
+
 // Returns object { track: any | null , is_paused: boolean | undefined }
 router.get('/:user_id/currently-listening', async (req, res, next) => {
     try {
