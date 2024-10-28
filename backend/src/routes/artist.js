@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getArtist, getArtistAlbums, getArtistSongs, getTopListeners } from "recurd-database/artist"
+import Database from "../db.js"
 import { DBErrorCodes, isDBError } from "../util.js"
 import { idSchema, timestampPaginationSchemaT } from "../schemas/shared.js"
 
@@ -17,7 +17,7 @@ const limitSchema = z.object({
 router.get('/:id', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params) // route parameter always exists
-        const result = await getArtist(id)
+        const result = await Database.Artist.get(id)
         res.json(result)
     } catch(e) {
         if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
@@ -31,7 +31,7 @@ router.get('/:id/albums', async (req, res, next) => {
         const { id } = paramsIdSchema.parse(req.params)
         const { limit } = limitSchema.parse(req.body)
 
-        const result = await getArtistAlbums(id, limit)
+        const result = await Database.Artist.getAlbums(id, limit)
         res.json(result)
     } catch(e) {
        return next(e)
@@ -43,7 +43,7 @@ router.get('/:id/songs', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         const { limit } = limitSchema.parse(req.body)
-        const result = await getArtistSongs(id, limit)
+        const result = await Database.Artist.getSongs(id, limit)
         res.json(result)
     } catch(e) {
         return next(e)
@@ -54,7 +54,7 @@ router.get('/:id/top-listeners', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.body)
-        const result = await getTopListeners({
+        const result = await Database.Artist.getTopListeners({
             id: id,
             start_date: start_date,
             end_date: end_date,

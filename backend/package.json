@@ -18,6 +18,7 @@
     "express-session": "^1.18.0",
     "morgan": "^1.10.0",
     "recurd-database": "file:../database",
+    "recurd-external": "file:../external",
     "zod": "^3.23.8",
     "zod-validation-error": "^3.4.0"
   },

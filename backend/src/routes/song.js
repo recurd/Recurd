@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import { getSong, getSongAlbums, getSongRatings, getSongReviews, getTopListeners } from "recurd-database/song"
+import Database from "../db.js"
 import { DBErrorCodes, isDBError } from "../util.js"
 import { idSchema, timestampPaginationSchemaT } from "../schemas/shared.js"
 
@@ -12,7 +12,7 @@ router.get('/:id', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         // TODO: add aggregated artists
-        const result = await getSong(id)
+        const result = await Database.Song.get(id)
         res.json(result)
     } catch(e) {
         if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
@@ -24,7 +24,7 @@ router.get('/:id', async (req, res, next) => {
 router.get('/:id/albums', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
-        const albums = await getSongAlbums(id)
+        const albums = await Database.Song.getAlbums(id)
         res.status(200).json(albums)
     } catch(e) {
         if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
@@ -36,7 +36,7 @@ router.get('/:id/albums', async (req, res, next) => {
 router.get('/:id/ratings', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
-        const ratings = await getSongRatings(id)
+        const ratings = await Database.Song.getRatings(id)
         res.status(200).json(ratings)
     } catch(e) {
         return next(e)
@@ -46,7 +46,7 @@ router.get('/:id/ratings', async (req, res, next) => {
 router.get('/:id/reviews', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
-        const reviews = await getSongReviews(id)
+        const reviews = await Database.Song.getReviews(id)
         res.status(200).json(reviews)
     } catch(e) {
         return next(e)
@@ -57,7 +57,7 @@ router.get('/:id/top-listeners', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
         const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.body)
-        const result = await getTopListeners({
+        const result = await Database.Song.getTopListeners({
             id: id,
             start_date: start_date,
             end_date: end_date,

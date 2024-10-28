@@ -1,5 +1,22 @@
-import sqlDf from "../db.js"
 import { removeNullish } from "../util.js"
+
+export default class Metadata {
+    #sql
+
+    constructor(sql) {
+        this.#sql = sql
+    }
+
+    // Exported function, with no transaction context
+    // see private function for what 'data' is
+    async findOrInsertSongArtistAlbum(data) {
+        // Need to be in a transaction to execute #findOrInsertSongArtistAlbum()
+        const result = await this.#sql.begin(async sqlTxact => {
+            return await findOrInsertSongArtistAlbumTxact(data, sqlTxact)
+        })
+        return result
+    }
+}
 
 // Internal function, with transaction context
 // Param song (Required): must contain 'name' field
@@ -8,8 +25,8 @@ import { removeNullish } from "../util.js"
 // Param albumArtists (Optional): an array of at least one element, each artist must contain 'name' field
 // Returned: song and album objects,
 // all objects (however nested) has 'found' field that is true iff the object was found in DB
-export async function findOrInsertSongArtistAlbum({ song, trackInfo, songArtists, album, albumArtists }, sql=sqlDf) {
-    const outSong = await findOrInsertSong({ song: song, songArtists }, sql)
+export async function findOrInsertSongArtistAlbumTxact({ song, trackInfo, songArtists, album, albumArtists }, sqlTxact) {
+    const outSong = await findOrInsertSong({ song: song, songArtists }, sqlTxact)
     // if album input does not exist, return
     if (!album) {
         return { song: outSong }
@@ -19,7 +36,7 @@ export async function findOrInsertSongArtistAlbum({ song, trackInfo, songArtists
     // If song was found (not created), fetch album by name
     if (outSong.found) {
         if (!album?.name) throw 'album must have a name!'
-        const [resAlbum] = await sql`
+        const [resAlbum] = await sqlTxact`
             SELECT 
                 ab.*,
                 abs.disc_number as disc_number, -- include these columns from album_songs for returning track object
@@ -46,7 +63,7 @@ export async function findOrInsertSongArtistAlbum({ song, trackInfo, songArtists
     }
     // If haven't found album, create one when album is specified
     else {
-        outAlbum = await findOrInsertAlbum({ album, albumArtists: albumArtists ?? songArtists }, sql)
+        outAlbum = await findOrInsertAlbum({ album, albumArtists: albumArtists ?? songArtists }, sqlTxact)
         outSong.disc_number = trackInfo?.disc_number
         outSong.album_position = trackInfo?.album_position
     }
@@ -60,8 +77,8 @@ export async function findOrInsertSongArtistAlbum({ song, trackInfo, songArtists
             album_position: trackInfo?.album_position
         }
         removeNullish(album_song)
-        await sql`
-            INSERT INTO album_songs ${sql(album_song)}`
+        await sqlTxact`
+            INSERT INTO album_songs ${sqlTxact(album_song)}`
     }
     return {
         song: outSong,
@@ -71,13 +88,13 @@ export async function findOrInsertSongArtistAlbum({ song, trackInfo, songArtists
 
 // Internal function, with transaction context
 // NOT CONCURRENTLY SAFE
-async function findOrInsertSong({ song, songArtists }, sql=sqlDf) {
+async function findOrInsertSong({ song, songArtists }, sqlTxact) {
     const artist_names = songArtists.map(e=>e.name)
     let outSong = null
 
     // Find song by exact match on song name and artist names
     if (!song?.name) throw 'song must have a name!'
-    const [matchedSA] = await sql`
+    const [matchedSA] = await sqlTxact`
         SELECT 
                 row_to_json(s) song,
                 json_agg(row_to_json(ar)) artists
@@ -103,11 +120,11 @@ async function findOrInsertSong({ song, songArtists }, sql=sqlDf) {
     // Then insert song, and insert into artist_songs
     else {
         // Insert artists
-        const artists = await findOrInsertArtists(songArtists, sql)
+        const artists = await findOrInsertArtists(songArtists, sqlTxact)
 
         // Insert song
-        const [res_song] = await sql`
-            INSERT INTO songs ${sql(song)}
+        const [res_song] = await sqlTxact`
+            INSERT INTO songs ${sqlTxact(song)}
             RETURNING *`
         outSong = { 
             ...res_song, 
@@ -123,19 +140,19 @@ async function findOrInsertSong({ song, songArtists }, sql=sqlDf) {
                 song_id: outSong.id
             }
         }) 
-        await sql`INSERT INTO artist_songs ${sql(artist_song_inserts)}`
+        await sqlTxact`INSERT INTO artist_songs ${sqlTxact(artist_song_inserts)}`
     }
     return outSong
 }
 
 // Internal function, with transaction context
 // NOT CONCURRENTLY SAFE
-async function findOrInsertAlbum({ album, albumArtists }, sql=sqlDf) {
+async function findOrInsertAlbum({ album, albumArtists }, sqlTxact) {
     const artist_names = albumArtists.map(e=>e.name)
     let outAlbum = null
 
     // Find album and artists by exact match on album name and artist names
-    const [matchedAA] = await sql`
+    const [matchedAA] = await sqlTxact`
         SELECT 
                 row_to_json(a) album,
                 json_agg(row_to_json(ar)) artists
@@ -162,12 +179,12 @@ async function findOrInsertAlbum({ album, albumArtists }, sql=sqlDf) {
     // Then insert album, and insert into artist_albums
     else  {
         // Insert artists
-        const artists = await findOrInsertArtists(albumArtists, sql)
+        const artists = await findOrInsertArtists(albumArtists, sqlTxact)
 
         // Insert album
         removeNullish(album)
-        const [res_album] = await sql`
-            INSERT INTO albums ${sql(album)}
+        const [res_album] = await sqlTxact`
+            INSERT INTO albums ${sqlTxact(album)}
             RETURNING *`
         outAlbum = { 
             ...res_album, 
@@ -183,22 +200,22 @@ async function findOrInsertAlbum({ album, albumArtists }, sql=sqlDf) {
                 album_id: outAlbum.id
             }
         })
-        await sql`INSERT INTO artist_albums ${sql(artist_album_inserts)}`
+        await sqlTxact`INSERT INTO artist_albums ${sqlTxact(artist_album_inserts)}`
     }
     return outAlbum
 }
 
 // Internal function, with transaction context
 // NOT CONCURRENTLY SAFE
-async function findOrInsertArtists(artists, sql=sqlDf) {
+async function findOrInsertArtists(artists, sqlTxact) {
     try {
         // create temp table with same type as artists (excluding id column)
-        await sql`
+        await sqlTxact`
             CREATE TEMPORARY TABLE temp_artists (LIKE artists); 
             ALTER TABLE temp_artists DROP COLUMN id`.simple() 
         artists.forEach(e => removeNullish(e))
-        await sql`INSERT INTO temp_artists ${sql(artists)}`
-        const res = await sql`
+        await sqlTxact`INSERT INTO temp_artists ${sqlTxact(artists)}`
+        const res = await sqlTxact`
             WITH existed AS (
                 SELECT *
                 FROM artists 
@@ -216,6 +233,6 @@ async function findOrInsertArtists(artists, sql=sqlDf) {
         // console.log('artists created and/or found:', artists)
         return res
     } finally {
-        await sql`DROP TABLE temp_artists`
+        await sqlTxact`DROP TABLE temp_artists`
     } // let error propogate up
 }
