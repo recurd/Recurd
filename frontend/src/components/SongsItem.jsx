@@ -1,43 +1,37 @@
-import { Image, Flex, Box, Button } from "@chakra-ui/react";
+import { Image, Box, Flex } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
 export default function SongsItem({ song }) {
-    const artist = song.artist
-    const name = song.name
-    const thumbnail = song.thumbnail
-    const plays = song.plays;
-        return (
-            <Box
-            borderWidth="1px"
-            borderRadius="md"
-            p={4}
-            display="flex"
-            alignItems="center"
-            bg="white"
-            boxShadow="sm"
-            _hover={{ boxShadow: "lg", transform: "scale(1.02)" }}
-            transition="0.2s"
-        >
-            <Link to={`./song/${name}`}>
+    const { name, artist, thumbnail, plays, id } = song; // Destructuring the song object
+
+    return (
+        <Flex justifyContent="space-between" alignItems="center" marginBottom="0.5em" padding="0.5em">
+            {/* Thumbnail */}
+            <Link to={`/song/${id}`}>
                 <Image
                     src={thumbnail}
                     alt={`${name} cover`}
-                    boxSize="50px"
+                    height="2.5em"
+                    width="2.5em"
                     borderRadius="md"
-                    mr={4}
+                    marginRight="1em"
                 />
             </Link>
-            <Flex direction="column" flex="1">
-                <Text fontWeight="bold" fontSize="lg">
-                    {name}
-                </Text>
-                <Text fontSize="md" color="gray.600">
+
+            {/* Song and Artist Information */}
+            <Flex justifyContent="space-between" alignItems="center" flexGrow="1">
+                <Box fontWeight="bold">
+                    <Link to={`/song/${id}`}>{name}</Link>
+                </Box>
+                <Box color="#666" fontSize="0.9rem" textAlign="right" whiteSpace="nowrap" marginLeft="1em">
                     {artist}
-                </Text>
+                </Box>
             </Flex>
-            <Text fontSize="md" textAlign="right" color="gray.800">
+
+            {/* Play Count */}
+            <Box marginLeft="1em" color="#999" fontSize="0.9rem">
                 {plays.toLocaleString()} plays
-            </Text>
-        </Box>
-        )
+            </Box>
+        </Flex>
+    );
 }
