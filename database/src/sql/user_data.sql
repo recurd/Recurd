@@ -19,7 +19,7 @@ create table album_opinions (
     user_id uuid references users(id) on delete cascade not null,
     album_id uuid references albums(id) on delete restrict not null,
     time_stamp timestamp not null default now(),
-    rating smallint check (rating >= 1 or rating <= 10),
+    rating smallint check (rating >= 1 and rating <= 10),
     review text,
     check (rating is not null or review is not null)
 );

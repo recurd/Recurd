@@ -26,7 +26,7 @@ const isNullish = (e) => e === undefined || e === null
 export const timestampPaginationSchemaT = z.object({
     start_date: timestampSchemaT.nullish(),
     end_date: timestampSchemaT.nullish().transform(d => d ? d : new Date()), // defaults to current time
-    n: z.number().int().gt(0).lte(100).nullish()
+    n: coerceNumSchemaT.pipe(z.number().int().gt(0).lte(100).nullish())
 }).refine(obj => 
     (!obj.start_date) || obj.start_date < obj.end_date, {
     message: "start_date must be before end_date"

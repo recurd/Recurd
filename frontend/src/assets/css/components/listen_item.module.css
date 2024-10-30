@@ -1,0 +1,51 @@
+.recent-listens {
+  padding: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.recent-listens h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.track-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Space between the image and song/artist info */
+  margin-bottom: 0.2em;
+  padding: 0.5em;
+  /* border-radius: 0.2em; */
+}
+
+.album-cover {
+  /* width: 30px;
+  height: 30px; */
+  margin-right: 1em;
+  /* border-radius: 2em; */
+}
+
+.track-info {
+  display: flex;
+  flex: 1; /* This makes the track info take up the remaining space */
+  justify-content: space-between; /* Ensure the song name is on the left and the artist is on the right */
+  align-items: center;
+}
+
+.track-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-right: 1rem; 
+}
+
+.track-artist {
+  color: #666;
+  font-size: 0.9rem;
+  text-align: right;
+  white-space: nowrap; /* Prevents the artist name from wrapping */
+}
