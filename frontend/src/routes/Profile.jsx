@@ -4,6 +4,7 @@ import { SiHeadphonezone } from "react-icons/si";
 import Activity from "../components/Activity";
 import RecentListens from "../components/RecentListens";
 import TopAlbum from "../components/UserTopAlbum";
+import CurrentListen from "../components/CurrentListen";
 
 const sectionHeaderStyle = {
   as:"h2", 
@@ -29,6 +30,7 @@ function Profile() {
           <SiHeadphonezone/></Icon> Top Albums</Box>
       <TopAlbum user_id={id}/>
 
+      <CurrentListen user_id={id}/>
       <Activity />
 
       <Box {...sectionHeaderStyle}>

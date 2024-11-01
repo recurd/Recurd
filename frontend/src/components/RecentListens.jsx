@@ -21,7 +21,7 @@ export default function RecentListens({ user_id }) {
     }
 
     fetchRecentTracks()
-  }, []);
+  }, [])
 
   return (
     <Box>

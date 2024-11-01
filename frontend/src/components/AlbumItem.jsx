@@ -8,11 +8,12 @@ export default function AlbumItem({album}){
             <Image src={album.image} alt={album.title} 
                 height={{md: "200px", lg: "300px"}} aspectRatio={1} />
             <p>{album.name}</p>
-            <p>{album.artists.map(a =>
-                    <Box key={a.id} _hover={{ color: '#000' }}>
-                        <Link to={"/artist/"+a.id}>{a.name}</Link><br />
-                    </Box>)
-                }</p>
+            <Box>{album.artists.map((a,idx,arr) => {
+                    return <Box key={a.id} _hover={{ color: '#000' }}>
+                        <Link to={"/artist/"+a.id}>{a.name}</Link>
+                        { (idx != arr.length -1) ? ', ' : '' }
+                    </Box>
+                })}</Box>
             <p>{album.listen_count}</p>
         </Box>
     );
