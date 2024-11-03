@@ -1,10 +1,12 @@
 import { useParams } from "react-router-dom";
-import { Box, Icon } from "@chakra-ui/react"
+import { Avatar, Box, Icon } from "@chakra-ui/react"
 import { SiHeadphonezone } from "react-icons/si";
 import Activity from "../components/Activity";
 import RecentListens from "../components/RecentListens";
 import TopAlbum from "../components/UserTopAlbum";
 import CurrentListen from "../components/CurrentListen";
+import { useEffect, useState } from "react";
+import backend from "../backend";
 
 const sectionHeaderStyle = {
   as:"h2", 
@@ -14,16 +16,35 @@ const sectionHeaderStyle = {
 
 function Profile() {
   const { id } = useParams() // this is user's id
+  const [displayName, setDisplayName] = useState(null)
+  const [image, setImage] = useState(null)
+  const [followers, setFollowers] = useState(null)
+  const [followings, setFollowings] = useState(null)
+
+  useEffect(() => {
+    (async () => {
+        try {
+          const res = await backend.get('/user/'+id+'/profile')
+          const data = res.data
+          setDisplayName(data.display_name)
+          setImage(data.image)
+          setFollowers(data.follower_count)
+          setFollowings(data.following_count)
+        } catch (error) {
+          console.error('Error fetching recent tracks:', error);
+        }
+    })()
+  }, [])
+
   return (
     <div>
-      {/* Header for the Profile Page */}
-      <h2>User Profile</h2>
-      
-      {/* Placeholder for the profile description */}
-      {/* TODO: Display user's profile information */}
-      
-      {/* Placeholder for the edit profile button (if viewing own profile) */}
-      {/* TODO: Implement edit button for logged-in users */}
+      {/* Profile header */}
+      <Box>
+        <Box fontSize='2.5rem'>{ displayName }</Box>
+        <Box>
+          <Avatar name={displayName} src={image} size='2xl'/>
+        </Box>
+      </Box>
 
       <Box {...sectionHeaderStyle}>
           <Icon>
@@ -37,9 +58,6 @@ function Profile() {
           <Icon>
           <SiHeadphonezone/></Icon> Recent Listens</Box>
       <RecentListens user_id={id}/>
-
-      {/* Placeholder for the reviews */}
-      {/* TODO: Display user's reviews */}
     </div>
   );
 }
