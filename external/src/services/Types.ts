@@ -11,7 +11,7 @@ export interface Service {
     user_id: string
 
     // Fetches the currently listening track from the service, and stores its metadata in the database
-    getCurrentlyListening(): Promise<{ track: any, is_paused?: boolean }>
+    getCurrentlyListening(): Promise<{ track: any, is_paused?: boolean, progress?: number, duration?: number }>
 
     // Fetches the recent listens from the service, and stores its metadata alongside the listens in the database
     getRecentListens(): Promise<any[]>

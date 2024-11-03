@@ -6,7 +6,7 @@ function formatTimestamp(timestamp) {
         (timestamp.getMinutes() < 10 ? '0':'') + timestamp.getMinutes()
 }
 
-export default function ListenItem({ listen }) {
+export default function ListenItem({ listen, ...props }) {
     const song = listen.song
     const timestamp = listen.time_stamp
     const artists = listen.artists
@@ -15,7 +15,8 @@ export default function ListenItem({ listen }) {
     return <Flex justifyContent="space-between"
                 alignItems="center"
                 marginBottom="0.2em"
-                padding="0.1em">
+                padding="0.1em"
+                {...props}>
         { album ?
             <Link to={"/album/"+album.image}>
                 <Image 
