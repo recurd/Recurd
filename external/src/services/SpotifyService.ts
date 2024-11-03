@@ -124,13 +124,15 @@ export class SpotifyService implements Service {
 
         // For each listen, format it and insert it into database
         const listens: any[] = []
-        for (const track of spRes?.items) {
-            const songNMtdt = Formatter.formatPlayHistoryObject(track)
-            const listen = await Database.Listen.insertByData({
-                user_id: this.user_id,
-                ...songNMtdt
-            })
-            listens.push(listen)
+        if (spRes) { // spRes is nullish if no songs are returned
+            for (const track of spRes.items) {
+                const songNMtdt = Formatter.formatPlayHistoryObject(track)
+                const listen = await Database.Listen.insertByData({
+                    user_id: this.user_id,
+                    ...songNMtdt
+                })
+                listens.push(listen)
+            }
         }
 
         // New fetch timestamp will be the time that the user finishes the last song 

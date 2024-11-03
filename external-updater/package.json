@@ -1,0 +1,22 @@
+{
+  "name": "recurd-external-updater",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./build/src/Updater.js",
+  "scripts": {
+    "dev": "npx tsc; node ./build/src/Updater.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cron": "^3.1.8",
+    "dotenv": "^16.4.5",
+    "recurd-database": "file:../database",
+    "recurd-external": "file:../external"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.6",
+    "typescript": "^5.6.3"
+  }
+}
