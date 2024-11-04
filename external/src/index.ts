@@ -26,5 +26,6 @@ async function findService(service_type: ServiceType, user_id: string) : Promise
 
 export default {
     connectService,
-    findService
+    findService,
+    ServiceType
 }

@@ -1,0 +1,35 @@
+.histogram-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-left: 0;
+  }
+  
+  .custom-tooltip {
+    background-color: rgba(0, 123, 255, 0.85);
+    color: white;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .custom-tooltip .label {
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .bar-chart {
+    transition: all 0.2s ease;
+  }
+  
+  .bar-chart:hover {
+    fill: #ff6b6b !important;
+    cursor: pointer;
+  }
+
+  .recharts-bar-rectangle:hover {
+    fill: #e74c3c;
+    transition: all 0.2s ease-in-out;
+  }
+  

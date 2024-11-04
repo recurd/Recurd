@@ -18,7 +18,7 @@ router.get('/:type/status/', authGate(), async (req, res, next) => {
             type: userServicesTypeSchema
         }).parse(req.params)
 
-        const result = await Database.UserService.getStatus(user_id, type)
+        const result = await Database.UserService.isConnected(user_id, type)
         res.status(200).json({ connected: result })
     } catch (e) {
         return next(e)
