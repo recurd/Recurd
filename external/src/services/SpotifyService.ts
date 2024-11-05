@@ -72,7 +72,7 @@ export class SpotifyService implements Service {
         this.#refresh_token = refresh_token ?? this.#refresh_token
     }
 
-    async getCurrentlyListening() : Promise<{ track: any, is_paused?: boolean }> {
+    async getCurrentlyListening() : Promise<{ track: any, is_paused?: boolean, progress?: number, duration?: number }> {
         let res = await Spotify.fetchCurrentlyPlayingTrack(this.#access_token)
         if (!res.success && res.retry) {
             this.refreshToken() // would throw
@@ -94,8 +94,12 @@ export class SpotifyService implements Service {
 
         // Format spotify API returned result to be in our DB format
         const songNMtdt = Formatter.formatTrackToMetadatas(spRes.item)
-        const { song: retSong, album: _ } = await Database.Metadata.findOrInsertSongArtistAlbum(songNMtdt)
-        return { track: retSong, is_paused: !spRes.is_playing }
+        const { song: retSong, album: retAlbum } = await Database.Metadata.findOrInsertSongArtistAlbum(songNMtdt)
+
+        // Get the progress and total duration (ms) of the song, then calculate time-to-end
+        const progress = spRes.progress_ms
+        const duration = spRes.item.duration_ms
+        return { track: { ...retSong, album: retAlbum }, is_paused: !spRes.is_playing, progress: progress, duration: duration }
     }
 
     async getRecentListens() : Promise<any[]> {
@@ -120,13 +124,15 @@ export class SpotifyService implements Service {
 
         // For each listen, format it and insert it into database
         const listens: any[] = []
-        for (const track of spRes?.items) {
-            const songNMtdt = Formatter.formatPlayHistoryObject(track)
-            const listen = await Database.Listen.insertByData({
-                user_id: this.user_id,
-                ...songNMtdt
-            })
-            listens.push(listen)
+        if (spRes) { // spRes is nullish if no songs are returned
+            for (const track of spRes.items) {
+                const songNMtdt = Formatter.formatPlayHistoryObject(track)
+                const listen = await Database.Listen.insertByData({
+                    user_id: this.user_id,
+                    ...songNMtdt
+                })
+                listens.push(listen)
+            }
         }
 
         // New fetch timestamp will be the time that the user finishes the last song 

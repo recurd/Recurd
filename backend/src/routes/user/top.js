@@ -1,24 +1,15 @@
 import { Router } from "express"
 import { z } from "zod"
 import Database from "../../db.js"
-import { timestampSchemaT, idSchema } from "../../schemas/shared.js"
+import { idSchema, timestampPaginationSchemaT } from "../../schemas/shared.js"
 
 const router = Router({mergeParams: true})
-
-const topSchemaT = z.object({
-    start_date: timestampSchemaT,
-    end_date: timestampSchemaT.nullish().transform(d => d ? d : new Date()), // defaults to current time
-    n: z.number().int().gt(0).lte(100).nullish().default(10)
-}).refine(obj =>
-    obj.start_date < obj.end_date, {
-        message: "start_date must be before end_date"
-    })
 
 // Get top (n) artist (id, name, ...), listen count (per artist)
 router.get('/artists', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
-        const { start_date, end_date, n } = topSchemaT.parse(req.body)
+        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.query)
 
         const topArtists = await Database.User.getTopArtists({
             user_id: user_id,
@@ -36,7 +27,7 @@ router.get('/artists', async (req, res, next) => {
 router.get('/albums', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
-        const { start_date, end_date, n } = topSchemaT.parse(req.body)
+        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.query)
 
         const topAlbums = await Database.User.getTopAlbums({
             user_id: user_id,
@@ -55,7 +46,7 @@ router.get('/albums', async (req, res, next) => {
 router.get('/songs', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
-        const { start_date, end_date, n } = topSchemaT.parse(req.body)
+        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.query)
 
         const topSongs = await Database.User.getTopSongs({
             user_id: user_id,

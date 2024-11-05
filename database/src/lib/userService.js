@@ -116,4 +116,20 @@ export default class UserService {
                             service_type = ${service_type})`
         return result.count > 0
     }
+
+    // Gets all users by a service type
+    // Calls callback with returned users in batches (This uses a cursor)
+    async getUserIdsByType(service_type, callback, batchSize=10) {
+        await this.#sql`
+            SELECT 
+                us.user_id AS user_id
+            FROM
+                user_services us
+            JOIN
+                user_services_t ut
+            ON
+                us.service_id = ut.id
+            WHERE
+                ut.service_type = ${service_type}`.cursor(batchSize, callback)
+    }
 }
