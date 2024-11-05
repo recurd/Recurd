@@ -1,35 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Flex, Text, Image } from '@chakra-ui/react';
+import { Box, Flex, Text, Image, VStack } from '@chakra-ui/react';
 import  {Link} from 'react-router-dom';
 import axios from 'axios';
+import SongsItem from './SongsItem.jsx';
 
-const TopSongs = () => {
+export default function TopSongs({ user_id }) {
     const [songData, setSongData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // useEffect(() => {
+    //   const [topSongs, setTopSongs] = useState([]);
+    
+    //   // Fetch top songs from backend
+    //   useEffect(() => {
     //     const fetchTopSongs = async () => {
-    //         try {
-    //             setLoading(true);
-    //             const response = await axios.get('/api/top-songs'); // Replace with backend point
-    //             setSongData(response.data);
-    //             setLoading(false);
-    //         } catch (err) {
-    //             setError('Failed to fetch top songs.');
-    //             setLoading(false);
-    //         }
+    //       try {
+    //         const response = await axios.get(`/user/${user_id}/top-songs?${new URLSearchParams({ n: 10 })}`);
+    //         const songs = response.data.songs;
+    //         songs.sort((a, b) => b.plays - a.plays); // Sort songs by play count in descending order
+    //         setTopSongs(songs);
+    //       } catch (error) {
+    //         console.error('Error fetching top songs:', error);
+    //       }
     //     };
-
+    
     //     fetchTopSongs();
-    // }, []);
-    // if (loading) {
-    //     return <Text>Loading...</Text>;
-    // }
-
-    // if (error) {
-    //     return <Text>{error}</Text>;
-    // }
+    //   }, []);
 
     const mockTopSongs = [
         { name: 'Song A', artist: 'Artist A', thumbnail: 'https://pbs.twimg.com/profile_images/1752515582665068544/3UsnVSp5_400x400.jpg', plays: 1500 },
@@ -109,6 +104,11 @@ const TopSongs = () => {
             </Flex>
         </Box>
     );
+    // return (
+    //  <VStack align="stretch" spacing={4}> {/* VStack to create a vertical column with spacing */}
+    //   {topSongs.map(song => (
+    //     <SongsItem key={song.id} song={song} />
+    //   ))}
+    //  </VStack>
+    //   );
 };
-
-export default TopSongs;

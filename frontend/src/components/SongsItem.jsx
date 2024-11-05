@@ -2,12 +2,16 @@ import { Image, Box, Flex } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
 export default function SongsItem({ song }) {
-    const { name, artist, thumbnail, plays, id } = song; // Destructuring the song object
+    // Destructuring the song object { name, artist, thumbnail, plays} = song
+    const name = song.name; 
+    const artist = song.artist;
+    const thumbnail = song.image;
+    const plays = song.plays;
 
     return (
         <Flex justifyContent="space-between" alignItems="center" marginBottom="0.5em" padding="0.5em">
             {/* Thumbnail */}
-            <Link to={`/song/${id}`}>
+            <Link to={`/song/${thumbnail}`}>
                 <Image
                     src={thumbnail}
                     alt={`${name} cover`}
@@ -21,7 +25,7 @@ export default function SongsItem({ song }) {
             {/* Song and Artist Information */}
             <Flex justifyContent="space-between" alignItems="center" flexGrow="1">
                 <Box fontWeight="bold">
-                    <Link to={`/song/${id}`}>{name}</Link>
+                    <Link to={"/song/"+song.id}>{name}</Link>
                 </Box>
                 <Box color="#666" fontSize="0.9rem" textAlign="right" whiteSpace="nowrap" marginLeft="1em">
                     {artist}
