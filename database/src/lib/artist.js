@@ -91,4 +91,19 @@ export default class Artist {
             ${n ? this.#sql`LIMIT ${n}` : this.#sql``}`
         return result
     }
+
+    async searchByName(query) {
+        const result = await this.#sql`
+            SELECT
+                name
+            FROM
+                artists
+            WHERE
+                name ILIKE ${'%' + query + '%'}
+            ORDER BY
+                name ASC
+            LIMIT 10
+        `
+        return result.map(row => row.name)
+    }
 }

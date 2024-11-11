@@ -13,6 +13,9 @@ const limitSchema = z.object({
         z.literal(-1).nullish().default(-1) // or -1
     ])
 })
+const searchQuerySchema = z.object({
+    query: z.string().min(1).max(100) // Adjust max length based on expected input
+})
 
 router.get('/:id', async (req, res, next) => {
     try {
@@ -65,5 +68,21 @@ router.get('/:id/top-listeners', async (req, res, next) => {
         return next(e)
     }
 })
+
+// Route for search suggestions
+router.get('/search', async (req, res, next) => {
+    try {
+        const { query } = searchQuerySchema.parse(req.query);
+        
+        const result = await Database.Artist.searchByName(query);
+        res.json(result);
+    } catch (e) {
+        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
+            res.status(400).json({ message: "Invalid search query" });
+        } else {
+            return next(e);
+        }
+    }
+});
 
 export default router
