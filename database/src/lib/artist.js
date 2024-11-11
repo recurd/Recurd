@@ -99,11 +99,11 @@ export default class Artist {
             FROM
                 artists
             WHERE
-                name ILIKE ${'%' + query + '%'}
+                name ILIKE ${query + '%'}
             ORDER BY
                 name ASC
             LIMIT 10
         `
         return result.map(row => row.name)
-    }
+    }    
 }
