@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Avatar, Box, Icon } from "@chakra-ui/react"
+import { Avatar, Box, Icon, Text } from "@chakra-ui/react"
 import { SiHeadphonezone } from "react-icons/si";
 import Activity from "../components/Activity";
 import RecentListens from "../components/RecentListens";
@@ -38,13 +38,30 @@ function Profile() {
 
   return (
     <div>
+      
+      {/* Gray header box */}
+      <Box position="relative" textAlign="center" >
+      <Box
+        bg="gray.700"
+        width="100%"
+        height="150px" // Adjust height to cover up to middle of Avatar
+        position="absolute"
+        top="0"
+        left="0"
+        zIndex="1"
+        />
       {/* Profile header */}
-      <Box>
-        <Box fontSize='2.5rem'>{ displayName }</Box>
-        <Box>
-          <Avatar name={displayName} src={image} size='2xl'/>
+      
+      <Box textAlign='center' mb = '4' zIndex="3">
+        <Box fontSize='2.5rem' zIndex="3">{ displayName }</Box>
+        <Text fontSize="2.5rem" color="white" mt="-12" zIndex="3" position="relative">
+          {displayName}
+        </Text>
+        <Box display = 'flex' justifyContent = 'center' mt = '4'>
+          <Avatar name={displayName} src={image} size='2xl' zIndex="3"/>
         </Box>
       </Box>
+    </Box>
 
       <Box {...sectionHeaderStyle}>
           <Icon>
