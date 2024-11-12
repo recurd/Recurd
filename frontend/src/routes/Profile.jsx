@@ -1,10 +1,12 @@
 import { useParams } from "react-router-dom";
-import { Box, Icon } from "@chakra-ui/react"
+import { Avatar, Box, Icon, Text } from "@chakra-ui/react"
 import { SiHeadphonezone } from "react-icons/si";
 import Activity from "../components/Activity";
 import RecentListens from "../components/RecentListens";
 import TopAlbum from "../components/UserTopAlbum";
 import CurrentListen from "../components/CurrentListen";
+import { useEffect, useState } from "react";
+import backend from "../backend";
 
 const sectionHeaderStyle = {
   as:"h2", 
@@ -14,16 +16,52 @@ const sectionHeaderStyle = {
 
 function Profile() {
   const { id } = useParams() // this is user's id
+  const [displayName, setDisplayName] = useState(null)
+  const [image, setImage] = useState(null)
+  const [followers, setFollowers] = useState(null)
+  const [followings, setFollowings] = useState(null)
+
+  useEffect(() => {
+    (async () => {
+        try {
+          const res = await backend.get('/user/'+id+'/profile')
+          const data = res.data
+          setDisplayName(data.display_name)
+          setImage(data.image)
+          setFollowers(data.follower_count)
+          setFollowings(data.following_count)
+        } catch (error) {
+          console.error('Error fetching recent tracks:', error);
+        }
+    })()
+  }, [])
+
   return (
     <div>
-      {/* Header for the Profile Page */}
-      <h2>User Profile</h2>
       
-      {/* Placeholder for the profile description */}
-      {/* TODO: Display user's profile information */}
+      {/* Gray header box */}
+      <Box position="relative" textAlign="center" >
+      <Box
+        bg="gray.700"
+        width="100%"
+        height="150px" // Adjust height to cover up to middle of Avatar
+        position="absolute"
+        top="0"
+        left="0"
+        zIndex="1"
+        />
+      {/* Profile header */}
       
-      {/* Placeholder for the edit profile button (if viewing own profile) */}
-      {/* TODO: Implement edit button for logged-in users */}
+      <Box textAlign='center' mb = '4' zIndex="3">
+        <Box fontSize='2.5rem' zIndex="3">{ displayName }</Box>
+        <Text fontSize="2.5rem" color="white" mt="-12" zIndex="3" position="relative">
+          {displayName}
+        </Text>
+        <Box display = 'flex' justifyContent = 'center' mt = '4'>
+          <Avatar name={displayName} src={image} size='2xl' zIndex="3"/>
+        </Box>
+      </Box>
+    </Box>
 
       <Box {...sectionHeaderStyle}>
           <Icon>
@@ -37,9 +75,6 @@ function Profile() {
           <Icon>
           <SiHeadphonezone/></Icon> Recent Listens</Box>
       <RecentListens user_id={id}/>
-
-      {/* Placeholder for the reviews */}
-      {/* TODO: Display user's reviews */}
     </div>
   );
 }
