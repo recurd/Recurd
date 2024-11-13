@@ -41,7 +41,7 @@ function NavBar() {
   return (
     <div className={`bg-navbar w-full sticky flex top-0 z-10 h-[49px] items-center text-[35px]`}>
       {/* Upper-left project title */}
-      <h1 className={`pl-[21px]`}>
+      <h1 className={`text-white pl-[10px]`}>
         Recurd
       </h1>
       {/* Div for search and menu buttons */}
@@ -49,7 +49,7 @@ function NavBar() {
         <Search/>
         <button className={`w-[41px] h-[41px]`}>
           {/* Menu stack svg */}
-          <svg className={`transition duration-100 text-[#1D1B20] hover:text-white`} width="41" height="41" viewBox="0 0 41 41" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <svg className={`transition duration-100 text-white`} width="41" height="41" viewBox="0 0 41 41" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M5.125 30.75V27.3333H35.875V30.75H5.125ZM5.125 22.2083V18.7917H35.875V22.2083H5.125ZM5.125 13.6667V10.25H35.875V13.6667H5.125Z" fill="currentColor"/>
           </svg>
         </button>
