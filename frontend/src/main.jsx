@@ -17,6 +17,7 @@ import Review from './routes/Review.jsx'
 import Settings from './routes/Settings.jsx'
 import { isLoggedIn } from './user.js'
 import { servicesCallbackPath, spotifyRedirLoader } from './services.js'
+import './assets/css/index.css';
 
 // Redirects to login page if user is not logged in
 export async function authGateLoader({request}) {
