@@ -17,6 +17,8 @@ import {
   Stack,
 } from '@chakra-ui/react';
 import Search from './Search';
+import logo from '../assets/image/RecurdLogo.png';
+import { Link } from 'react-router-dom';
 
 const Links = ['Album', 'Artist', 'Profile'];
 
@@ -39,13 +41,13 @@ function NavBar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <div className={`bg-navbar w-full sticky flex top-0 z-10 h-[49px] items-center text-[35px]`}>
+    <div className={`bg-navbar shadow-md w-full sticky flex top-0 z-10 h-[49px] items-center text-[35px]`}>
       {/* Upper-left project title */}
-      <h1 className={`text-white pl-[10px]`}>
-        Recurd
-      </h1>
+      <Link to='/' className={`w-full h-full`}>
+        <img src={logo} className={`pl-[10px] pt-[5px] h-full w-auto`}/>
+      </Link>
       {/* Div for search and menu buttons */}
-      <div className={`ml-auto pr-[9px] w-full h-full flex items-center justify-end`}>
+      <div className={`ml-auto pr-[9px] w-full h-full flex gap-x-[4px] items-center justify-end`}>
         <Search/>
         <button className={`w-[41px] h-[41px]`}>
           {/* Menu stack svg */}
