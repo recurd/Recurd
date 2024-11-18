@@ -1,3 +1,6 @@
+// Concurrently safe insertion of metadata
+import { LockType } from "./locktype.js"
+import { hashString } from "../util.js"
 import { removeNullish } from "../util.js"
 
 export default class Metadata {
@@ -208,31 +211,51 @@ async function findOrInsertAlbum({ album, albumArtists }, sqlTxact) {
 // Internal function, with transaction context
 // NOT CONCURRENTLY SAFE
 async function findOrInsertArtists(artists, sqlTxact) {
-    try {
-        // create temp table with same type as artists (excluding id column)
-        await sqlTxact`
-            CREATE TEMPORARY TABLE temp_artists (LIKE artists); 
-            ALTER TABLE temp_artists DROP COLUMN id`.simple() 
-        artists.forEach(e => removeNullish(e))
-        await sqlTxact`INSERT INTO temp_artists ${sqlTxact(artists)}`
-        const res = await sqlTxact`
-            WITH existed AS (
-                SELECT *
-                FROM artists 
-                WHERE name IN (SELECT name FROM temp_artists)
-            ), inserted AS (
-                INSERT INTO artists (name, image, description)
-                SELECT *
-                FROM temp_artists ta
+    // Sort artist by names (alphabetically) to ensure locking in predetermined order
+    artists.sort((a, b) => a.name.localeCompare(b.name))
+
+    const resArtists = []
+    // For each artist,
+    // 1. Lock by name
+    // 2. Insert into table, if exists do nothing and grab existing info
+    // 3. Unlock
+    for (const artist of artists) {
+        await sqlTxact`SELECT pg_advisory_xact_lock(${LockType.ARTIST}, ${hashString(artist.name)})`
+
+        const [rArtist] = await sqlTxact`
+            INSERT INTO artists 
+                ${sqlTxact(artist, 'name', 'image', 'description')}
                 WHERE NOT EXISTS (SELECT name FROM existed WHERE name = ta.name)
-                RETURNING *
-            )
-            SELECT *, TRUE AS found FROM existed
-            UNION
-            SELECT *, FALSE AS found FROM inserted`
-        // console.log('artists created and/or found:', artists)
-        return res
-    } finally {
-        await sqlTxact`DROP TABLE temp_artists`
-    } // let error propogate up
+                RETURNING *`
+        resArtists.push(rArtist)
+        await sqlTxact`SELECT pg_advisory_xact_unlock(${LockType.ARTIST}, ${hashString(artist.name)})`
+    }
+
+    // try {
+    //     // create temp table with same type as artists (excluding id column)
+    //     await sqlTxact`
+    //         CREATE TEMPORARY TABLE temp_artists (LIKE artists); 
+    //         ALTER TABLE temp_artists DROP COLUMN id`.simple() 
+    //     artists.forEach(e => removeNullish(e))
+    //     await sqlTxact`INSERT INTO temp_artists ${sqlTxact(artists)}`
+    //     const res = await sqlTxact`
+    //         WITH existed AS (
+    //             SELECT *
+    //             FROM artists 
+    //             WHERE name IN (SELECT name FROM temp_artists)
+    //         ), inserted AS (
+    //             INSERT INTO artists (name, image, description)
+    //             SELECT *
+    //             FROM temp_artists ta
+    //             WHERE NOT EXISTS (SELECT name FROM existed WHERE name = ta.name)
+    //             RETURNING *
+    //         )
+    //         SELECT *, TRUE AS found FROM existed
+    //         UNION
+    //         SELECT *, FALSE AS found FROM inserted`
+    //     // console.log('artists created and/or found:', artists)
+    //     return res
+    // } finally {
+    //     await sqlTxact`DROP TABLE temp_artists`
+    // } // let error propogate up
 }
