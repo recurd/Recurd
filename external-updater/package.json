@@ -12,6 +12,7 @@
   "dependencies": {
     "cron": "^3.1.8",
     "dotenv": "^16.4.5",
+    "rabbitmq-stream-js-client": "^0.4.2",
     "recurd-database": "file:../database",
     "recurd-external": "file:../external"
   },
