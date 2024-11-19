@@ -7,7 +7,7 @@ const ServiceFactories = {
 }
 
 // Call this function if the user is not yet connected to the service
-async function connectService(service_type: ServiceType, user_id: string, payload: any) : Promise<Service> {
+export async function connectService(service_type: ServiceType, user_id: string, payload: any) : Promise<Service> {
     if (!(service_type in ServiceFactories)) {
         return Promise.reject('Unknown service type')
     }
@@ -16,7 +16,7 @@ async function connectService(service_type: ServiceType, user_id: string, payloa
 }
 
 // Call this function if the user has connected to the service
-async function findService(service_type: ServiceType, user_id: string) : Promise<Service | undefined> {
+export async function findService(service_type: ServiceType, user_id: string) : Promise<Service | undefined> {
     if (!(service_type in ServiceFactories)) {
         return undefined
     }
@@ -24,8 +24,5 @@ async function findService(service_type: ServiceType, user_id: string) : Promise
     return factory.fromDatabase(user_id)
 }
 
-export default {
-    connectService,
-    findService,
-    ServiceType
-}
+export { APIError, FetchError, RefreshError } from './api/Types.js'
+export { ServiceType, Service } from './services/Types.js'

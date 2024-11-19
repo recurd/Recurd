@@ -1,7 +1,7 @@
 // Handles conversion between Spotify's Web API and our database acceptable inputs
+import * as Types from '../api/SpotifyTypes.js'
 
-import * as Spotify from '../api/Spotify.js'
-function formatTokens(tokens: Spotify.TokenResponse) {
+function formatTokens(tokens: Types.TokenResponse) {
     return {
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token,
@@ -11,7 +11,7 @@ function formatTokens(tokens: Spotify.TokenResponse) {
     }
 }
 
-export function formatSmplArtist(artist: Spotify.SmplArtist) {
+export function formatSmplArtist(artist: Types.SmplArtist) {
     return {
         name: artist.name
     }
@@ -26,7 +26,7 @@ function parseReleaseDate(datestring: string) : Date {
     ))
 }
 
-export function formatAlbum(album: Spotify.Album) {
+export function formatAlbum(album: Types.Album) {
     return {
         name: album.name,
         artists: album.artists.map(e=>formatSmplArtist(e)),
@@ -38,7 +38,7 @@ export function formatAlbum(album: Spotify.Album) {
     }
 }
 
-function formatTrack(track: Spotify.Track) {
+function formatTrack(track: Types.Track) {
     return {
         song: {
             name: track.name,
@@ -53,7 +53,7 @@ function formatTrack(track: Spotify.Track) {
     }
 }
 
-function formatTrackToMetadatas(track: Spotify.Track) {
+function formatTrackToMetadatas(track: Types.Track) {
     const { song, trackInfo } = formatTrack(track)
     // Extract fields from song for insertion
     const procSong: any = song // cast to any to delete properties that we can't allow when inserting into DB
@@ -72,7 +72,7 @@ function formatTrackToMetadatas(track: Spotify.Track) {
     }
 }
 
-function formatPlayHistoryObject(listen: Spotify.PlayHistoryObject) {
+function formatPlayHistoryObject(listen: Types.PlayHistoryObject) {
     const time_stamp = new Date(listen.played_at)
     return {
         time_stamp,

@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { z } from "zod"
-import External from "recurd-external"
+import { connectService } from "recurd-external"
 import { authGate, getAuthUser } from "../../auth.js"
 
 const router = Router()
@@ -14,7 +14,7 @@ router.post('/connect', authGate(), async (req, res, next) => {
             }).parse(req.body)
         const user_id = getAuthUser(req).id
 
-        const service = await External.connectService('spotify', user_id, { auth_code, redirect_uri })
+        const service = await connectService('spotify', user_id, { auth_code, redirect_uri })
         if (!service) {
             res.status(500).json({ message: 'Failed to connect user to spotify service! Uesr id: '+user_id })
             return
