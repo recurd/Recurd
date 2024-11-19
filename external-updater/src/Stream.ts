@@ -2,6 +2,10 @@ import rabbit from 'rabbitmq-stream-js-client'
 import dotenv from "dotenv"
 dotenv.config()
 
+export enum StreamTypes {
+    LISTENS = 'listens'
+}
+
 export async function getStreamClient(streamName : string) : Promise<rabbit.Client> {
     const client = await rabbit.connect({
         hostname: process.env.RABBIT_HOST!,
