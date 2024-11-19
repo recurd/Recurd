@@ -2,7 +2,7 @@ import { Router } from "express"
 import bcrypt from "bcrypt"
 import Database from "../db.js"
 import { authGate } from '../auth.js'
-import { userSchemaT } from "../schemas/user.js"
+import { userSchema } from "../schemas/user.js"
 
 const router = Router()
 
@@ -10,7 +10,7 @@ const router = Router()
 // Body: username (string), password (string)
 router.post('/password', async (req, res, next) => {
     try {
-        const { username, password } = userSchemaT.pick({ username: true, password: true}).parse(req.body)
+        const { username, password } = userSchema.pick({ username: true, password: true}).parse(req.body)
 
         const user = await Database.User.getByUsername(username)
         if (!user) {
