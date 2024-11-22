@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { z } from "zod"
 import Database from "../../db.js"
-import External from "recurd-external"
+import { findService } from "recurd-external"
 import topRouter from './top.js'
 import { timestampPaginationSchemaT, idSchema } from "../../schemas/shared.js"
 import { userServicesTypeSchema } from "../../schemas/user.js"
@@ -62,7 +62,7 @@ router.get('/:user_id/currently-listening', async (req, res, next) => {
 
         // Find any currently listening songs from connected services, return first found
         for (const s_type of services) {
-            const service = await External.findService(s_type, user_id)
+            const service = await findService(s_type, user_id)
             if (!service) {
                 console.error(`recurd-external cannot find service ${s_type} for a user when it should exist`)
                 res.status(500).end()
@@ -88,7 +88,7 @@ router.get('/:user_id/recent-listens-temp', async (req, res, next) => {
         const services = await Database.User.getServices(user_id)
         const listens = []
         for (const s_type of services) {
-            const service = await External.findService(s_type, user_id)
+            const service = await findService(s_type, user_id)
             if (!service) {
                 console.error(`recurd-external cannot find service ${s_type} for a user when it should exist`)
                 continue
