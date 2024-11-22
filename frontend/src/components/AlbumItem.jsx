@@ -11,7 +11,7 @@ export default function AlbumItem({album}){
         <Box cursor="pointer" onClick={() => navigate("/album/"+album.id)} className={"relative w-full aspect-square p-2"} 
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}>
-            <Image src={album.image} alt={album.title} className={"aspect-square"} objectFit="cover"/>
+            <Image src={album.image} alt={album.title} className={"aspect-square shadow-md"} objectFit="cover"/>
                     {/* Gradient overlay - visible on hover */}
                     <Box
                         className={`absolute bottom-2 left-2 right-2 h-[50%] bg-gradient-to-t from-black to-transparent transition-opacity duration-100 ${hovered ? 'opacity-70' : 'opacity-0'}`}
