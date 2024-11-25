@@ -84,4 +84,26 @@ export default class Song {
             ${n ? this.#sql`LIMIT ${n}` : this.#sql``}`
         return result
     }
+
+    async getSongsByHour({ userId, date }) {
+        const result = await this.#sql`
+            SELECT
+                EXTRACT(HOUR FROM l.time_stamp) AS hour,
+                s.id AS song_id,
+                s.title AS song_title,
+                COUNT(l.id) AS listen_count
+            FROM
+                listens l
+            JOIN
+                songs s ON l.song_id = s.id
+            WHERE
+                l.user_id = ${userId}
+                AND DATE(l.time_stamp) = ${date}
+            GROUP BY
+                hour, s.id, s.title
+            ORDER BY
+                hour ASC
+        `
+        return result
+    }    
 }
