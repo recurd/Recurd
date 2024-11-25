@@ -2,7 +2,7 @@ import { Router } from "express"
 import { z } from "zod"
 import Database from "../db.js"
 import { authGate, getAuthUser } from "../auth.js"
-import { albumSchemaT, artistSchema, songSchema, trackSchema } from "../schemas/metadata.js"
+import { albumSchema, artistSchema, songSchema, trackSchema } from "../schemas/metadata.js"
 import { coerceStrSchemaT, timestampSchemaT, idSchema } from "../schemas/shared.js"
 
 const router = Router()
@@ -48,7 +48,7 @@ router.post('/log', authGate(), async (req, res, next) => {
         // optional
         song_metadata: songSchema.omit({ name: true }).nullish(),
         track_metadata: trackSchema.nullish(),
-        album: albumSchemaT.nullish(),
+        album: albumSchema.nullish(),
         album_artists: artistArraySchemaT.nullish(),
         time_stamp: timestampSchemaT.nullish()
     })

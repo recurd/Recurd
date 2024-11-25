@@ -8,7 +8,7 @@ export const artistSchema = z.object({
 })
 
 export const albumTypeSchema = z.enum(['album', 'single'])
-export const albumSchemaT = z.object({ 
+export const albumSchema = z.object({ 
     name: coerceStrSchemaT,
     image: urlSchema.nullish(),
     album_type: albumTypeSchema.nullish(), // has DB default

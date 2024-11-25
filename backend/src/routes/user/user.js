@@ -3,7 +3,7 @@ import { z } from "zod"
 import Database from "../../db.js"
 import External from "recurd-external"
 import topRouter from './top.js'
-import { timestampPaginationSchemaT, idSchema } from "../../schemas/shared.js"
+import { timestampPaginationSchema, idSchema } from "../../schemas/shared.js"
 import { userServicesTypeSchema } from "../../schemas/user.js"
 
 const router = Router({mergeParams: true})
@@ -26,7 +26,7 @@ router.use('/:user_id/top', topRouter)
 router.get('/:user_id/listens', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
-        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.query)
+        const { start_date, end_date, n } = timestampPaginationSchema.parse(req.query)
 
         const listens = await Database.User.getListens({
             user_id: user_id,
