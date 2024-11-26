@@ -12,7 +12,7 @@ export async function getStreamClient(streamName : string) : Promise<rabbit.Clie
         port: Number.parseInt(process.env.RABBIT_PORT!),
         username: process.env.RABBIT_USERNAME!,
         password: process.env.RABBIT_PASSWORD!,
-        vhost: "/",
+        vhost: process.env.RABBIT_VHOST!,
         // ssl: {
         //     key: "<client_private_key>",
         //     cert: "<client_certificate>",
