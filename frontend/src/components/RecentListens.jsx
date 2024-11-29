@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box } from '@chakra-ui/react';
 import backend from '../backend.js'; // Using the pre-configured backend
 import ListenItem from './ListenItem.jsx';
+import { createStreamConsumer, streamType } from '../stream.js';
 
 export default function RecentListens({ user_id }) {
   const [recentTracks, setRecentTracks] = useState([]); // Use mock data instead of fetching from API
@@ -20,7 +21,18 @@ export default function RecentListens({ user_id }) {
       }
     }
 
-    fetchRecentTracks()
+    fetchRecentTracks();
+
+    (async () => {
+      await createStreamConsumer(streamType.LISTENS, (message) => {
+        const listen = JSON.parse(message.content.toString('utf-8'))
+        setRecentTracks([...recentTracks, listen])
+      }, {
+        filter: {
+          values: [ user_id ]
+        }
+      })
+    })()
   }, [])
 
   return (
