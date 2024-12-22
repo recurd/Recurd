@@ -116,6 +116,21 @@ export default class Album {
             ${n ? this.#sql`LIMIT ${n}` : this.#sql``}`
         return result
     }
+
+    async searchByName(query) {
+        const result = await this.#sql`
+            SELECT
+                name
+            FROM
+                albums
+            WHERE
+                name ILIKE ${query + '%'}
+            ORDER BY
+                name ASC
+            LIMIT 10
+        `
+        return result.map(row => row.name)
+    }  
 }
 
 // Old version of album ratings, where we always return an array of { rating: int, count: int }
