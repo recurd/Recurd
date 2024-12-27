@@ -8,18 +8,17 @@ export default function Podium ({ topArtists }) {
   }
 
   const podiumOrder = [
-    { place: "2nd", height: "8", artist: topArtists[1] },
-    { place: "1st", height: "10", artist: topArtists[0] },
-    { place: "3rd", height: "6", artist: topArtists[2] }, 
+    { place: "2nd", height: "8", artist: topArtists[1].name, listens: topArtists[1].listen_count, image: topArtists[1].image },
+    { place: "1st", height: "10", artist: topArtists[0].name, listens: topArtists[0].listen_count, image: topArtists[0].image },
+    { place: "3rd", height: "6", artist: topArtists[2].name, listens: topArtists[2].listen_count, image: topArtists[2].image }, 
   ];
 
   const longList = [
-    { place: "4th", artist: topArtists[3] },
-    { place: "5th", artist: topArtists[4] },
+    { place: "4th", artist: topArtists[3].name, listens: topArtists[3].listen_count, image: topArtists[3].image },
+    { place: "5th", artist: topArtists[4].name, listens: topArtists[4].listen_count, image: topArtists[4].image },
   ];
 
   const testImage = "https://hips.hearstapps.com/hmg-prod/images/gettyimages-1254695432-crop-6711597f37fae.jpg?crop=1xw:1xh;center,top&resize=640:*"
-  const testCount = 76
 
   return (
     <Box>
@@ -48,7 +47,7 @@ export default function Podium ({ topArtists }) {
               borderRadius="0"
               boxShadow="md"
             >
-              <Text fontWeight="bold">{testCount}</Text>
+              <Text fontWeight="bold">{podium.listens}</Text>
             </Box>
             <Text fontWeight="bold">{podium.artist}</Text>
           </VStack>
@@ -82,7 +81,7 @@ export default function Podium ({ topArtists }) {
 
             <Text fontWeight="bold" mx={3}>{entry.artist}</Text>
             
-            <Text fontWeight="bold" position="absolute" left="27rem">{testCount}</Text>
+            <Text fontWeight="bold" position="absolute" left="27rem">{entry.listens}</Text>
           </Box>
         ))}
       </Box>
