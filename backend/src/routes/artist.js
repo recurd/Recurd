@@ -2,7 +2,7 @@ import { Router } from "express"
 import { z } from "zod"
 import Database from "../db.js"
 import { DBErrorCodes, isDBError } from "../util.js"
-import { idSchema, timestampPaginationSchemaT } from "../schemas/shared.js"
+import { idSchema, timestampPaginationSchema } from "../schemas/shared.js"
 
 const router = Router()
 
@@ -13,6 +13,27 @@ const limitSchema = z.object({
         z.literal(-1).nullish().default(-1) // or -1
     ])
 })
+const searchQuerySchema = z.object({
+    query: z.string()
+        .min(1, { message: "Search query must not be empty" })
+        .max(100, { message: "Search query must not exceed 100 characters" })
+});
+
+// Route for search suggestions
+router.get('/search', async (req, res, next) => {
+    try {
+        const { query } = searchQuerySchema.parse(req.query);
+        
+        const result = await Database.Artist.searchByName(query);
+        res.json(result);
+    } catch (e) {
+        if (isDBError(e, DBErrorCodes.INVALID_TEXT_REPRESENTATION)) {
+            res.status(400).json({ message: "Invalid search query" });
+        } else {
+            return next(e);
+        }
+    }
+});
 
 router.get('/:id', async (req, res, next) => {
     try {
@@ -53,7 +74,7 @@ router.get('/:id/songs', async (req, res, next) => {
 router.get('/:id/top-listeners', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
-        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.query)
+        const { start_date, end_date, n } = timestampPaginationSchema.parse(req.query)
         const result = await Database.Artist.getTopListeners({
             id: id,
             start_date: start_date,
