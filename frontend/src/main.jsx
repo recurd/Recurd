@@ -15,6 +15,7 @@ import Song from './routes/Song.jsx'
 import Profile from './routes/Profile.jsx'
 import Review from './routes/Review.jsx'
 import Settings from './routes/Settings.jsx'
+import NavBar from './components/Navbar.jsx'
 import { isLoggedIn } from './user.js'
 import { servicesCallbackPath, spotifyRedirLoader } from './services.js'
 import './assets/css/index.css';
@@ -43,7 +44,7 @@ const router = createBrowserRouter([{
       loader: authGateLoader
     }, {
       path: "profile/:id",
-      element: <Profile/>
+      element: <><NavBar/><Profile/></>
     }, {
       path: "review/:id",
       element: <Review />
