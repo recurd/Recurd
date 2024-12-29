@@ -67,7 +67,12 @@ function Profile() {
 
       <div className={"flex"}>
         {/* Left column */}
+        
         <div className={"w-3/5 px-[30px]"}>
+          <Box {...sectionHeaderStyle}>
+            <Icon>
+            <SiHeadphonezone/></Icon> Top Artists</Box>
+          <TopArtists user_id={id}/>
           <Box {...sectionHeaderStyle}>
               <Icon>
               <SiHeadphonezone/></Icon> Top Albums</Box>
