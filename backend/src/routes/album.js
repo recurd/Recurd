@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { z } from "zod"
 import Database from "../db.js"
-import { idSchema, timestampPaginationSchemaT } from "../schemas/shared.js"
+import { idSchema, timestampPaginationSchema } from "../schemas/shared.js"
 
 const router = Router()
 
@@ -63,7 +63,7 @@ router.get('/:id/reviews', async (req, res, next) => {
 router.get('/:id/top-listeners', async (req, res, next) => {
     try {
         const { id } = paramsIdSchema.parse(req.params)
-        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.query)
+        const { start_date, end_date, n } = timestampPaginationSchema.parse(req.query)
         const result = await Database.Album.getTopListeners({
             id: id,
             start_date: start_date,

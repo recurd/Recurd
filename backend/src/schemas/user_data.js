@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { timestampSchemaT, idSchema, nonEmptyStrSchema } from "./shared.js"
 
-export const listenSchemaT = z.object({
+export const listenSchema = z.object({
     user_id: idSchema,
     song_id: idSchema,
     time_stamp: timestampSchemaT.nullish()

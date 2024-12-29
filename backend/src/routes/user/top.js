@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { z } from "zod"
 import Database from "../../db.js"
-import { idSchema, timestampPaginationSchemaT } from "../../schemas/shared.js"
+import { idSchema, timestampPaginationSchema } from "../../schemas/shared.js"
 
 const router = Router({mergeParams: true})
 
@@ -9,7 +9,7 @@ const router = Router({mergeParams: true})
 router.get('/artists', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
-        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.query)
+        const { start_date, end_date, n } = timestampPaginationSchema.parse(req.query)
 
         const topArtists = await Database.User.getTopArtists({
             user_id: user_id,
@@ -27,7 +27,7 @@ router.get('/artists', async (req, res, next) => {
 router.get('/albums', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
-        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.query)
+        const { start_date, end_date, n } = timestampPaginationSchema.parse(req.query)
 
         const topAlbums = await Database.User.getTopAlbums({
             user_id: user_id,
@@ -46,7 +46,7 @@ router.get('/albums', async (req, res, next) => {
 router.get('/songs', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
-        const { start_date, end_date, n } = timestampPaginationSchemaT.parse(req.query)
+        const { start_date, end_date, n } = timestampPaginationSchema.parse(req.query)
 
         const topSongs = await Database.User.getTopSongs({
             user_id: user_id,
