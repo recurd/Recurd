@@ -28,7 +28,7 @@ export default function Podium ({ topArtists }) {
           <VStack key={index} spacing={2} textAlign="center" mx={2}>
             <Box position="relative" top="-1rem">
               <Image
-                src={testImage}
+                src={podium.image ? (podium.image) : (testImage) }
                 alt={`Artist ${index + 1}`}
                 borderRadius="full"
                 boxSize="4rem"
@@ -72,7 +72,7 @@ export default function Podium ({ topArtists }) {
             <Text fontWeight="bold" position="absolute" left="0.33rem">{entry.place}</Text>
 
             <Image
-              src={testImage}
+              src={entry.image ? (entry.image) : (testImage) }
               alt={`Artist ${index + 4}`}
               borderRadius="full"
               boxSize="2.5rem"
