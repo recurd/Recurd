@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Text, VStack, HStack, Image } from "@chakra-ui/react";
 
 export default function Podium ({ topArtists }) {
@@ -18,7 +18,13 @@ export default function Podium ({ topArtists }) {
     { place: "5th", artist: topArtists[4].name, listens: topArtists[4].listen_count, image: topArtists[4].image },
   ];
 
-  const testImage = "https://hips.hearstapps.com/hmg-prod/images/gettyimages-1254695432-crop-6711597f37fae.jpg?crop=1xw:1xh;center,top&resize=640:*"
+  const altImage = "https://hips.hearstapps.com/hmg-prod/images/gettyimages-1254695432-crop-6711597f37fae.jpg?crop=1xw:1xh;center,top&resize=640:*"
+
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    setAnimate(true);
+  }, []);
 
   return (
     <Box>
@@ -28,7 +34,7 @@ export default function Podium ({ topArtists }) {
           <VStack key={index} spacing={2} textAlign="center" mx={2}>
             <Box position="relative" top="-1rem">
               <Image
-                src={podium.image ? (podium.image) : (testImage) }
+                src={podium.image ? (podium.image) : (altImage) }
                 alt={`Artist ${index + 1}`}
                 borderRadius="full"
                 boxSize="4rem"
@@ -40,12 +46,16 @@ export default function Podium ({ topArtists }) {
             <Box
               bg="gray.200"
               width="8rem"
-              height={`${podium.height}rem`}
+              height="0rem"
               display="flex"
               alignItems="top"
               justifyContent="center"
               borderRadius="0"
               boxShadow="md"
+              style={{
+                height: animate ? `${podium.height}rem` : "0rem",
+                transition: "height 1.5s ease-in-out",
+              }}
             >
               <Text fontWeight="bold">{podium.listens}</Text>
             </Box>
@@ -72,7 +82,7 @@ export default function Podium ({ topArtists }) {
             <Text fontWeight="bold" position="absolute" left="0.33rem">{entry.place}</Text>
 
             <Image
-              src={entry.image ? (entry.image) : (testImage) }
+              src={entry.image ? (entry.image) : (altImage) }
               alt={`Artist ${index + 4}`}
               borderRadius="full"
               boxSize="2.5rem"
