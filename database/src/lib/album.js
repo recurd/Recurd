@@ -120,7 +120,7 @@ export default class Album {
     async searchByName(query) {
         const result = await this.#sql`
             SELECT
-                name
+                name, id
             FROM
                 albums
             WHERE
@@ -129,7 +129,7 @@ export default class Album {
                 name ASC
             LIMIT 10
         `
-        return result.map(row => row.name)
+        return result.map(row => ({ name: row.name, id: row.id }))
     }  
 }
 

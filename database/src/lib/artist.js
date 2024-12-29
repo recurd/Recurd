@@ -95,7 +95,7 @@ export default class Artist {
     async searchByName(query) {
         const result = await this.#sql`
             SELECT
-                name
+                name, id
             FROM
                 artists
             WHERE
@@ -104,6 +104,6 @@ export default class Artist {
                 name ASC
             LIMIT 10
         `
-        return result.map(row => row.name)
+        return result.map(row => ({ name: row.name, id: row.id }))
     }    
 }
