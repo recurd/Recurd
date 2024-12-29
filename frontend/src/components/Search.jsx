@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SearchInput from './SearchInput';
 
 function Search() {
@@ -10,6 +11,8 @@ function Search() {
 
     const inputRef = useRef(null);
 
+    const navigate = useNavigate();
+
     // We need a short delay before closing due to lost focus to prevent immediately
     // re-opening the search box with the click
     // let timer = null;
@@ -18,6 +21,16 @@ function Search() {
         setSearchOpen(false);
         //timer = setTimeout(() => setSearchOpen(false), 80);
       };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
+        const query = event.currentTarget.elements.namedItem("search_query").value;
+        
+        if(query == "") return;
+
+        navigate(`/search/${encodeURIComponent(query)}`)
+    };
 
     useEffect(() => {
         if (searchOpen && inputRef.current) {
@@ -34,6 +47,7 @@ function Search() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onLoseFocus={onLoseFocus}
+                onSubmit={handleSubmit}
                 disabled={!searchOpen}
             />
             <button disabled={searchOpen} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)} onMouseUp={() => { setSearchOpen(!searchOpen) }} className={`h-full aspect-square transition-all duration-100 ${searchOpen ? "pr-[8px] absolute scale-[80%] mr-[155px]" : ""}`}>

@@ -19,6 +19,7 @@ import NavBar from './components/Navbar.jsx'
 import { isLoggedIn } from './user.js'
 import { servicesCallbackPath, spotifyRedirLoader } from './services.js'
 import './assets/css/index.css';
+import SearchResults from './routes/SearchResults.jsx'
 
 // Redirects to login page if user is not logged in
 export async function authGateLoader({request}) {
@@ -57,6 +58,9 @@ const router = createBrowserRouter([{
     }, {
       path: "song/:id",
       element: <Song />
+    }, {
+      path: "search/:query",
+      element: <><NavBar/><SearchResults/></>
     }],
 }, {
   path: servicesCallbackPath.SPOTIFY,
