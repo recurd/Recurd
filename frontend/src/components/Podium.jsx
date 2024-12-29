@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Box, Text, VStack, HStack, Image } from "@chakra-ui/react";
+import { Box, Text, VStack, Image, Flex } from "@chakra-ui/react";
 
-export default function Podium ({ topArtists }) {
+export default function Podium({ topArtists }) {
   if (!topArtists || topArtists.length < 5) {
-    console.log(topArtists)
     return <Text>Not enough top artists available at the moment.</Text>;
   }
 
   const podiumOrder = [
     { place: "2nd", height: "8", artist: topArtists[1].name, listens: topArtists[1].listen_count, image: topArtists[1].image },
     { place: "1st", height: "10", artist: topArtists[0].name, listens: topArtists[0].listen_count, image: topArtists[0].image },
-    { place: "3rd", height: "6", artist: topArtists[2].name, listens: topArtists[2].listen_count, image: topArtists[2].image }, 
+    { place: "3rd", height: "6", artist: topArtists[2].name, listens: topArtists[2].listen_count, image: topArtists[2].image },
   ];
 
   const longList = [
@@ -27,25 +26,30 @@ export default function Podium ({ topArtists }) {
   }, []);
 
   return (
-    <Box>
+    <Box p={[2, 4, 8]}>
       {/*1, 2 & 3 places*/}
-      <Box display="flex" alignItems="flex-end" justifyContent="center" height="15rem" mt={4}>
+      <Box
+        display="flex"
+        alignItems="flex-end"
+        justifyContent="center"
+        height={{ base: "12rem", md: "15rem", lg: "18rem" }}
+        mt={[2, 4]}
+      >
         {podiumOrder.map((podium, index) => (
-          <VStack key={index} spacing={2} textAlign="center" mx={2}>
+          <VStack key={index} spacing={2} textAlign="center" mx={{ base: 1, md: 2 }}>
             <Box position="relative" top="-1rem">
               <Image
-                src={podium.image ? (podium.image) : (altImage) }
+                src={podium.image || altImage}
                 alt={`Artist ${index + 1}`}
                 borderRadius="full"
-                boxSize="4rem"
+                boxSize={{ base: "3rem", md: "4rem", lg: "5rem" }}
                 objectFit="cover"
                 border="2px solid white"
               />
             </Box>
-
             <Box
               bg="gray.200"
-              width="8rem"
+              width={{ base: "5rem", md: "7rem", lg: "9rem" }}
               height="0rem"
               display="flex"
               alignItems="top"
@@ -57,41 +61,57 @@ export default function Podium ({ topArtists }) {
                 transition: "height 1.5s ease-in-out",
               }}
             >
-              <Text fontWeight="bold">{podium.listens}</Text>
+              <Text fontWeight="bold" fontSize={{ base: "sm", md: "md", lg: "lg" }}>
+                {podium.listens}
+              </Text>
             </Box>
-            <Text fontWeight="bold">{podium.artist}</Text>
+            <Text fontWeight="bold" fontSize={{ base: "sm", md: "md", lg: "lg" }}>
+              {podium.artist}
+            </Text>
           </VStack>
         ))}
       </Box>
 
       {/*4 & 5 places*/}
-      <Box display="flex" flexDirection="column" alignItems="center" mt={8} gap={4} ml={30}>
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        mt={[4, 6, 8]}
+        gap={[2, 4]}
+        ml={{ base: 0, lg: 6 }}
+      >
         {longList.map((entry, index) => (
           <Box
             key={index}
             bg="gray.200"
-            width="24rem"
+            width={{ base: "20rem", md: "24rem", lg: "28rem" }}
             height="3rem"
             display="flex"
             alignItems="center"
             justifyContent="flex-start"
-            p={2}
+            p={[2, 4]}
             borderRadius="0"
             boxShadow="md"
           >
-            <Text fontWeight="bold" position="absolute" left="0.33rem">{entry.place}</Text>
-
-            <Image
-              src={entry.image ? (entry.image) : (altImage) }
-              alt={`Artist ${index + 4}`}
-              borderRadius="full"
-              boxSize="2.5rem"
-              objectFit="cover"
-            />
-
-            <Text fontWeight="bold" mx={3}>{entry.artist}</Text>
-            
-            <Text fontWeight="bold" position="absolute" left="27rem">{entry.listens}</Text>
+            <Flex alignItems="center" flex="1">
+              <Text fontWeight="bold" position="absolute" left="1.5rem" fontSize={{ base: "sm", md: "md" }}>
+                {entry.place}
+              </Text>
+              <Image
+                src={entry.image || altImage}
+                alt={`Artist ${index + 4}`}
+                borderRadius="full"
+                boxSize={{ base: "2rem", md: "2.5rem" }}
+                objectFit="cover"
+              />
+              <Text fontWeight="bold" mx={3} fontSize={{ base: "sm", md: "md", lg: "lg" }}>
+                {entry.artist}
+              </Text>
+            </Flex>
+            <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }} mx={3}>
+              {entry.listens}
+            </Text>
           </Box>
         ))}
       </Box>
