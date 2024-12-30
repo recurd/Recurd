@@ -2,9 +2,11 @@
 import { Router } from "express"
 import { z } from "zod"
 import Database from "../../db.js"
-import { idSchema } from "../../schemas/shared.js"
+import { idSchema, activityQuerySchema } from "../../schemas/shared.js"
 
 const router = Router({mergeParams: true})
+
+const paramsIdSchema = z.object({ user_id: idSchema })
 
 // Returns the hour, song id, song name, and number of listens within the hour for a day
 router.get('/songs-by-hour', async (req, res, next) => {
@@ -27,6 +29,18 @@ router.get('/songs-by-hour', async (req, res, next) => {
         res.status(200).json(songsByHour)
     } catch (e) {
         next(e)
+    }
+})
+
+router.get('/activity', async (req, res, next) => {
+    try {
+        const { user_id } =  paramsIdSchema.parse(req.params)
+        const { unit, start_date, end_date } = activityQuerySchema.parse(req.query)
+
+        const result = await Database.User.getActivity({ user_id, unit, start_date, end_date})
+        res.status(200).json(result)
+    } catch (e) {
+        return next(e)
     }
 })
 

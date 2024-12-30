@@ -193,7 +193,7 @@ export default class User {
                 ao.time_stamp DESC
         `
         return albumRatings
-    }    
+    }
 
     async getSongsByHour({ userId, date }) {
         const result = await this.#sql`
@@ -211,6 +211,27 @@ export default class User {
                 hour
             ORDER BY
                 hour ASC`
+        return result
+    }
+
+    async getActivity({ user_id, unit, start_date, end_date }) {
+        // unit accepts: minute, hour, day, week, month, quarter, year
+        const result = await this.#sql`
+            SELECT
+                COUNT(*) AS listen_count,
+                date_trunc(${unit}, l.time_stamp) as unit_value
+            FROM 
+                listens l
+            WHERE 
+                l.user_id = ${user_id}
+                AND l.time_stamp 
+                    ${start_date ? 
+                        this.#sql`BETWEEN ${start_date} AND ${end_date}` : 
+                        this.#sql`<= ${end_date}`}
+            GROUP BY 
+                unit_value
+            ORDER BY 
+                unit_value ASC`
         return result
     }
 }
