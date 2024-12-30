@@ -21,6 +21,32 @@ const opinionSchemaT = (callback= ((e) => e)) => {
     })
 }
 
+router.get('/song/:id', async (req, res, next) => {
+    try {
+        const { id } = z.object({ id: idSchema }).parse(req.params)
+        const result = await Database.Opinion.getSongOpinion(id)
+        if (result.count === 0)
+            res.status(404).end()
+        else
+            res.status(200).json(result[0])
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.get('/album/:id', async (req, res, next) => {
+    try {
+        const { id } = z.object({ id: idSchema }).parse(req.params)
+        const result = await Database.Opinion.getAlbumOpinion(id)
+        if (result.count === 0)
+            res.status(404).end()
+        else
+            res.status(200).json(result[0])
+    } catch (e) {
+        return next(e)
+    }
+})
+
 // create or edit song opinion
 // if opinion_id is provided, then it is edited
 // otherwise, if a song_id is provided, and a new opinion is created

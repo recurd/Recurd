@@ -7,6 +7,20 @@ export default class Opinion {
         this.#sql = sql
     }
 
+    async getSongOpinion(id)  {
+        return await this.#sql`
+            SELECT *
+            FROM    song_opinions s
+            WHERE   id = ${id}`
+    }
+
+    async getAlbumOpinion(id)  {
+        return await this.#sql`
+            SELECT *
+            FROM    album_opinions a
+            WHERE   id = ${id}`
+    }
+
     async insertSongOpinion({ user_id, song_id, time_stamp, rating, review }) {
         const songOpinion = { user_id, song_id, time_stamp, rating, review }
         return await this.#sql`
