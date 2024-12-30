@@ -40,12 +40,35 @@ router.get('/:user_id/listens', async (req, res, next) => {
     }
 })
 
-router.get('/:user_id/album-ratings', async (req, res, next) => {
+router.get('/:user_id/ratings', async (req, res, next) => {
     try {
         const user_id = idSchema.parse(req.params.user_id)
         const albumRatings = await Database.User.getAlbumRatings(user_id)
+        const songRatings = await Database.User.getSongRatings(user_id)
 
-        res.status(200).json({ album_ratings: albumRatings || [] })
+        res.status(200).json({ album_ratings: albumRatings, song_ratings: songRatings })
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.get('/:user_id/opinions/album', async (req, res, next) => {
+    try {
+        const user_id = idSchema.parse(req.params.user_id)
+        const albumOpinions = await Database.User.getAlbumOpininons(user_id)
+
+        res.status(200).json(albumOpinions)
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.get('/:user_id/opinions/song', async (req, res, next) => {
+    try {
+        const user_id = idSchema.parse(req.params.user_id)
+        const songOpinions = await Database.User.getSongOpininons(user_id)
+
+        res.status(200).json(songOpinions)
     } catch (e) {
         return next(e)
     }
