@@ -1,13 +1,13 @@
 
 import { Router } from "express"
 import { z } from "zod"
-import Database from "../db.js"
-import { idSchema } from "../schemas/shared.js"
+import Database from "../../db.js"
+import { idSchema } from "../../schemas/shared.js"
 
 const router = Router({mergeParams: true})
 
 // Returns the hour, song id, song name, and number of listens within the hour for a day
-router.get('/:user_id/songs-by-hour', async (req, res, next) => {
+router.get('/songs-by-hour', async (req, res, next) => {
     try {
         // Validate the user_id parameter
         const user_id = idSchema.parse(req.params.user_id)
@@ -24,7 +24,7 @@ router.get('/:user_id/songs-by-hour', async (req, res, next) => {
             date: date
         })
 
-        res.status(200).json({ songs_by_hour: songsByHour })
+        res.status(200).json(songsByHour)
     } catch (e) {
         next(e)
     }
