@@ -92,7 +92,7 @@ router.post('/album', authGate(), async (req, res, next) => {
 
 router.delete('/song', authGate(), async(req, res, next) => {
     try {
-        const { opinion_id } = z.object({ opinion_id: idSchema }).parse(req.body)
+        const { opinion_id } = z.object({ opinion_id: idSchema }).parse(req.query)
         const result = await Database.Opinion.deleteSongOpinion({ opinion_id })
         if (result.count === 0) {
             res.status(400).json({ message: "No opinion of the current user is found with this opinion_id" })
@@ -106,7 +106,7 @@ router.delete('/song', authGate(), async(req, res, next) => {
 
 router.delete('/album', authGate(), async(req, res, next) => {
     try {
-        const { opinion_id } = z.object({ opinion_id: idSchema }).parse(req.body)
+        const { opinion_id } = z.object({ opinion_id: idSchema }).parse(req.query)
         const result = await Database.Opinion.deleteAlbumOpinion({ opinion_id })
         if (result.count === 0) {
             res.status(400).json({ message: "No opinion of the current user is found with this opinion_id" })
