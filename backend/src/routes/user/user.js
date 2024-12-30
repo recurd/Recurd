@@ -105,12 +105,15 @@ router.get('/:user_id/recent-listens-temp', async (req, res, next) => {
 // Returns the hour, song id, song name, and number of listens within the hour for a day
 router.get('/:user_id/songs-by-hour', async (req, res, next) => {
     try {
+        // Validate the user_id parameter
         const user_id = idSchema.parse(req.params.user_id)
 
         // Validate the query parameters: expecting 'date' in YYYY-MM-DD format
-        const { date } = z.object({
-            date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (expected YYYY-MM-DD)")
-        }).parse(req.query)
+        const querySchema = z.object({
+            date: z.string().date()
+        })
+
+        const { date } = querySchema.parse(req.query)
 
         const songsByHour = await Database.User.getSongsByHour({
             userId: user_id,
