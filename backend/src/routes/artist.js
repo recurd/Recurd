@@ -2,7 +2,7 @@ import { Router } from "express"
 import { z } from "zod"
 import Database from "../db.js"
 import { DBErrorCodes, isDBError } from "../util.js"
-import { idSchema, timestampPaginationSchema } from "../schemas/shared.js"
+import { idSchema, timestampPaginationSchema, activityQuerySchema } from "../schemas/shared.js"
 
 const router = Router()
 
@@ -81,6 +81,18 @@ router.get('/:id/top-listeners', async (req, res, next) => {
             end_date: end_date,
             n: n
         })
+        res.status(200).json(result)
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.get('/:id/activity', async (req, res, next) => {
+    try {
+        const { id } = paramsIdSchema.parse(req.params)
+        const { unit, start_date, end_date } = activityQuerySchema.parse(req.query)
+
+        const result = await Database.Artist.getActivity({ id, unit, start_date, end_date})
         res.status(200).json(result)
     } catch (e) {
         return next(e)

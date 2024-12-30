@@ -117,6 +117,29 @@ export default class Album {
         return result
     }
 
+    async getActivity({ id, unit, start_date, end_date }) {
+        // unit accepts: minute, hour, day, week, month, quarter, year
+        const result = await this.#sql`
+            SELECT
+                COUNT(*) AS listen_count,
+                date_trunc(${unit}, l.time_stamp) as unit_value
+            FROM 
+                listens l
+            JOIN 
+                album_songs abs ON l.song_id = abs.song_id
+            WHERE 
+                abs.album_id = ${id}
+                AND l.time_stamp 
+                    ${start_date ? 
+                        this.#sql`BETWEEN ${start_date} AND ${end_date}` : 
+                        this.#sql`<= ${end_date}`}
+            GROUP BY 
+                unit_value
+            ORDER BY 
+                unit_value ASC`
+        return result
+    }
+
     async searchByName(query) {
         if (!query || query.trim() === '') {
             return []

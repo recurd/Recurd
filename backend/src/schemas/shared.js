@@ -36,3 +36,12 @@ export const timestampPaginationSchema = z.object({
     !(isNullish(obj.start_date) && isNullish(obj.n)), {
     message: "either start_date or n must be provided"
 })
+
+export const activityQuerySchema = z.object({
+    unit: z.enum(["minute", "hour", "day", "week", "month", "quarter", "year"]),
+    start_date: timestampSchemaT.nullish(),
+    end_date: timestampSchemaT.nullish().transform(d => d ? d : new Date()), // defaults to current time
+}).refine(obj => 
+    (!obj.start_date) || obj.start_date < obj.end_date, {
+    message: "start_date must be before end_date"
+})
