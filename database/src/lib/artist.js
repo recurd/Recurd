@@ -93,17 +93,26 @@ export default class Artist {
     }
 
     async searchByName(query) {
+        if (!query || query.trim() === '') {
+            return []
+        }
+    
         const result = await this.#sql`
             SELECT
                 name, id
             FROM
                 artists
             WHERE
-                name ILIKE ${query + '%'}
+                name ILIKE '%' || ${query} || '%'
             ORDER BY
+                CASE
+                    WHEN name ILIKE ${query + '%'} THEN 1
+                    WHEN name ILIKE '%' || ${query} || '%' THEN 2
+                    ELSE 3
+                END,
                 name ASC
             LIMIT 10
         `
         return result.map(row => ({ name: row.name, id: row.id }))
-    }    
+    }   
 }

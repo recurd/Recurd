@@ -118,19 +118,28 @@ export default class Album {
     }
 
     async searchByName(query) {
+        if (!query || query.trim() === '') {
+            return []
+        }
+    
         const result = await this.#sql`
             SELECT
                 name, id
             FROM
                 albums
             WHERE
-                name ILIKE ${query + '%'}
+                name ILIKE '%' || ${query} || '%'
             ORDER BY
+                CASE
+                    WHEN name ILIKE ${query + '%'} THEN 1
+                    WHEN name ILIKE '%' || ${query} || '%' THEN 2
+                    ELSE 3
+                END,
                 name ASC
             LIMIT 10
         `
         return result.map(row => ({ name: row.name, id: row.id }))
-    }  
+    }   
 }
 
 // Old version of album ratings, where we always return an array of { rating: int, count: int }
