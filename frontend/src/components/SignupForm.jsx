@@ -6,12 +6,14 @@ import {
   Button
  } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
+import { useErrorBoundary } from "react-error-boundary"
 import backend from '../backend.js'; 
 
 export default function SignupForm() {
     const [username, setUsername] = useState('')
     const [displayName, setDisplayName] = useState('')
     const [password, setPassword] = useState('')
+    const { showBoundary } = useErrorBoundary()
     const navigate = useNavigate()
 
     async function handleSignup() {
@@ -33,12 +35,7 @@ export default function SignupForm() {
             const redirPath = url.searchParams.get("from") ?? '/' // default to main page
             navigate(redirPath)
         } catch (err) {
-            // TODO: display error message
-            if (err.serverResponds) {
-                console.log("Server responds with status " + err.response.status)
-            } else if (err.requestSent) {
-                console.log("Server timed out!")
-            }
+            showBoundary(err)
         }
     }
 
