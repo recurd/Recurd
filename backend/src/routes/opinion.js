@@ -21,27 +21,98 @@ const opinionSchemaT = (callback= ((e) => e)) => {
     })
 }
 
+// create or edit song opinion
+// if opinion_id is provided, then it is edited
+// otherwise, if a song_id is provided, and a new opinion is created
+// opinion_id and song_id cannot both be present at the same time
 router.post('/song', authGate(), async (req, res, next) => {
-    const inputSchemaT = opinionSchemaT(s => s.extend(({ song_id: idSchema })))
+    const inputSchemaT = opinionSchemaT(s => 
+        z.union([
+            s.extend({ song_id: idSchema }).strict(), // .strict() so that only one of song_id or opinion_id is allowed
+            s.extend({ opinion_id: idSchema }).strict()
+        ])
+    )
+
     try {
-        const { song_id, time_stamp, rating, review } = inputSchemaT.parse(req.body)
+        const body = inputSchemaT.parse(req.body)
         const user_id = getAuthUser(req).id
 
-        const [result] = await Database.Opinion.insertSongOpinion({ user_id, song_id, time_stamp, rating, review })
-        res.status(200).json(result)
+        // edit opinion
+        if (body.opinion_id !== undefined) {
+            const result = await Database.Opinion.updateSongOpinion({ user_id, ...body })
+            if (result.count === 0) {
+                res.status(400).json({ message: "No opinion of the current user is found with this opinion_id" })
+                return
+            }
+            res.status(200).json(result[0])
+
+        // create opinion
+        } else {
+            const [result] = await Database.Opinion.insertSongOpinion({ user_id, ...body })
+            res.status(200).json(result)
+        }
     } catch (e) {
         return next(e)
     }
 })
 
+// create or edit album opinion
+// if opinion_id is provided, then it is edited
+// otherwise, album_id must be provided, and a new opinion is created
+// opinion_id and album_id cannot both be present at the same time
 router.post('/album', authGate(), async (req, res, next) => {
-    const inputSchemaT = opinionSchemaT(s => s.extend(({ album_id: idSchema })))
+    const inputSchemaT = opinionSchemaT(s => 
+        z.union([
+            s.extend({ album_id: idSchema }).strict(), // .strict() so that only one of album_id or opinion_id is allowed 
+            s.extend({ opinion_id: idSchema }).strict()
+        ])
+    )
     try {
-        const { album_id, time_stamp, rating, review } = inputSchemaT.parse(req.body)
+        const body = inputSchemaT.parse(req.body)
         const user_id = getAuthUser(req).id
 
-        const [result] = await Database.Opinion.insertAlbumOpinion({ user_id, album_id, time_stamp, rating, review })
-        res.status(200).json(result)
+        // edit opinion
+        if (body.opinion_id !== undefined) {
+            const result = await Database.Opinion.updateAlbumOpinion({ user_id, ...body })
+            if (result.count === 0) {
+                res.status(400).json({ message: "No opinion of the current user is found with this opinion_id" })
+                return
+            }
+            res.status(200).json(result[0])
+
+        // create opinion
+        } else {
+            const [result] = await Database.Opinion.insertAlbumOpinion({ user_id, ...body })
+            res.status(200).json(result)
+        }
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.delete('/song', authGate(), async(req, res, next) => {
+    try {
+        const { opinion_id } = z.object({ opinion_id: idSchema }).parse(req.body)
+        const result = await Database.Opinion.deleteSongOpinion({ opinion_id })
+        if (result.count === 0) {
+            res.status(400).json({ message: "No opinion of the current user is found with this opinion_id" })
+            return
+        }
+        res.status(200).end()
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.delete('/album', authGate(), async(req, res, next) => {
+    try {
+        const { opinion_id } = z.object({ opinion_id: idSchema }).parse(req.body)
+        const result = await Database.Opinion.deleteAlbumOpinion({ opinion_id })
+        if (result.count === 0) {
+            res.status(400).json({ message: "No opinion of the current user is found with this opinion_id" })
+            return
+        }
+        res.status(200).end()
     } catch (e) {
         return next(e)
     }
