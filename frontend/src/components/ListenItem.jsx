@@ -16,6 +16,7 @@ export default function ListenItem({ listen, ...props }) {
                 alignItems="center"
                 marginBottom="0.2em"
                 padding="0.1em"
+                className={"shadow-sm transition duration-100 hover:shadow-md"}
                 {...props}>
         { album ?
             <Link to={"/album/"+album.image}>
