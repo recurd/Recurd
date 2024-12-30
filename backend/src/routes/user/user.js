@@ -3,6 +3,7 @@ import { z } from "zod"
 import Database from "../../db.js"
 import External from "recurd-external"
 import topRouter from './top.js'
+import statsRouter from './stats.js'
 import { timestampPaginationSchema, idSchema } from "../../schemas/shared.js"
 import { userServicesTypeSchema } from "../../schemas/user.js"
 
@@ -20,6 +21,8 @@ router.get('/:user_id/profile', async (req, res, next) => {
         next(e)
     }
 })
+
+router.use('/:user_id/stats', statsRouter)
 
 router.use('/:user_id/top', topRouter)
 
@@ -101,30 +104,5 @@ router.get('/:user_id/recent-listens-temp', async (req, res, next) => {
         return next(e)
     }
 })
-
-// Returns the hour, song id, song name, and number of listens within the hour for a day
-router.get('/:user_id/songs-by-hour', async (req, res, next) => {
-    try {
-        // Validate the user_id parameter
-        const user_id = idSchema.parse(req.params.user_id)
-
-        // Validate the query parameters: expecting 'date' in YYYY-MM-DD format
-        const querySchema = z.object({
-            date: z.string().date()
-        })
-
-        const { date } = querySchema.parse(req.query)
-
-        const songsByHour = await Database.User.getSongsByHour({
-            userId: user_id,
-            date: date
-        })
-
-        res.status(200).json({ songs_by_hour: songsByHour })
-    } catch (e) {
-        next(e)
-    }
-})
-
 
 export default router
