@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import { Box, Text, VStack, Image, Flex } from "@chakra-ui/react";
+import { Box, Text, Image, Flex, Icon } from "@chakra-ui/react";
+import { FaStar } from "react-icons/fa";
 import backend from "../backend.js";
 
 function AlbumTrackList({ album_id }) {
@@ -34,7 +35,7 @@ function AlbumTrackList({ album_id }) {
                 key={index}
                 bg="gray.200"
                 width={{ base: "20rem", md: "24rem", lg: "28rem" }}
-                height="3rem"
+                height="2.5rem"
                 display="flex"
                 alignItems="center"
                 justifyContent="flex-start"
@@ -44,13 +45,13 @@ function AlbumTrackList({ album_id }) {
             >
                 <Flex alignItems="center" flex="1">
                 <Text fontWeight="bold" mx={2} fontSize={{ base: "sm", md: "md", lg: "lg" }}>
-                    #{entry.album_position}
+                    #{index+1}
                 </Text>
                 <Image
                     src={entry.image || altImage}
                     alt={`Artist ${index + 4}`}
                     borderRadius="full"
-                    boxSize={{ base: "2rem", md: "2.5rem" }}
+                    boxSize={{ base: "1.5rem", md: "2rem" }}
                     objectFit="cover"
                 />
                 <Text fontWeight="bold" mx={3} fontSize={{ base: "sm", md: "md", lg: "lg" }}>
@@ -58,8 +59,14 @@ function AlbumTrackList({ album_id }) {
                 </Text>
                 </Flex>
                 <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }} mx={3}>
-                {entry.listens}
+                    {entry.listens}
                 </Text>
+                <Flex alignItems="center" mr={2}>
+                    <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }} mr={1}>
+                        0.0
+                    </Text>
+                    <Icon as={FaStar} color="gray.500" />
+                </Flex>
             </Box>
             ))}
         </Box>
