@@ -29,19 +29,26 @@ export default class Album {
             SELECT
                 s.*,
                 abs.disc_number AS disc_number,
-                abs.album_position AS album_position
+                abs.album_position AS album_position,
+                COALESCE(AVG(so.rating)::numeric(10, 2), 0) AS average_rating,
+                COUNT(so.rating)::integer AS rating_count
             FROM
                 album_songs abs
             JOIN
                 songs s ON abs.song_id = s.id
+            LEFT JOIN
+                song_opinions so ON so.song_id = s.id
             WHERE
                 abs.album_id = ${id}
+            GROUP BY
+                s.id, abs.disc_number, abs.album_position
             ORDER BY
                 abs.disc_number ASC NULLS LAST,
                 abs.album_position ASC NULLS LAST,
-                s.name DESC`
+                s.name DESC
+        `
         return result
-    }
+    }    
 
     // Return an array of { rating: int, count: int }. Note that if a rating is 0, no corresponding object will be returned
     async getRatings(id) {
