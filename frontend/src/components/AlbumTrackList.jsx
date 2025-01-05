@@ -20,7 +20,6 @@ function AlbumTrackList({ album_id }) {
             }
         } 
         fetchTopTracks()
-        console.log(topTracks)
     }, []);
 
     return (

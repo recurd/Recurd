@@ -1,7 +1,11 @@
 import { Avatar, Box, Icon, Text } from "@chakra-ui/react"
 import { SiHeadphonezone } from "react-icons/si";
 import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { useEffect } from "react";
+import backend from "../backend";
 import TrackList from "../components/AlbumTrackList";
+import TopListeners from "../components/AlbumTopListeners";
 
 const sectionHeaderStyle = {
   as:"h2", 
@@ -11,9 +15,22 @@ const sectionHeaderStyle = {
 
 function Album() {
   const { id } = useParams() // this is album id
-  const [albumName, setAlbumName] = "be"
-  const [image, setImage] = "https://hips.hearstapps.com/hmg-prod/images/gettyimages-1254695432-crop-6711597f37fae.jpg?crop=1xw:1xh;center,top&resize=640:*"
+  const [albumName, setAlbumName] = useState(null)
+  const [image, setImage] = useState(null)
   
+  useEffect(() => {
+    (async () => {
+        try {
+          const res = await backend.get('/album/'+id)
+          const data = res.data
+          setAlbumName(data.name)
+          setImage(data.image)
+        } catch (err) {
+            console.error("Error fetching album data: ", err)
+        }
+    })()
+  }, []);
+
   return (
     <div>
       
@@ -35,7 +52,7 @@ function Album() {
         <Box fontSize="2.5rem" zIndex="3">{albumName}</Box>
         <Box display="flex" justifyContent="left" ml="10" mt="4" alignItems="center">
           <Avatar name={albumName} src={image} size="2xl" zIndex="3" />
-          <Text fontSize="2.5rem" color="white" zIndex="3" position="relative" ml="4">
+          <Text fontSize="2.5rem" color="white" zIndex="3" mt="-12" position="relative" ml="4">
             {albumName}
           </Text>
         </Box>
@@ -52,7 +69,7 @@ function Album() {
           <Box {...sectionHeaderStyle}>
               <Icon>
               <SiHeadphonezone/></Icon> Top Listeners</Box>
-              
+            <TopListeners album_id={id}/>
         </div>
 
         {/* Right column */}
