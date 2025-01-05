@@ -12,7 +12,7 @@ function AlbumTrackList({ album_id }) {
             try {
                 const response = await backend.get('/album/'+album_id+'/tracks?'+
                     new URLSearchParams({
-                        n: 10
+                        n: 5
                     }))
                 setTopTracks(response.data)
             } catch (err) {
@@ -27,9 +27,7 @@ function AlbumTrackList({ album_id }) {
             display="flex"
             flexDirection="column"
             alignItems="left"
-            mt={[4, 6, 8]}
-            gap={[2, 4]}
-            ml={{ base: 0, lg: 6 }}
+            gap={[1, 2]}
         >
             {topTracks.map((entry, index) => (
             <Box

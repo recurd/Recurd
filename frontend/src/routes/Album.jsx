@@ -70,6 +70,10 @@ function Album() {
               <Icon>
               <SiHeadphonezone/></Icon> Top Listeners</Box>
             <TopListeners album_id={id}/>
+          <Box {...sectionHeaderStyle}>
+              <Icon>
+              <SiHeadphonezone/></Icon> Reviews</Box>
+            
         </div>
 
         {/* Right column */}
@@ -77,6 +81,12 @@ function Album() {
         <Box {...sectionHeaderStyle}>
           <Icon>
           </Icon> Review</Box>
+        <Box {...sectionHeaderStyle}>
+          <Icon>
+          </Icon> Ratings</Box>
+        <Box {...sectionHeaderStyle}>
+          <Icon>
+          </Icon> Activity</Box>
         </div>
       </div>
     </div>

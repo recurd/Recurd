@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { Avatar, Box, Grid, GridItem } from "@chakra-ui/react";
 import backend from "../backend.js";
-import AlbumItem from "./AlbumItem.jsx";
+import ListenerItem from "./ListenerItem.jsx";
 
 export default function AlbumTopListeners({ album_id }) {
     const [topListeners, setTopListeners] = useState([]);
@@ -15,7 +15,6 @@ export default function AlbumTopListeners({ album_id }) {
                         n: 10
                     }))
                 setTopListeners(response.data)
-                console.log(response.data)
             } catch (err) {
                 console.error("Error fetching top listeners: ", err)
             }
@@ -29,7 +28,7 @@ export default function AlbumTopListeners({ album_id }) {
                 topListeners.map(listener => (
                     <GridItem key={listener.id} colSpan="1">
                         <Box className={"relative w-full aspect-square p-2"}>
-                            <Avatar name={listener.display_name} src={listener.image} size='lg' zIndex="3"/>
+                            <ListenerItem listener={listener} /> 
                         </Box>
                     </GridItem>
                 ))
