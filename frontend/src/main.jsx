@@ -51,13 +51,13 @@ const router = createBrowserRouter([{
       element: <Review />
     }, {
       path: "artist/:id",
-      element: <Artist />
+      element: <><NavBar/><Artist/></>
     }, {
       path: "album/:id",
-      element: <Album />
+      element: <><NavBar/><Album/></>
     }, {
       path: "song/:id",
-      element: <Song />
+      element: <><NavBar/><Song/></>
     }, {
       path: "search/:query",
       element: <><NavBar/><SearchResults/></>
