@@ -15,6 +15,7 @@ function AlbumTrackList({ album_id }) {
                     new URLSearchParams({
                         n: 5
                     }))
+                response.data.sort((a,b) => Number(b.average_rating) - Number(a.average_rating));
                 setTopTracks(response.data)
             } catch (err) {
                 console.error("Error fetching top tracks: ", err)
@@ -24,53 +25,60 @@ function AlbumTrackList({ album_id }) {
     }, []);
 
     return (
-        <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="left"
-            gap={[1, 2]}
-        >
-            {topTracks.map((entry, index) => (
+        <Box display="flex" flexDirection="column" alignItems="left" gap={[1, 2]}>
+          {topTracks.map((entry, index) => (
             <Box
-                key={index}
-                bg="gray.200"
-                width={{ base: "20rem", md: "24rem", lg: "28rem" }}
-                height="2.5rem"
-                display="flex"
-                alignItems="center"
-                justifyContent="flex-start"
-                p={[2, 1]}
-                borderRadius="0"
-                boxShadow="md"
+              key={index}
+              position="relative"
+              bg="transparent"
+              width={{ base: "20rem", md: "24rem", lg: "28rem" }}
+              height="2.5rem"
+              display="flex"
+              alignItems="center"
+              justifyContent="flex-start"
+              p={[2, 1]}
+              borderRadius="md"
             >
-                <Flex alignItems="center" flex="1">
-                <Text fontWeight="bold" mx={2} fontSize={{ base: "sm", md: "md", lg: "lg" }}>
-                    #{index+1}
+              <Box
+                position="absolute"
+                top="0"
+                left="0"
+                height="100%"
+                width={`${(entry.average_rating / 5.0) * 100}%`}
+                bg="gray.300"
+                borderRadius="inherit"
+                zIndex="0"
+              />
+              <Flex
+                alignItems="center"
+                flex="1"
+                zIndex="1"
+                position="relative"
+              >
+                <Text fontWeight="bold" mx={1.5} fontSize={{ base: "sm", md: "md", lg: "lg" }}>
+                  #{index + 1}
                 </Text>
                 <Image
-                    src={entry.image || altImage}
-                    alt={`Artist ${index + 4}`}
-                    borderRadius="full"
-                    boxSize={{ base: "1.5rem", md: "2rem" }}
-                    objectFit="cover"
+                  src={entry.image || altImage}
+                  alt={`Artist ${index + 1}`}
+                  borderRadius="full"
+                  boxSize={{ base: "1.5rem", md: "2rem" }}
+                  objectFit="cover"
                 />
                 <Text fontWeight="bold" mx={3} fontSize={{ base: "sm", md: "md", lg: "lg" }}>
-                    {entry.name}
+                  {entry.name}
                 </Text>
-                </Flex>
-                <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }} mx={3}>
-                    {entry.listens}
+              </Flex>
+              <Flex alignItems="center" zIndex="1" position="relative" mr={2}>
+                <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }} mr={1}>
+                  {Number(entry.average_rating)}
                 </Text>
-                <Flex alignItems="center" mr={2}>
-                    <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }} mr={1}>
-                        0.0
-                    </Text>
-                    <Icon as={FaStar} color="gray.500" />
-                </Flex>
+                <Icon as={FaStar} color="gray.500" />
+              </Flex>
             </Box>
-            ))}
+          ))}
         </Box>
-    );
+      );
 
 }
 
