@@ -199,9 +199,7 @@ export default class User {
         const result = await this.#sql`
             SELECT
                 EXTRACT(HOUR FROM l.time_stamp) AS hour,
-                s.id AS song_id,
-                s.name AS song_title,
-                COUNT(l.id) AS listen_count
+                COUNT(*) AS listen_count
             FROM
                 listens l
             JOIN
@@ -210,10 +208,9 @@ export default class User {
                 l.user_id = ${userId}
                 AND DATE(l.time_stamp) = ${date}
             GROUP BY
-                hour, s.id, s.name
+                hour
             ORDER BY
-                hour ASC
-        `
+                hour ASC`
         return result
-    }    
+    }
 }
