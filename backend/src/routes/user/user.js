@@ -3,6 +3,7 @@ import { z } from "zod"
 import Database from "../../db.js"
 import External from "recurd-external"
 import topRouter from './top.js'
+import statsRouter from './stats.js'
 import { timestampPaginationSchema, idSchema } from "../../schemas/shared.js"
 import { userServicesTypeSchema } from "../../schemas/user.js"
 
@@ -20,6 +21,8 @@ router.get('/:user_id/profile', async (req, res, next) => {
         next(e)
     }
 })
+
+router.use('/:user_id/stats', statsRouter)
 
 router.use('/:user_id/top', topRouter)
 
@@ -69,6 +72,17 @@ router.get('/:user_id/opinions/song', async (req, res, next) => {
         const songOpinions = await Database.User.getSongOpininons(user_id)
 
         res.status(200).json(songOpinions)
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.get('/:user_id/song-ratings', async (req, res, next) => {
+    try {
+        const user_id = idSchema.parse(req.params.user_id)
+        const songRatings = await Database.User.getSongRatings(user_id)
+
+        res.status(200).json({ song_ratings: songRatings || [] })
     } catch (e) {
         return next(e)
     }

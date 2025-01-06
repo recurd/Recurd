@@ -1,5 +1,5 @@
 // Navbar.jsx
-import React from 'react';
+import { React } from 'react';
 import {
   Box,
   Flex,
@@ -16,6 +16,10 @@ import {
   useColorModeValue,
   Stack,
 } from '@chakra-ui/react';
+import Search from './Search';
+import MenuDropdown from './MenuDropdown';
+import logo from '../assets/image/RecurdLogo.png';
+import { Link } from 'react-router-dom';
 
 const Links = ['Album', 'Artist', 'Profile'];
 
@@ -34,8 +38,22 @@ const NavLink = ({ children }) => (
   </Box>
 );
 
-function NavBar() {
+function NavBar({hideButtons = false}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  return (
+    <div className={`bg-navbar shadow-md w-full sticky flex top-0 z-10 h-[49px] items-center text-[35px]`}>
+      {/* Upper-left project title */}
+      <Link to='/' className={`w-full h-full`}>
+        <img src={logo} className={`pl-[10px] pt-[5px] h-full w-auto`}/>
+      </Link>
+      {/* Div for search and menu buttons */}
+      {hideButtons || <div className={`ml-auto pr-[9px] w-full h-full flex gap-x-[4px] items-center justify-end`}>
+        <Search/>
+        <MenuDropdown/>
+      </div>}
+    </div>
+  );
 
   return (
     <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4}>

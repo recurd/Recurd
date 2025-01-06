@@ -248,4 +248,51 @@ export default class User {
         `
         return songOpinions
     }
+
+    async getSongsByHour({ userId, date }) {
+        const result = await this.#sql`
+            SELECT
+                EXTRACT(HOUR FROM l.time_stamp) AS hour,
+                COUNT(*) AS listen_count
+            FROM
+                listens l
+            JOIN
+                songs s ON l.song_id = s.id
+            WHERE
+                l.user_id = ${userId}
+                AND DATE(l.time_stamp) = ${date}
+            GROUP BY
+                hour
+            ORDER BY
+                hour ASC`
+        return result
+    }
+
+    async getUserSongRatingStats(user_id) {
+        const result = await this.#sql`
+            SELECT 
+                AVG(rating)::NUMERIC(5, 2) AS average_rating, 
+                COUNT(rating) AS num_ratings
+            FROM 
+                song_opinions
+            WHERE 
+                user_id = ${user_id}
+                AND rating IS NOT NULL
+        `
+        return result[0]
+    }
+
+    async getUserAlbumRatingStats(user_id) {
+        const result = await this.#sql`
+            SELECT 
+                AVG(rating)::NUMERIC(5, 2) AS average_rating, 
+                COUNT(rating) AS num_ratings
+            FROM 
+                album_opinions
+            WHERE 
+                user_id = ${user_id}
+                AND rating IS NOT NULL
+        `
+        return result[0]
+    }
 }

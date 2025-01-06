@@ -4,6 +4,7 @@ import { SiHeadphonezone } from "react-icons/si";
 import Activity from "../components/Activity";
 import RecentListens from "../components/RecentListens";
 import TopAlbum from "../components/UserTopAlbum";
+import TopArtists from "../components/UserTopArtists";
 import CurrentListen from "../components/CurrentListen";
 import { useEffect, useState } from "react";
 import backend from "../backend";
@@ -62,19 +63,31 @@ function Profile() {
         </Box>
       </Box>
     </Box>
-
-      <Box {...sectionHeaderStyle}>
-          <Icon>
-          <SiHeadphonezone/></Icon> Top Albums</Box>
-      <TopAlbum user_id={id}/>
-
       <CurrentListen user_id={id}/>
-      <Activity />
 
-      <Box {...sectionHeaderStyle}>
-          <Icon>
-          <SiHeadphonezone/></Icon> Recent Listens</Box>
-      <RecentListens user_id={id}/>
+      <div className={"flex"}>
+        {/* Left column */}
+        
+        <div className={"w-3/5 px-[30px]"}>
+          <Box {...sectionHeaderStyle}>
+            <Icon>
+            <SiHeadphonezone/></Icon> Top Artists</Box>
+          <TopArtists user_id={id}/>
+          <Box {...sectionHeaderStyle}>
+              <Icon>
+              <SiHeadphonezone/></Icon> Top Albums</Box>
+              <TopAlbum user_id={id}/>
+        </div>
+
+        {/* Right column */}
+        <div className={"w-2/5 px-[30px]"}>
+          <Box {...sectionHeaderStyle}>
+              <Icon>
+              <SiHeadphonezone/></Icon> Recent Listens</Box>
+            <RecentListens user_id={id}/>
+          <Activity />
+        </div>
+      </div>
     </div>
   );
 }
