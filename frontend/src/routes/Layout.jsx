@@ -16,9 +16,10 @@ export default function Layout() {
     return <>
         <GlobalErrorBoundary>
         <Outlet />
-        { loggedIn
+        {// Logout moved to navbar
+        /* { loggedIn
             ? <LogoutButton />
-            : <></> }
+            : <></> } */}
         </GlobalErrorBoundary>
     </>
 }

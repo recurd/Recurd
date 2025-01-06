@@ -9,6 +9,7 @@ import {
 import { getID, isLoggedIn } from '../user.js'
 import LoginForm from '../components/LoginForm.jsx'
 import SignupForm from '../components/SignupForm.jsx'
+import NavBar from '../components/Navbar.jsx'
 
 export async function landingPageLoader({request}) {
   const loggedIn = await isLoggedIn()
@@ -22,20 +23,23 @@ export async function landingPageLoader({request}) {
 function Login() {
 
   return (
-    <Tabs>
-      <TabList>
-        <Tab>Login</Tab>
-        <Tab>Sign Up</Tab>
-      </TabList>
-      <TabPanels>
-        <TabPanel>
-          <LoginForm />
-        </TabPanel>
-        <TabPanel>
-          <SignupForm />
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+    <>
+      <NavBar hideButtons={true}/>
+      <Tabs>
+        <TabList>
+          <Tab>Login</Tab>
+          <Tab>Sign Up</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <LoginForm />
+          </TabPanel>
+          <TabPanel>
+            <SignupForm />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </>
   )
 }
 
