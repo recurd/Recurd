@@ -9,7 +9,6 @@ const router = Router({mergeParams: true})
 // Returns the hour, song id, song name, and number of listens within the hour for a day
 router.get('/songs-by-hour', async (req, res, next) => {
     try {
-        // Validate the user_id parameter
         const user_id = idSchema.parse(req.params.user_id)
 
         // Validate the query parameters: expecting 'date' in YYYY-MM-DD format
@@ -25,6 +24,32 @@ router.get('/songs-by-hour', async (req, res, next) => {
         })
 
         res.status(200).json(songsByHour)
+    } catch (e) {
+        next(e)
+    }
+})
+
+// Returns the average rating and number of ratings for a user's song opinions
+router.get('/song-rating-stats', async (req, res, next) => {
+    try {
+        const user_id = idSchema.parse(req.params.user_id)
+
+        const songRatingStats = await Database.User.getUserSongRatingStats(user_id)
+
+        res.status(200).json(songRatingStats)
+    } catch (e) {
+        next(e)
+    }
+})
+
+// Returns the average rating and number of ratings for a user's album opinions
+router.get('/album-rating-stats', async (req, res, next) => {
+    try {
+        const user_id = idSchema.parse(req.params.user_id)
+
+        const albumRatingStats = await Database.User.getUserAlbumRatingStats(user_id)
+
+        res.status(200).json(albumRatingStats)
     } catch (e) {
         next(e)
     }

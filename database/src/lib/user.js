@@ -231,4 +231,34 @@ export default class User {
                 hour ASC`
         return result
     }
+
+    async getUserSongRatingStats(user_id) {
+        const result = await this.#sql`
+            SELECT 
+                AVG(rating)::NUMERIC(5, 2) AS average_rating, 
+                COUNT(rating) AS num_ratings
+            FROM 
+                song_opinions
+            WHERE 
+                user_id = ${user_id}
+                AND rating IS NOT NULL
+        `
+        
+        return result[0]
+    }
+
+    async getUserAlbumRatingStats(user_id) {
+        const result = await this.#sql`
+            SELECT 
+                AVG(rating)::NUMERIC(5, 2) AS average_rating, 
+                COUNT(rating) AS num_ratings
+            FROM 
+                album_opinions
+            WHERE 
+                user_id = ${user_id}
+                AND rating IS NOT NULL
+        `
+        
+        return result[0]
+    }   
 }
