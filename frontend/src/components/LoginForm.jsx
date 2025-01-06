@@ -1,18 +1,20 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { 
+    Text,
+    Box,
     Button,
     Input,
     FormControl,
     FormLabel
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
-import { useErrorBoundary } from "react-error-boundary"
 import backend from '../backend.js'
 
 export default function LoginForm() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const { showBoundary } = useErrorBoundary()
+    const [errorText, setErrorText] = useState('')
+    const [buttonDisabled, setButtonDisabled] = useState(true)
     const navigate = useNavigate()
 
     async function handleLogin() {
@@ -30,30 +32,44 @@ export default function LoginForm() {
             // TODO: display error message
             if (err.serverResponds) {
                 console.log("Server responds with status " + err.response.status)
+                setErrorText(err.response.data.message)
             } else if (err.requestSent) {
                 console.log("Server timed out!")
+                setErrorText("Server timed out!")
             }
-            showBoundary(err)
         }
     }
 
+    useEffect (() =>
+    {
+        setButtonDisabled(username.length == 0 || password.length == 0)
+    }, [username, password]);
+
     return <>
-        <FormControl isRequired>
-            <FormLabel>Username</FormLabel>
-            <Input  
-                type="text" 
-                value={username} 
-                onChange={(e) => setUsername(e.target.value)} 
-                required/>
-        </FormControl>
-        <FormControl isRequired>
-            <FormLabel>Password</FormLabel>
-            <Input  
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required />
-        </FormControl>
-        <Button onClick={()=>handleLogin()}>Login</Button>
+        <Box className={"flex-col items-center m-auto w-[500px]"}>
+            <FormControl isRequired>
+                <FormLabel>Username</FormLabel>
+                <Input  
+                    type="text" 
+                    value={username} 
+                    onChange={(e) => setUsername(e.target.value)} 
+                    required/>
+            </FormControl>
+            <FormControl isRequired>
+                <FormLabel>Password</FormLabel>
+                <Input  
+                    type="password" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    required />
+            </FormControl>
+            <Button 
+                className={"mt-4 w-full"}
+                isDisabled={buttonDisabled}
+                colorScheme={buttonDisabled ? 'gray' : 'blue'}
+                onClick={()=>handleLogin()}>Login
+            </Button>
+            <Text className={"mt-2"} color="red.500" fontSize="md">{errorText}</Text>
+        </Box>
     </>
 }
