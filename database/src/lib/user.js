@@ -193,6 +193,24 @@ export default class User {
                 ao.time_stamp DESC
         `
         return albumRatings
+    }  
+    
+    async getSongRatings(user_id) {
+        const songRatings = await this.#sql`
+            SELECT 
+                so.id AS rating_id,
+                so.song_id,
+                so.rating,
+                so.review,
+                so.time_stamp
+            FROM 
+                song_opinions so
+            WHERE 
+                so.user_id = ${user_id}
+            ORDER BY 
+                so.time_stamp DESC
+        `
+        return songRatings
     }    
 
     async getSongsByHour({ userId, date }) {
@@ -213,4 +231,34 @@ export default class User {
                 hour ASC`
         return result
     }
+
+    async getUserSongRatingStats(user_id) {
+        const result = await this.#sql`
+            SELECT 
+                AVG(rating)::NUMERIC(5, 2) AS average_rating, 
+                COUNT(rating) AS num_ratings
+            FROM 
+                song_opinions
+            WHERE 
+                user_id = ${user_id}
+                AND rating IS NOT NULL
+        `
+        
+        return result[0]
+    }
+
+    async getUserAlbumRatingStats(user_id) {
+        const result = await this.#sql`
+            SELECT 
+                AVG(rating)::NUMERIC(5, 2) AS average_rating, 
+                COUNT(rating) AS num_ratings
+            FROM 
+                album_opinions
+            WHERE 
+                user_id = ${user_id}
+                AND rating IS NOT NULL
+        `
+        
+        return result[0]
+    }   
 }
