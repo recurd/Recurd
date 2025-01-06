@@ -7,6 +7,7 @@ import albumRouter from "./album.js"
 import songRouter from "./song.js"
 import listenRouter from "./listen.js"
 import userRouter from "./user/user.js"
+import opinionRouter from "./opinion.js"
 
 
 const router = Router()
@@ -18,6 +19,7 @@ router.use('/artist', artistRouter)
 router.use('/album', albumRouter)
 router.use('/song', songRouter)
 router.use('/listen', listenRouter)
+router.use('/opinion', opinionRouter)
 router.use('/user', userRouter)
 
 export default router

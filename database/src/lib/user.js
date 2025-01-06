@@ -177,8 +177,44 @@ export default class User {
         return listens
     }
 
+    // Returns an array of { rating: int, count: int }. Note that if a rating is 0, no corresponding object will be returned
     async getAlbumRatings(user_id) {
-        const albumRatings = await this.#sql`
+        const result = await this.#sql`
+            SELECT
+                rating AS rating,
+                COUNT(rating)::integer AS count
+            FROM
+                album_opinions
+            WHERE
+                user_id = ${user_id}
+                AND rating IS NOT NULL
+            GROUP BY
+                rating
+            ORDER BY
+                rating ASC`
+        return result
+    }
+
+    // Returns an array of { rating: int, count: int }. Note that if a rating is 0, no corresponding object will be returned
+    async getSongRatings(user_id) {
+        const result = await this.#sql`
+            SELECT
+                rating AS rating,
+                COUNT(rating)::integer AS count
+            FROM
+                song_opinions
+            WHERE
+                user_id = ${user_id}
+                AND rating IS NOT NULL
+            GROUP BY
+                rating
+            ORDER BY
+                rating ASC`
+        return result
+    }
+
+    async getAlbumOpinions(user_id) {
+        const albumOpinions = await this.#sql`
             SELECT 
                 ao.id AS rating_id,
                 ao.album_id,
@@ -192,11 +228,11 @@ export default class User {
             ORDER BY 
                 ao.time_stamp DESC
         `
-        return albumRatings
-    }  
-    
-    async getSongRatings(user_id) {
-        const songRatings = await this.#sql`
+        return albumOpinions
+    }
+
+    async getSongOpinions(user_id) {
+        const songOpinions = await this.#sql`
             SELECT 
                 so.id AS rating_id,
                 so.song_id,
@@ -210,8 +246,8 @@ export default class User {
             ORDER BY 
                 so.time_stamp DESC
         `
-        return songRatings
-    }    
+        return songOpinions
+    }
 
     async getSongsByHour({ userId, date }) {
         const result = await this.#sql`
@@ -243,7 +279,6 @@ export default class User {
                 user_id = ${user_id}
                 AND rating IS NOT NULL
         `
-        
         return result[0]
     }
 
@@ -258,7 +293,6 @@ export default class User {
                 user_id = ${user_id}
                 AND rating IS NOT NULL
         `
-        
         return result[0]
-    }   
+    }
 }

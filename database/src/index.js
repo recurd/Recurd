@@ -6,6 +6,7 @@ import Metadata from './lib/Metadata.js'
 import Artist from './lib/Artist.js'
 import Album from './lib/Album.js'
 import Song from './lib/Song.js'
+import Opinion from './lib/opinion.js'
 
 export default function db(configs) {
     // Necessary configs consists of
@@ -64,6 +65,7 @@ export default function db(configs) {
         UserService: new UserService(sql),
         Listen: new Listen(sql),
         Metadata: new Metadata(sql),
+        Opinion: new Opinion(sql),
         Artist: new Artist(sql),
         Album: new Album(sql),
         Song: new Song(sql)
