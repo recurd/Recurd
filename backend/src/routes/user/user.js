@@ -54,6 +54,17 @@ router.get('/:user_id/album-ratings', async (req, res, next) => {
     }
 })
 
+router.get('/:user_id/song-ratings', async (req, res, next) => {
+    try {
+        const user_id = idSchema.parse(req.params.user_id)
+        const songRatings = await Database.User.getSongRatings(user_id)
+
+        res.status(200).json({ song_ratings: songRatings || [] })
+    } catch (e) {
+        return next(e)
+    }
+})
+
 // Returns object { track: any | null , is_paused: boolean | undefined }
 router.get('/:user_id/currently-listening', async (req, res, next) => {
     try {

@@ -193,6 +193,24 @@ export default class User {
                 ao.time_stamp DESC
         `
         return albumRatings
+    }  
+    
+    async getSongRatings(user_id) {
+        const songRatings = await this.#sql`
+            SELECT 
+                so.id AS rating_id,
+                so.song_id,
+                so.rating,
+                so.review,
+                so.time_stamp
+            FROM 
+                song_opinions so
+            WHERE 
+                so.user_id = ${user_id}
+            ORDER BY 
+                so.time_stamp DESC
+        `
+        return songRatings
     }    
 
     async getSongsByHour({ userId, date }) {
