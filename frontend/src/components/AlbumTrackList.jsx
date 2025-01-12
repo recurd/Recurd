@@ -55,7 +55,7 @@ function AlbumTrackList({ album_id }) {
                 zIndex="1"
                 position="relative"
               >
-                <Text fontWeight="bold" mx={1.5} fontSize={{ base: "sm", md: "md", lg: "lg" }}>
+                <Text fontWeight="bold" mx={2} fontSize={{ base: "sm", md: "md", lg: "lg" }}>
                   #{index + 1}
                 </Text>
                 <Image

@@ -4,16 +4,17 @@ import { Avatar, Box, Grid, GridItem } from "@chakra-ui/react";
 import backend from "../backend.js";
 import ListenerItem from "./ListenerItem.jsx";
 
-export default function AlbumTopListeners({ album_id }) {
+export default function AlbumTopListeners({ song_id }) {
     const [topListeners, setTopListeners] = useState([]);
 
     useEffect(() => {
         async function fetchTopListeners() {
             try {
-                const response = await backend.get('/album/'+album_id+'/top-listeners?'+
+                const response = await backend.get('/song/'+song_id+'/top-listeners?'+
                     new URLSearchParams({
                         n: 10
                     }))
+                console.log(response.data)
                 setTopListeners(response.data)
             } catch (err) {
                 console.error("Error fetching top listeners: ", err)

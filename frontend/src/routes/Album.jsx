@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import backend from "../backend";
 import TrackList from "../components/AlbumTrackList";
 import TopListeners from "../components/AlbumTopListeners";
+import Reviews from "../components/Reviews";
 
 const sectionHeaderStyle = {
   as:"h2", 
@@ -50,13 +51,13 @@ function Album() {
 
       <Box textAlign="center" mb="4" zIndex="3">
         <Box fontSize="2.5rem" zIndex="3">{albumName}</Box>
-        <Box display="flex" justifyContent="left" ml="10" mt="4" alignItems="center">
-          <Avatar name={albumName} src={image} size="2xl" zIndex="3" />
-          <Text fontSize="2.5rem" color="white" zIndex="3" mt="-12" position="relative" ml="4">
-            {albumName}
-          </Text>
+          <Box display="flex" justifyContent="left" ml="10" mt="4" alignItems="center">
+            <Avatar name={albumName} src={image} size="2xl" zIndex="3" />
+            <Text fontSize="2.5rem" color="white" zIndex="3" mt="-12" position="relative" ml="4">
+              {albumName}
+            </Text>
+          </Box>
         </Box>
-      </Box>
       </Box>
       <div className={"flex"}>
         {/* Left column */}
@@ -69,10 +70,23 @@ function Album() {
           <Box {...sectionHeaderStyle}>
               <Icon>
               <SiHeadphonezone/></Icon> Top Listeners</Box>
-            <TopListeners album_id={id}/>
+              <TopListeners album_id={id}/>
           <Box {...sectionHeaderStyle}>
               <Icon>
               <SiHeadphonezone/></Icon> Reviews</Box>
+              <Reviews Reviews={[
+                  {
+                      "user_id": "33bd22c5-0bb1-4a4e-8183-5e10fc0da45e",
+                      "time_stamp": "2024-10-21T20:11:56.063Z",
+                      "rating": 2,
+                      "review": "This is the body of the review. This is the body of the review. This is the body of the review. This is the body of the review. This is the body of the review. This is the body of the review. This is the body of the review. This is the body of the review. This is the body of the review..."
+                  }, {
+                    "user_id": "33bd22c5-0bb1-4a4e-8183-5e10fc0da45e",
+                    "time_stamp": "2024-10-21T20:11:56.063Z",
+                    "rating": 2,
+                    "review": "N@X99}I.<["
+                }
+              ]}/>
             
         </div>
 
