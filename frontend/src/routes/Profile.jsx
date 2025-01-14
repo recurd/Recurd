@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Avatar, Box, Icon, Text } from "@chakra-ui/react"
+import { Avatar, Box, Icon, Text, Button } from "@chakra-ui/react"
 import { SiHeadphonezone } from "react-icons/si";
 import Activity from "../components/Activity";
 import RecentListens from "../components/RecentListens";
@@ -8,6 +8,8 @@ import TopArtists from "../components/UserTopArtists";
 import CurrentListen from "../components/CurrentListen";
 import { useEffect, useState } from "react";
 import backend from "../backend";
+import { getID } from '../user.js'
+import { useNavigate } from 'react-router-dom'
 
 const sectionHeaderStyle = {
   as:"h2", 
@@ -22,6 +24,13 @@ function Profile() {
   const [followers, setFollowers] = useState(null)
   const [followings, setFollowings] = useState(null)
 
+  //TODO: Connect this to backend
+  const [isFollowed, setIsFollowed] = useState(false)
+
+  const [isOwnProfile, setIsOwnProfile] = useState(false)
+
+  const navigate = useNavigate()
+
   useEffect(() => {
     (async () => {
         try {
@@ -31,8 +40,12 @@ function Profile() {
           setImage(data.image)
           setFollowers(data.follower_count)
           setFollowings(data.following_count)
+
+          const localUserID = await getID()
+          setIsOwnProfile(id == localUserID)
+
         } catch (error) {
-          console.error('Error fetching recent tracks:', error);
+          console.error('Error fetching user data:', error);
         }
     })()
   }, [])
@@ -42,6 +55,24 @@ function Profile() {
       
       {/* Gray header box */}
       <Box position="relative" textAlign="center" >
+        <Box fontSize='1.5rem' zIndex="3" position="absolute" left="4" bottom="16" display="inline-flex">
+          <Text color="blue.500" zIndex="3" position="relative" as="button"
+          _hover={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => navigate("/follow/" + id)}>
+            {followers + " Followers"}
+          </Text>
+          <Text color="blue.500" ml="2" zIndex="3" position="relative" as="button"
+          _hover={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => navigate("/follow/" + id)}>
+            {followers + " Following"}
+          </Text>
+          {isOwnProfile ||
+            <Button px="2" ml="4">
+              <Text fontSize="1.5rem" color="blue.500" zIndex="3" as="button"
+                  _hover={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => alert("Followed! This is WIP")}>
+                    {"+ Follow"}
+              </Text>
+            </Button>
+          }
+        </Box>
       <Box
         bg="gray.700"
         width="100%"
@@ -58,7 +89,7 @@ function Profile() {
         <Text fontSize="2.5rem" color="white" mt="-12" zIndex="3" position="relative">
           {displayName}
         </Text>
-        <Box display = 'flex' justifyContent = 'center' mt = '4'>
+        <Box display = 'flex' justifyContent = 'center' mt = '2'>
           <Avatar name={displayName} src={image} size='2xl' zIndex="3"/>
         </Box>
       </Box>

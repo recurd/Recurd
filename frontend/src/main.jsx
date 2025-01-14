@@ -16,6 +16,7 @@ import Profile from './routes/Profile.jsx'
 import Review from './routes/Review.jsx'
 import Settings from './routes/Settings.jsx'
 import NavBar from './components/Navbar.jsx'
+import Follow from './routes/Follow.jsx'
 import { isLoggedIn } from './user.js'
 import { servicesCallbackPath, spotifyRedirLoader } from './services.js'
 import './assets/css/index.css';
@@ -61,6 +62,9 @@ const router = createBrowserRouter([{
     }, {
       path: "search/:query",
       element: <><NavBar/><SearchResults/></>
+    }, {
+      path: "follow/:userId",
+      element: <><NavBar/><Follow/></>
     }],
 }, {
   path: servicesCallbackPath.SPOTIFY,
