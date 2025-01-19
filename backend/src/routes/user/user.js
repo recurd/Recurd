@@ -139,4 +139,76 @@ router.get('/:user_id/recent-listens-temp', async (req, res, next) => {
     }
 })
 
+router.post('/:user_id/followers', async (req, res, next) => {
+    try {
+        const { user_id: followee } = z.object({ user_id: idSchema }).parse(req.params)
+        const { follower } = z.object({ follower: idSchema }).parse(req.body)
+
+        const result = await Database.User.addFollower({ followee, follower })
+
+        if (!result.success) {
+            return res.status(400).json({ error: result.message })
+        }
+
+        res.status(201).json({ message: "Follow successful" })
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.delete('/:user_id/followers/:follower_id', async (req, res, next) => {
+    try {
+        const { user_id: followee, follower_id: follower } = z.object({
+            user_id: idSchema,
+            follower_id: idSchema,
+        }).parse(req.params)
+
+        const result = await Database.User.removeFollower({ followee, follower })
+
+        if (!result.success) {
+            return res.status(404).json({ error: result.message })
+        }
+
+        res.status(200).json({ message: "Unfollow successful" })
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.get('/:user_id/followers', async (req, res, next) => {
+    try {
+        const { user_id } = z.object({ user_id: idSchema }).parse(req.params)
+
+        const followers = await Database.User.getFollowers(user_id)
+        res.status(200).json({ followers: followers })
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.get('/:user_id/followees', async (req, res, next) => {
+    try {
+        const { user_id } = z.object({ user_id: idSchema }).parse(req.params)
+
+        const followees = await Database.User.getFollowees(user_id)
+        res.status(200).json({ followees: followees })
+    } catch (e) {
+        return next(e)
+    }
+})
+
+router.get('/:user_id/is-following/:followee_id', async (req, res, next) => {
+    try {
+        const { user_id: follower, followee_id: followee } = z.object({
+            user_id: idSchema,
+            followee_id: idSchema,
+        }).parse(req.params)
+
+        const isFollowing = await Database.User.isFollowing({ followee, follower })
+        res.status(200).json({ is_following: isFollowing })
+    } catch (e) {
+        return next(e)
+    }
+})
+
 export default router

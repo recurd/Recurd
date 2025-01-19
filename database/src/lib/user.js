@@ -295,4 +295,80 @@ export default class User {
         `
         return result[0]
     }
+
+    async addFollower({ followee, follower }) {
+        try {
+            await this.#sql`
+                INSERT INTO user_followers (followee, follower)
+                VALUES (${followee}, ${follower})
+            `
+            return { success: true }
+        } catch (error) {
+            if (error.code === "23505") {
+                // Duplicate key error if the follower relationship already exists
+                return { success: false, message: "Already following" }
+            }
+            throw error
+        }
+    }
+    
+    async removeFollower({ followee, follower }) {
+        const result = await this.#sql`
+            DELETE FROM user_followers
+            WHERE followee = ${followee} AND follower = ${follower}
+            RETURNING *
+        `
+        return result.length > 0
+            ? { success: true }
+            : { success: false, message: "Follow relationship not found" }
+    }
+    
+    async getFollowers(user_id) {
+        const followers = await this.#sql`
+            SELECT 
+                u.id,
+                u.username,
+                u.display_name,
+                u.image
+            FROM
+                user_followers uf
+            JOIN
+                users u ON uf.follower = u.id
+            WHERE
+                uf.followee = ${user_id}
+            ORDER BY
+                uf.time_stamp DESC
+        `
+        return followers
+    }
+    
+    async getFollowees(user_id) {
+        const followees = await this.#sql`
+            SELECT 
+                u.id,
+                u.username,
+                u.display_name,
+                u.image
+            FROM
+                user_followers uf
+            JOIN
+                users u ON uf.followee = u.id
+            WHERE
+                uf.follower = ${user_id}
+            ORDER BY
+                uf.time_stamp DESC
+        `
+        return followees
+    }
+    
+    async isFollowing({ followee, follower }) {
+        const [result] = await this.#sql`
+            SELECT 1
+            FROM user_followers
+            WHERE followee = ${followee} AND follower = ${follower}
+            LIMIT 1
+        `
+        return !!result // Returns true if a record exists, otherwise false
+    }
+    
 }
