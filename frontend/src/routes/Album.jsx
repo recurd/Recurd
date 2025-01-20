@@ -7,6 +7,7 @@ import backend from "../backend";
 import TrackList from "../components/AlbumTrackList";
 import TopListeners from "../components/AlbumTopListeners";
 import Reviews from "../components/Reviews";
+import Rating from "../components/StarRating"
 
 const sectionHeaderStyle = {
   as:"h2", 
@@ -74,7 +75,7 @@ function Album() {
           <Box {...sectionHeaderStyle}>
               <Icon>
               <SiHeadphonezone/></Icon> Reviews</Box>
-              <Reviews Reviews={[
+              <Reviews ReviewList={[
                   {
                       "user_id": "33bd22c5-0bb1-4a4e-8183-5e10fc0da45e",
                       "time_stamp": "2024-10-21T20:11:56.063Z",
@@ -95,6 +96,8 @@ function Album() {
         <Box {...sectionHeaderStyle}>
           <Icon>
           </Icon> Review</Box>
+          <Rating></Rating>
+          
         <Box {...sectionHeaderStyle}>
           <Icon>
           </Icon> Ratings</Box>

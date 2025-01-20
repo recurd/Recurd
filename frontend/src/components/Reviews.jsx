@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Text, Flex, Icon, Avatar } from "@chakra-ui/react";
 import { FaStar } from "react-icons/fa";
 
-function Reviews({ Reviews }) {
+function Reviews({ ReviewList }) {
 
     const formatDate = (timestamp) => {
         const date = new Date(timestamp);
@@ -18,7 +18,7 @@ function Reviews({ Reviews }) {
     };
     return (
         <Box display="flex" flexDirection="column" gap={4}>
-            {albumReviews.map((review, index) => (
+            {ReviewList.map((review, index) => (
                 <Flex
                 key={index}
                 bg="gray.200"
@@ -60,4 +60,4 @@ function Reviews({ Reviews }) {
     );
 }
 
-export default AlbumReviews;
+export default Reviews;
